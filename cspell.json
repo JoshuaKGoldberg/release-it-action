@@ -4,6 +4,7 @@
 		".github",
 		"CHANGELOG.md",
 		"coverage",
+		"dist",
 		"lib",
 		"node_modules",
 		"pnpm-lock.yaml"
@@ -21,7 +22,6 @@
 		"outro",
 		"packagejson",
 		"quickstart",
-		"tsup",
 		"wontfix"
 	]
 }
