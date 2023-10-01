@@ -1,6 +1,6 @@
 {
 	"name": "release-it-action",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "Runs release-it as a GitHub Action, with handling for semantic releases and protected branches. 📤",
 	"repository": {
 		"type": "git",
