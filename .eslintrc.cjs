@@ -48,7 +48,7 @@ module.exports = {
 			rules: {
 				"n/no-missing-import": [
 					"error",
-					{ allowModules: ["create-typescript-app"] },
+					{ allowModules: ["release-it-action"] },
 				],
 			},
 		},
