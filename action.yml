@@ -1,0 +1,6 @@
+author: JoshuaKGoldberg
+description: Runs release-it as a GitHub Action, with handling for semantic releases and protected branches. 📤
+name: release-it Action
+runs:
+  main: dist/index.js
+  using: node20
