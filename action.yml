@@ -9,6 +9,8 @@ inputs:
     description: "`git config user.name` value for Git commits."
   github-token:
     description: "GitHub token (PAT) with repo and workflow permissions."
+  npm-token:
+    description: "npm access token with the automation role."
   skip-branch-protections:
     default: "false"
     description: "Whether to skip deleting and recreating branch protections."

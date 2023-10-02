@@ -73,7 +73,7 @@ permissions:
 | `git-user-email`          | `string`  | `${<git-user-name>}@users.noreply.github.com` | `git config user.email` value for Git commits.                                          |
 | `git-user-name`           | `string`  | `${github.context.actor}`                     | `git config user.name` value for Git commits.                                           |
 | `github-token`            | `string`  | `${GITHUB_TOKEN}`                             | GitHub token (PAT) with _repo_ and _workflow_ permissions.                              |
-| `npm-token`               | `string`  | `${NPM_TOKEN}`                                | npm token with the _automation_ role.                                                   |
+| `npm-token`               | `string`  | `${NPM_TOKEN}`                                | npm access token with the _automation_ role.                                            |
 | `skip-branch-protections` | `boolean` | `false`                                       | Whether to skip deleting and recreating branch protections.                             |
 
 ### Node API
