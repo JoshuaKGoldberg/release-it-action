@@ -2,18 +2,18 @@ author: JoshuaKGoldberg
 description: Runs release-it as a GitHub Action, with handling for semantic releases and protected branches. 📤
 inputs:
   branch:
-    description: "Branch to delete and recreate branch protections on (unless `skip-branch-protections`)."
+    description: Branch to delete and recreate branch protections on (unless `skip-branch-protections`).
   git-user-email:
     description: "`git config user.email` value for Git commits."
   git-user-name:
     description: "`git config user.name` value for Git commits."
   github-token:
-    description: "GitHub token (PAT) with repo and workflow permissions."
+    description: GitHub token (PAT) with repo and workflow permissions.
   npm-token:
-    description: "npm access token with the automation role."
+    description: npm access token with the automation role.
   skip-branch-protections:
     default: "false"
-    description: "Whether to skip deleting and recreating branch protections."
+    description: Whether to skip deleting and recreating branch protections.
 name: release-it Action
 runs:
   main: dist/index.js
