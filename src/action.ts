@@ -4,7 +4,7 @@ import * as github from "@actions/github";
 import { getTokenInput } from "./getTokenInput.js";
 import { releaseItAction } from "./index.js";
 
-const gitUserName = getTokenInput("git-user-name", "GITHUB_ACTOR");
+const gitUserName = core.getInput("git-user-name") || github.context.actor;
 
 await releaseItAction({
 	branch: core.getInput("branch") || "main",
@@ -14,7 +14,7 @@ await releaseItAction({
 	gitUserName,
 	githubToken: getTokenInput("github-token", "GITHUB_TOKEN"),
 	npmToken: getTokenInput("npm-token", "NPM_TOKEN"),
-	owner: core.getInput("owner") || github.context.repo.owner,
-	repo: core.getInput("repo") || github.context.repo.repo,
+	owner: github.context.repo.owner,
+	repo: github.context.repo.repo,
 	skipBranchProtections: core.getBooleanInput("skip-branch-protections"),
 });

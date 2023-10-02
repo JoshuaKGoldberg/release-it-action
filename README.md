@@ -67,16 +67,14 @@ permissions:
 
 ## Options
 
-| Key                       | Type      | Default                                    | Description                                                                             |
-| ------------------------- | --------- | ------------------------------------------ | --------------------------------------------------------------------------------------- |
-| `branch`                  | `string`  | `"main"`                                   | Branch to delete and recreate branch protections on (unless `skip-branch-protections`). |
-| `git-user-email`          | `string`  | `${GITHUB_ACTOR}@users.noreply.github.com` | `git config user.email` value for Git commits.                                          |
-| `git-user-name`           | `string`  | `${GITHUB_ACTOR}`                          | `git config user.name` value for Git commits.                                           |
-| `github-token`            | `string`  | `${GITHUB_TOKEN}`                          | GitHub token (PAT) with _repo_ and _workflow_ permissions.                              |
-| `npm-token`               | `string`  | `${NPM_TOKEN}`                             | npm token with the _automation_ role.                                                   |
-| `owner`                   | `string`  | Repository owner                           | Owning organization or username of the GitHub repository.                               |
-| `repo`                    | `string`  | Repository name                            | Name of the GitHub repository.                                                          |
-| `skip-branch-protections` | `boolean` | `false`                                    | Whether to skip deleting and recreating branch protections.                             |
+| Key                       | Type      | Default                                       | Description                                                                             |
+| ------------------------- | --------- | --------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `branch`                  | `string`  | `"main"`                                      | Branch to delete and recreate branch protections on (unless `skip-branch-protections`). |
+| `git-user-email`          | `string`  | `${<git-user-name>}@users.noreply.github.com` | `git config user.email` value for Git commits.                                          |
+| `git-user-name`           | `string`  | `${github.context.actor}`                     | `git config user.name` value for Git commits.                                           |
+| `github-token`            | `string`  | `${GITHUB_TOKEN}`                             | GitHub token (PAT) with _repo_ and _workflow_ permissions.                              |
+| `npm-token`               | `string`  | `${NPM_TOKEN}`                                | npm token with the _automation_ role.                                                   |
+| `skip-branch-protections` | `boolean` | `false`                                       | Whether to skip deleting and recreating branch protections.                             |
 
 ### Node API
 
@@ -91,6 +89,8 @@ import { releaseItAction } from "release-it-action";
 
 await releaseItAction({
 	branch: "main",
+	gitUserEmail: "your@email.com",
+	gitUserName: "YourUsername",
 	githubToken: process.env.GITHUB_TOKEN,
 	npmToken: process.env.NPM_TOKEN,
 	owner: "YourUsername",
