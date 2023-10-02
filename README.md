@@ -107,6 +107,17 @@ Note that all non-`boolean` inputs are required and do not have default values i
 `release-it-action` needs to run on the latest commit on the default/release branch and with a [concurrency group](https://docs.github.com/en/actions/using-jobs/using-concurrency).
 Otherwise, if multiple workflows are triggered quickly, later workflows might not include release commits from earlier workflows.
 
+### Why does this delete and recreate branch protections?
+
+It would be great to instead either change which branch is protected or have a native GitHub API to disable a branch protection rule.
+Neither exist at time of writing.
+If you know that one now exists, please do file an issue!
+
+See:
+
+- [#13](https://github.com/JoshuaKGoldberg/release-it-action/issues/13) for supporting bypassing PR allowances
+- [#14](https://github.com/JoshuaKGoldberg/release-it-action/issues/14) for supporting dismissal restrictions
+
 ## Contributors
 
 <!-- spellchecker: disable -->
