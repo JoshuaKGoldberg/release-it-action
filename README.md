@@ -98,7 +98,7 @@ await releaseItAction({
 });
 ```
 
-Note that `branch`, `owner`, `repo`, and `token` are required and do not have default values in the Node API.
+Note that all non-`boolean` inputs are required and do not have default values in the Node API.
 
 ## FAQs
 
