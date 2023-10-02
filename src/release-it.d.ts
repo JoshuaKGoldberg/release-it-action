@@ -3,7 +3,14 @@ declare module "release-it" {
 		verbose?: boolean;
 	}
 
+	export interface ReleaseItResult {
+		changelog: string;
+		latestVersion: string;
+		name: string;
+		version: string;
+	}
+
 	export default function releaseIt(
 		options?: ReleaseItOptions,
-	): Promise<unknown>;
+	): Promise<ReleaseItResult>;
 }

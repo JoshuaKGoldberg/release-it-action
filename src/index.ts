@@ -28,10 +28,10 @@ export async function releaseItAction({
 	skipBranchProtections,
 }: ReleaseItActionOptions) {
 	if (
-		!(await tryCatchInfoAction(
+		(await tryCatchInfoAction(
 			"should-semantic-release",
 			async () => await shouldSemanticRelease({ verbose: true }),
-		))
+		)) === false
 	) {
 		return;
 	}
@@ -74,10 +74,14 @@ export async function releaseItAction({
 		core.info(`No existing branch protections found for ${branch}.`);
 	}
 
-	await tryCatchInfoAction(
-		"running release-it",
-		async () => await releaseIt({ verbose: true }),
-	);
+	await tryCatchInfoAction("running release-it", async () => {
+		try {
+			await releaseIt({ verbose: true });
+		} catch (error) {
+			core.error(`Error running release-it: ${error as string}`);
+			core.setFailed(error as string);
+		}
+	});
 
 	if (existingProtections) {
 		await tryCatchInfoAction(
