@@ -26,15 +26,86 @@
 
 ## Usage
 
+This action works by:
+
+1. Checking [`should-semantic-release`](https://github.com/JoshuaKGoldberg/should-semantic-release) for whether a new release is necessary, and bailing if not
+2. Fetching any existing branch protections for the configured branch, and temporarily deleting them if found
+3. Running [`release-it`](https://github.com/release-it/release-it)
+4. Restoring any temporarily deleted branch protections
+
+Run `JoshuaKGoldberg/release-it-action` in a GitHub workflow after building your code and setting your npm token:
+
+```yml
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+      - run: npm build
+      - env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        uses: JoshuaKGoldberg/release-it-action@v0.1.0
+
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  id-token: write
+```
+
+## Options
+
+| Key                       | Type      | Default                                    | Description                                                                             |
+| ------------------------- | --------- | ------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `branch`                  | `string`  | `"main"`                                   | Branch to delete and recreate branch protections on (unless `skip-branch-protections`). |
+| `git-user-email`          | `string`  | `${GITHUB_ACTOR}@users.noreply.github.com` | `git config user.email` value for Git commits.                                          |
+| `git-user-name`           | `string`  | `${GITHUB_ACTOR}`                          | `git config user.name` value for Git commits.                                           |
+| `github-token`            | `string`  | `${GITHUB_TOKEN}`                          | GitHub token (PAT) with _repo_ and _workflow_ permissions.                              |
+| `npm-token`               | `string`  | `${NPM_TOKEN}`                             | npm token with the _automation_ role.                                                   |
+| `owner`                   | `string`  | Repository owner                           | Owning organization or username of the GitHub repository.                               |
+| `repo`                    | `string`  | Repository name                            | Name of the GitHub repository.                                                          |
+| `skip-branch-protections` | `boolean` | `false`                                    | Whether to skip deleting and recreating branch protections.                             |
+
+### Node API
+
+`release-it-action` can be installed as a dependency that exports a `releaseItAction` function:
+
 ```shell
 npm i release-it-action
 ```
 
 ```ts
-import { greet } from "release-it-action";
+import { releaseItAction } from "release-it-action";
 
-greet("Hello, world! 💖");
+await releaseItAction({
+	branch: "main",
+	githubToken: process.env.GITHUB_TOKEN,
+	npmToken: process.env.NPM_TOKEN,
+	owner: "YourUsername",
+	repo: "your-repository",
+});
 ```
+
+Note that `branch`, `owner`, `repo`, and `token` are required and do not have default values in the Node API.
+
+## FAQs
+
+### Why does the checkout action run on the branch with full history?
+
+`release-it-action` needs to run on the latest commit on the default/release branch and with a [concurrency group](https://docs.github.com/en/actions/using-jobs/using-concurrency).
+Otherwise, if multiple workflows are triggered quickly, later workflows might not include release commits from earlier workflows.
 
 ## Contributors
 

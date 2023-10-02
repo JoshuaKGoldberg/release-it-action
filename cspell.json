@@ -11,17 +11,15 @@
 	],
 	"words": [
 		"Codecov",
-		"codespace",
-		"commitlint",
 		"contributorsrc",
 		"conventionalcommits",
+		"execa",
 		"knip",
 		"lcov",
-		"markdownlintignore",
+		"noreply",
+		"npmjs",
 		"npmpackagejsonlintrc",
 		"outro",
-		"packagejson",
-		"quickstart",
-		"wontfix"
+		"packagejson"
 	]
 }
