@@ -10,6 +10,7 @@ inputs:
   github-token:
     description: "GitHub token (PAT) with repo and workflow permissions."
   skip-branch-protections:
+    default: "false"
     description: "Whether to skip deleting and recreating branch protections."
 name: release-it Action
 runs:
