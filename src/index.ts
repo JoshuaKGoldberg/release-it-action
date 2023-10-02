@@ -1,10 +1,11 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { $ } from "execa";
-import releaseIt from "release-it";
 import { shouldSemanticRelease } from "should-semantic-release";
 
 import { tryCatchInfoAction } from "./tryCatchInfoAction.js";
+
+const $$ = $({ stdio: "inherit" });
 
 export interface ReleaseItActionOptions {
 	branch: string;
@@ -36,9 +37,9 @@ export async function releaseItAction({
 		return;
 	}
 
-	await $`git config user.email ${gitUserEmail}`;
-	await $`git config user.name ${gitUserName}`;
-	await $`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
+	await $$`git config user.email ${gitUserEmail}`;
+	await $$`git config user.name ${gitUserName}`;
+	await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
 
 	const octokit = github.getOctokit(githubToken);
 	const commonRequestData = {
@@ -76,7 +77,10 @@ export async function releaseItAction({
 
 	await tryCatchInfoAction("running release-it", async () => {
 		try {
-			await releaseIt({ verbose: true });
+			const { exitCode, stderr } = await $$`release-it --verbose`;
+			if (exitCode || stderr) {
+				throw new Error(stderr || `Exit code ${exitCode}.`);
+			}
 		} catch (error) {
 			core.error(`Error running release-it: ${error as string}`);
 			core.setFailed(error as string);
