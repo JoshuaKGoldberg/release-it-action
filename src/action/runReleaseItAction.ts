@@ -4,8 +4,8 @@ import * as github from "@actions/github";
 import { getTokenInput } from "../getTokenInput.js";
 import { releaseItAction } from "../index.js";
 
-export async function runReleaseItAction() {
-	const gitUserName = core.getInput("git-user-name") || github.context.actor;
+export async function runReleaseItAction(context: typeof github.context) {
+	const gitUserName = core.getInput("git-user-name") || context.actor;
 
 	await releaseItAction({
 		branch: core.getInput("branch") || "main",
@@ -15,8 +15,8 @@ export async function runReleaseItAction() {
 		gitUserName,
 		githubToken: getTokenInput("github-token", "GITHUB_TOKEN"),
 		npmToken: getTokenInput("npm-token", "NPM_TOKEN"),
-		owner: github.context.repo.owner,
-		repo: github.context.repo.repo,
+		owner: context.repo.owner,
+		repo: context.repo.repo,
 		skipBranchProtections: core.getBooleanInput("skip-branch-protections"),
 	});
 }

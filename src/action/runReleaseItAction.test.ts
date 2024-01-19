@@ -1,4 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
+import * as github from "@actions/github";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { runReleaseItAction } from "./runReleaseItAction.js";
 
@@ -27,11 +28,19 @@ vi.mock("../index.js", () => ({
 	},
 }));
 
+const mockContext = {
+	context: { actor: "test-actor" },
+	repo: {
+		owner: "context-owner",
+		repo: "context-repo",
+	},
+} as unknown as typeof github.context;
+
 describe("runReleaseItAction", () => {
 	it("runs when no optional core inputs are required", async () => {
 		mockGetInput.mockReturnValue(undefined);
 
-		await runReleaseItAction();
+		await runReleaseItAction(mockContext);
 
 		expect(mockReleaseItAction.mock.calls).toMatchInlineSnapshot(`
 			[
@@ -42,8 +51,8 @@ describe("runReleaseItAction", () => {
 			      "gitUserName": undefined,
 			      "githubToken": "mock-github-token",
 			      "npmToken": "mock-npm-token",
-			      "owner": "mock-github-repository",
-			      "repo": undefined,
+			      "owner": "context-owner",
+			      "repo": "context-repo",
 			      "skipBranchProtections": false,
 			    },
 			  ],
@@ -54,7 +63,7 @@ describe("runReleaseItAction", () => {
 	it("runs when all optional core inputs are required", async () => {
 		mockGetInput.mockImplementation((tokenName: string) => `mock-${tokenName}`);
 
-		await runReleaseItAction();
+		await runReleaseItAction(mockContext);
 
 		expect(mockReleaseItAction.mock.calls).toMatchInlineSnapshot(`
 			[
@@ -65,8 +74,8 @@ describe("runReleaseItAction", () => {
 			      "gitUserName": "mock-git-user-name",
 			      "githubToken": "mock-github-token",
 			      "npmToken": "mock-npm-token",
-			      "owner": "mock-github-repository",
-			      "repo": undefined,
+			      "owner": "context-owner",
+			      "repo": "context-repo",
 			      "skipBranchProtections": false,
 			    },
 			  ],
