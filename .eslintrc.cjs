@@ -41,15 +41,7 @@ module.exports = {
 				"jsdoc/require-param": "off",
 				"jsdoc/require-property": "off",
 				"jsdoc/require-returns": "off",
-			},
-		},
-		{
-			files: "**/*.md/*.ts",
-			rules: {
-				"n/no-missing-import": [
-					"error",
-					{ allowModules: ["release-it-action"] },
-				],
+				"n/no-missing-import": "off",
 			},
 		},
 		{
