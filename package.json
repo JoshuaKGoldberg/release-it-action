@@ -21,12 +21,12 @@
 	],
 	"scripts": {
 		"build": "tsc",
-		"build:release": "ncc build src/action.ts -o dist",
+		"build:release": "ncc build src/action/index.ts -o dist",
 		"format": "prettier \"**/*\" --ignore-unknown",
 		"lint": "eslint . .*js --max-warnings 0 --report-unused-disable-directives",
 		"lint:knip": "knip",
 		"lint:md": "markdownlint \"**/*.md\" \".github/**/*.md\" --rules sentences-per-line",
-		"lint:package-json": "npmPkgJsonLint .",
+		"lint:package-json": "npmPkgJsonLint ./package.json",
 		"lint:packages": "pnpm dedupe --check",
 		"lint:spelling": "cspell \"**\" \".github/**/*\"",
 		"prepare": "husky install",
@@ -44,6 +44,7 @@
 		"execa": "^8.0.1"
 	},
 	"devDependencies": {
+		"@octokit/types": "^12.4.0",
 		"@release-it/conventional-changelog": "^7.0.2",
 		"@types/eslint": "^8.44.3",
 		"@typescript-eslint/eslint-plugin": "^6.7.3",

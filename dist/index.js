@@ -12014,82 +12014,143 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 5496:
+/***/ 7181:
 /***/ ((module, __unused_webpack___webpack_exports__, __nccwpck_require__) => {
 
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8434);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(5248);
-/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _getTokenInput_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(3563);
-/* harmony import */ var _index_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(2789);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(9321);
 
-
-
-
-const gitUserName = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("git-user-name") || _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.actor;
-await (0,_index_js__WEBPACK_IMPORTED_MODULE_3__/* .releaseItAction */ .R)({
-    branch: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("branch") || "main",
-    gitUserEmail: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("git-user-email") ||
-        `${gitUserName}@users.noreply.github.com`,
-    gitUserName,
-    githubToken: (0,_getTokenInput_js__WEBPACK_IMPORTED_MODULE_2__/* .getTokenInput */ .I)("github-token", "GITHUB_TOKEN"),
-    npmToken: (0,_getTokenInput_js__WEBPACK_IMPORTED_MODULE_2__/* .getTokenInput */ .I)("npm-token", "NPM_TOKEN"),
-    owner: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.owner,
-    repo: _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.repo,
-    skipBranchProtections: _actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput("skip-branch-protections"),
-});
+await (0,_runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_0__/* .runReleaseItAction */ .O)();
 
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } }, 1);
 
 /***/ }),
 
-/***/ 3563:
-/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
-
-/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   "I": () => (/* binding */ getTokenInput)
-/* harmony export */ });
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8434);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var node_process__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(7742);
-/* harmony import */ var node_process__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(node_process__WEBPACK_IMPORTED_MODULE_1__);
-
-
-function getTokenInput(name, backup) {
-    const token = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput(name) || node_process__WEBPACK_IMPORTED_MODULE_1__.env[backup];
-    if (!token) {
-        throw new Error(`No ${name} input or ${backup} environment variable defined.`);
-    }
-    return token;
-}
-
-
-/***/ }),
-
-/***/ 2789:
+/***/ 9321:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
 // EXPORTS
 __nccwpck_require__.d(__webpack_exports__, {
-  "R": () => (/* binding */ releaseItAction)
+  "O": () => (/* binding */ runReleaseItAction)
 });
 
 // EXTERNAL MODULE: ./node_modules/.pnpm/@actions+core@1.10.1/node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(8434);
 // EXTERNAL MODULE: ./node_modules/.pnpm/@actions+github@5.1.1/node_modules/@actions/github/lib/github.js
 var github = __nccwpck_require__(5248);
+;// CONCATENATED MODULE: external "node:process"
+const external_node_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:process");
+;// CONCATENATED MODULE: ./src/getTokenInput.ts
+
+
+function getTokenInput(name, backup) {
+    const token = core.getInput(name) || external_node_process_namespaceObject.env[backup];
+    if (!token) {
+        throw new Error(`No ${name} input or ${backup} environment variable defined.`);
+    }
+    return token;
+}
+
+// EXTERNAL MODULE: ./node_modules/.pnpm/@pkgjs+parseargs@0.11.0/node_modules/@pkgjs/parseargs/index.js
+var parseargs = __nccwpck_require__(861);
+// EXTERNAL MODULE: ./node_modules/.pnpm/conventional-commits-parser@5.0.0/node_modules/conventional-commits-parser/index.js
+var conventional_commits_parser = __nccwpck_require__(9742);
+;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.2.0/node_modules/should-semantic-release/lib/getCommitMeaning.js
+
+const alwaysMeaningfulTypes = new Set(["feat", "fix", "perf"]);
+const alwaysIgnoredTypes = new Set(["docs", "refactor", "style", "test"]);
+const releaseCommitTester = /^(?:chore(?:\(.*\))?:?)?\s*release|v?\d+\.\d+\.\d+/;
+function getCommitMeaning(message) {
+    // Some types are always meaningful or ignored, regardless of potentially release-like messages
+    const { type } = conventional_commits_parser.sync(message);
+    if (type) {
+        if (alwaysMeaningfulTypes.has(type)) {
+            return "meaningful";
+        }
+        if (alwaysIgnoredTypes.has(type)) {
+            return { type };
+        }
+    }
+    // If we've hit a release commit, we know we don't need to release
+    if (releaseCommitTester.test(message)) {
+        return "release";
+    }
+    return { type: type ?? undefined };
+}
+//# sourceMappingURL=getCommitMeaning.js.map
+;// CONCATENATED MODULE: external "node:child_process"
+const external_node_child_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:child_process");
+;// CONCATENATED MODULE: external "node:util"
+const external_node_util_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:util");
+;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.2.0/node_modules/should-semantic-release/lib/utils.js
+
+
+const exec = (0,external_node_util_namespaceObject.promisify)(external_node_child_process_namespaceObject.exec);
+async function execOrThrow(command) {
+    const { stdout, stderr } = await exec(command);
+    if (stderr) {
+        throw new Error(stderr);
+    }
+    return stdout;
+}
+//# sourceMappingURL=utils.js.map
+;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.2.0/node_modules/should-semantic-release/lib/shouldSemanticRelease.js
+
+
+async function shouldSemanticRelease_shouldSemanticRelease({ verbose, }) {
+    const rawHistory = await execOrThrow(`git log --pretty=format:"%s"`);
+    const history = rawHistory.split("\n");
+    const log = verbose
+        ? console.log.bind(console)
+        : // eslint-disable-next-line @typescript-eslint/no-empty-function
+            () => { };
+    log(`Checking up to ${history.length} commits for release readiness...`);
+    for (const message of history) {
+        log(`Checking commit: ${message}`);
+        const meaning = getCommitMeaning(message);
+        switch (meaning) {
+            case "release":
+                log(`Found a release commit. Returning false.`);
+                return false;
+            case "meaningful":
+                log(`Found a meaningful commit. Returning true.`);
+                return true;
+            default:
+                log(`Found type ${meaning.type}. Continuing.`);
+        }
+    }
+    // If we've seen every commit in the history and none match, don't release
+    log("No commits found that indicate a semantic release is necessary. Returning false.");
+    return false;
+}
+//# sourceMappingURL=shouldSemanticRelease.js.map
+;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.2.0/node_modules/should-semantic-release/lib/cli.js
+
+
+async function shouldSemanticReleaseCLI(args) {
+    const { values } = parseArgs({
+        args,
+        options: {
+            verbose: { short: "v", type: "boolean" },
+        },
+        strict: false,
+        tokens: true,
+    });
+    return await shouldSemanticRelease({
+        verbose: !!values.verbose,
+    });
+}
+//# sourceMappingURL=cli.js.map
+;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.2.0/node_modules/should-semantic-release/lib/index.js
+
+
+//# sourceMappingURL=index.js.map
 ;// CONCATENATED MODULE: external "node:buffer"
 const external_node_buffer_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:buffer");
 ;// CONCATENATED MODULE: external "node:path"
 const external_node_path_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path");
-;// CONCATENATED MODULE: external "node:child_process"
-const external_node_child_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:child_process");
-// EXTERNAL MODULE: external "node:process"
-var external_node_process_ = __nccwpck_require__(7742);
 // EXTERNAL MODULE: ./node_modules/.pnpm/cross-spawn@7.0.3/node_modules/cross-spawn/index.js
 var cross_spawn = __nccwpck_require__(9902);
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/strip-final-newline@3.0.0/node_modules/strip-final-newline/index.js
@@ -12132,9 +12193,9 @@ function pathKey(options = {}) {
 
 function npmRunPath(options = {}) {
 	const {
-		cwd = external_node_process_.cwd(),
-		path: path_ = external_node_process_.env[pathKey()],
-		execPath = external_node_process_.execPath,
+		cwd = external_node_process_namespaceObject.cwd(),
+		path: path_ = external_node_process_namespaceObject.env[pathKey()],
+		execPath = external_node_process_namespaceObject.execPath,
 	} = options;
 
 	let previous;
@@ -12154,7 +12215,7 @@ function npmRunPath(options = {}) {
 	return [...result, path_].join(external_node_path_namespaceObject.delimiter);
 }
 
-function npmRunPathEnv({env = external_node_process_.env, ...options} = {}) {
+function npmRunPathEnv({env = external_node_process_namespaceObject.env, ...options} = {}) {
 	env = {...env};
 
 	const path = pathKey({env});
@@ -12719,7 +12780,7 @@ const makeError = ({
 	timedOut,
 	isCanceled,
 	killed,
-	parsed: {options: {timeout, cwd = external_node_process_.cwd()}},
+	parsed: {options: {timeout, cwd = external_node_process_namespaceObject.cwd()}},
 }) => {
 	// `signal` and `exitCode` emitted on `spawned.on('exit')` event can be `null`.
 	// We normalize them to `undefined`
@@ -13917,8 +13978,6 @@ const parseTemplates = (templates, expressions) => {
 };
 
 
-;// CONCATENATED MODULE: external "node:util"
-const external_node_util_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:util");
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@8.0.1/node_modules/execa/lib/verbose.js
 
 
@@ -13937,7 +13996,7 @@ const logCommand = (escapedCommand, {verbose}) => {
 		return;
 	}
 
-	external_node_process_.stderr.write(`[${getTimestamp()}] ${escapedCommand}\n`);
+	external_node_process_namespaceObject.stderr.write(`[${getTimestamp()}] ${escapedCommand}\n`);
 };
 
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@8.0.1/node_modules/execa/index.js
@@ -13961,7 +14020,7 @@ const logCommand = (escapedCommand, {verbose}) => {
 const DEFAULT_MAX_BUFFER = 1000 * 1000 * 100;
 
 const getEnv = ({env: envOption, extendEnv, preferLocal, localDir, execPath}) => {
-	const env = extendEnv ? {...external_node_process_.env, ...envOption} : envOption;
+	const env = extendEnv ? {...external_node_process_namespaceObject.env, ...envOption} : envOption;
 
 	if (preferLocal) {
 		return npmRunPathEnv({env, cwd: localDir, execPath});
@@ -13982,8 +14041,8 @@ const handleArguments = (file, args, options = {}) => {
 		stripFinalNewline: true,
 		extendEnv: true,
 		preferLocal: false,
-		localDir: options.cwd || external_node_process_.cwd(),
-		execPath: external_node_process_.execPath,
+		localDir: options.cwd || external_node_process_namespaceObject.cwd(),
+		execPath: external_node_process_namespaceObject.execPath,
 		encoding: 'utf8',
 		reject: true,
 		cleanup: true,
@@ -13997,7 +14056,7 @@ const handleArguments = (file, args, options = {}) => {
 
 	options.stdio = normalizeStdio(options);
 
-	if (external_node_process_.platform === 'win32' && external_node_path_namespaceObject.basename(file, '.exe') === 'cmd') {
+	if (external_node_process_namespaceObject.platform === 'win32' && external_node_path_namespaceObject.basename(file, '.exe') === 'cmd') {
 		// #116
 		args.unshift('/q');
 	}
@@ -14251,96 +14310,10 @@ function execaNode(scriptPath, args, options = {}) {
 	);
 }
 
-// EXTERNAL MODULE: ./node_modules/.pnpm/@pkgjs+parseargs@0.11.0/node_modules/@pkgjs/parseargs/index.js
-var parseargs = __nccwpck_require__(861);
-// EXTERNAL MODULE: ./node_modules/.pnpm/conventional-commits-parser@5.0.0/node_modules/conventional-commits-parser/index.js
-var conventional_commits_parser = __nccwpck_require__(9742);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.2.0/node_modules/should-semantic-release/lib/getCommitMeaning.js
+;// CONCATENATED MODULE: ./src/execa.ts
 
-const alwaysMeaningfulTypes = new Set(["feat", "fix", "perf"]);
-const alwaysIgnoredTypes = new Set(["docs", "refactor", "style", "test"]);
-const releaseCommitTester = /^(?:chore(?:\(.*\))?:?)?\s*release|v?\d+\.\d+\.\d+/;
-function getCommitMeaning(message) {
-    // Some types are always meaningful or ignored, regardless of potentially release-like messages
-    const { type } = conventional_commits_parser.sync(message);
-    if (type) {
-        if (alwaysMeaningfulTypes.has(type)) {
-            return "meaningful";
-        }
-        if (alwaysIgnoredTypes.has(type)) {
-            return { type };
-        }
-    }
-    // If we've hit a release commit, we know we don't need to release
-    if (releaseCommitTester.test(message)) {
-        return "release";
-    }
-    return { type: type ?? undefined };
-}
-//# sourceMappingURL=getCommitMeaning.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.2.0/node_modules/should-semantic-release/lib/utils.js
+const $$ = $({ stdio: "inherit" });
 
-
-const exec = (0,external_node_util_namespaceObject.promisify)(external_node_child_process_namespaceObject.exec);
-async function execOrThrow(command) {
-    const { stdout, stderr } = await exec(command);
-    if (stderr) {
-        throw new Error(stderr);
-    }
-    return stdout;
-}
-//# sourceMappingURL=utils.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.2.0/node_modules/should-semantic-release/lib/shouldSemanticRelease.js
-
-
-async function shouldSemanticRelease_shouldSemanticRelease({ verbose, }) {
-    const rawHistory = await execOrThrow(`git log --pretty=format:"%s"`);
-    const history = rawHistory.split("\n");
-    const log = verbose
-        ? console.log.bind(console)
-        : // eslint-disable-next-line @typescript-eslint/no-empty-function
-            () => { };
-    log(`Checking up to ${history.length} commits for release readiness...`);
-    for (const message of history) {
-        log(`Checking commit: ${message}`);
-        const meaning = getCommitMeaning(message);
-        switch (meaning) {
-            case "release":
-                log(`Found a release commit. Returning false.`);
-                return false;
-            case "meaningful":
-                log(`Found a meaningful commit. Returning true.`);
-                return true;
-            default:
-                log(`Found type ${meaning.type}. Continuing.`);
-        }
-    }
-    // If we've seen every commit in the history and none match, don't release
-    log("No commits found that indicate a semantic release is necessary. Returning false.");
-    return false;
-}
-//# sourceMappingURL=shouldSemanticRelease.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.2.0/node_modules/should-semantic-release/lib/cli.js
-
-
-async function shouldSemanticReleaseCLI(args) {
-    const { values } = parseArgs({
-        args,
-        options: {
-            verbose: { short: "v", type: "boolean" },
-        },
-        strict: false,
-        tokens: true,
-    });
-    return await shouldSemanticRelease({
-        verbose: !!values.verbose,
-    });
-}
-//# sourceMappingURL=cli.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.2.0/node_modules/should-semantic-release/lib/index.js
-
-
-//# sourceMappingURL=index.js.map
 ;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
 
 async function tryCatchInfoAction(label, action) {
@@ -14356,13 +14329,133 @@ async function tryCatchInfoAction(label, action) {
     }
 }
 
+;// CONCATENATED MODULE: ./src/steps/deleteProtections.ts
+
+
+async function deleteProtections({ branch, existingProtections, octokit, requestData, }) {
+    if (existingProtections) {
+        await tryCatchInfoAction(`deleting existing protections for ${branch}`, async () => await octokit.request(`DELETE /repos/{owner}/{repo}/branches/{branch}/protection`, requestData));
+    }
+    else {
+        core.info(`No existing branch protections found for ${branch}.`);
+    }
+}
+
+;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
+
+async function fetchProtections({ branch, octokit, requestData, skipBranchProtections, }) {
+    return skipBranchProtections
+        ? undefined
+        : await tryCatchInfoAction(`fetching existing branch protections for ${branch}`, async () => await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData));
+}
+
+;// CONCATENATED MODULE: ./src/steps/recreateProtections.ts
+
+async function recreateProtections({ commonRequestData, existingProtections, octokit, }) {
+    if (!existingProtections) {
+        return;
+    }
+    await tryCatchInfoAction("re-creating branch protections", async () => await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
+        ...commonRequestData,
+        allow_deletions: !!existingProtections.allow_deletions?.enabled,
+        allow_force_pushes: !!existingProtections.allow_force_pushes?.enabled,
+        allow_fork_syncing: !!existingProtections.allow_fork_syncing?.enabled,
+        block_creations: !!existingProtections.block_creations?.enabled,
+        enforce_admins: !!existingProtections.enforce_admins?.enabled,
+        lock_branch: !!existingProtections.lock_branch?.enabled,
+        required_conversation_resolution: !!existingProtections.required_conversation_resolution?.enabled,
+        required_linear_history: !!existingProtections.required_linear_history?.enabled,
+        required_pull_request_reviews: existingProtections.required_pull_request_reviews
+            ? {
+                // TODO: https://github.com/JoshuaKGoldberg/release-it-action/issues/13
+                // bypass_pull_request_allowances: {
+                // 	apps: currentBranchProtections.data.required_pull_request_reviews
+                // 		.bypass_pull_request_allowances?.apps,
+                // 	teams:
+                // 		currentBranchProtections.data.required_pull_request_reviews
+                // 			.bypass_pull_request_allowances?.teams,
+                // 	users:
+                // 		currentBranchProtections.data.required_pull_request_reviews
+                // 			.bypass_pull_request_allowances?.users,
+                // },
+                dismiss_stale_reviews: existingProtections.required_pull_request_reviews
+                    .dismiss_stale_reviews,
+                // TODO: https://github.com/JoshuaKGoldberg/release-it-action/issues/14
+                // dismissal_restrictions: {
+                // 	apps: currentBranchProtections.data.required_pull_request_reviews.dismissal_restrictions?.apps?.map(
+                // 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                // 		(app) => app.slug!,
+                // 	),
+                // 	teams:
+                // 		currentBranchProtections.data.required_pull_request_reviews.dismissal_restrictions?.teams?.map(
+                // 			(team) => team.slug,
+                // 		),
+                // 	users:
+                // 		currentBranchProtections.data.required_pull_request_reviews.dismissal_restrictions?.users?.map(
+                // 			(user) => user.login,
+                // 		),
+                // },
+                require_code_owner_reviews: existingProtections.required_pull_request_reviews
+                    .require_code_owner_reviews,
+                required_approving_review_count: existingProtections.required_pull_request_reviews
+                    .required_approving_review_count,
+            }
+            : null,
+        required_signatures: !!existingProtections.required_signatures?.enabled,
+        restrictions: existingProtections.restrictions
+            ? {
+                apps: existingProtections.restrictions.apps.map(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                (app) => app.slug),
+                teams: existingProtections.restrictions.teams.map(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                (team) => team.slug),
+                users: existingProtections.restrictions.users.map(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                (user) => user.login),
+            }
+            : null,
+        // @ts-expect-error -- The left types use 'null', while the right are 'undefined'...
+        required_status_checks: existingProtections.required_status_checks
+            ? {
+                checks: existingProtections.required_status_checks.checks.map((check) => ({
+                    app_id: check.app_id ?? undefined,
+                    context: check.context,
+                })),
+                strict: existingProtections.required_status_checks.strict,
+            }
+            : null,
+    }));
+}
+
+;// CONCATENATED MODULE: ./src/steps/runReleaseIt.ts
+
+
+
+async function runReleaseIt() {
+    await tryCatchInfoAction("running release-it", async () => {
+        try {
+            const { exitCode, stderr } = await $$ `release-it --verbose`;
+            if (exitCode || stderr) {
+                throw new Error(stderr || `Exit code ${exitCode}.`);
+            }
+        }
+        catch (error) {
+            core.error(`Error running release-it: ${error}`);
+            core.setFailed(error);
+        }
+    });
+}
+
 ;// CONCATENATED MODULE: ./src/index.ts
 
 
 
 
 
-const $$ = $({ stdio: "inherit" });
+
+
+
 async function releaseItAction({ branch, gitUserEmail, gitUserName, githubToken, npmToken, owner, repo, skipBranchProtections, }) {
     if ((await tryCatchInfoAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true }))) === false) {
         return;
@@ -14379,108 +14472,44 @@ async function releaseItAction({ branch, gitUserEmail, gitUserName, githubToken,
         owner,
         repo,
     };
-    const existingProtections = skipBranchProtections
-        ? undefined
-        : await tryCatchInfoAction(`fetching existing branch protections for ${branch}`, async () => await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", commonRequestData));
-    if (existingProtections) {
-        await tryCatchInfoAction(`deleting existing protections for ${branch}`, async () => await octokit.request(`DELETE /repos/{owner}/{repo}/branches/{branch}/protection`, commonRequestData));
-    }
-    else {
-        core.info(`No existing branch protections found for ${branch}.`);
-    }
-    await tryCatchInfoAction("running release-it", async () => {
-        try {
-            const { exitCode, stderr } = await $$ `release-it --verbose`;
-            if (exitCode || stderr) {
-                throw new Error(stderr || `Exit code ${exitCode}.`);
-            }
-        }
-        catch (error) {
-            core.error(`Error running release-it: ${error}`);
-            core.setFailed(error);
-        }
+    const existingProtections = await fetchProtections({
+        branch,
+        octokit,
+        requestData: commonRequestData,
+        skipBranchProtections,
     });
-    if (existingProtections) {
-        await tryCatchInfoAction("re-creating branch protections", async () => await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
-            ...commonRequestData,
-            allow_deletions: !!existingProtections.data.allow_deletions?.enabled,
-            allow_force_pushes: !!existingProtections.data.allow_force_pushes?.enabled,
-            block_creations: !!existingProtections.data.block_creations?.enabled,
-            enforce_admins: !!existingProtections.data.enforce_admins?.enabled,
-            required_conversation_resolution: !!existingProtections.data.required_conversation_resolution
-                ?.enabled,
-            required_linear_history: !!existingProtections.data.required_linear_history?.enabled,
-            required_pull_request_reviews: existingProtections.data
-                .required_pull_request_reviews
-                ? {
-                    // TODO
-                    // bypass_pull_request_allowances: {
-                    // 	apps: currentBranchProtections.data.required_pull_request_reviews
-                    // 		.bypass_pull_request_allowances?.apps,
-                    // 	teams:
-                    // 		currentBranchProtections.data.required_pull_request_reviews
-                    // 			.bypass_pull_request_allowances?.teams,
-                    // 	users:
-                    // 		currentBranchProtections.data.required_pull_request_reviews
-                    // 			.bypass_pull_request_allowances?.users,
-                    // },
-                    dismiss_stale_reviews: existingProtections.data.required_pull_request_reviews
-                        .dismiss_stale_reviews,
-                    // TODO
-                    // dismissal_restrictions: {
-                    // 	apps: currentBranchProtections.data.required_pull_request_reviews.dismissal_restrictions?.apps?.map(
-                    // 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    // 		(app) => app.slug!,
-                    // 	),
-                    // 	teams:
-                    // 		currentBranchProtections.data.required_pull_request_reviews.dismissal_restrictions?.teams?.map(
-                    // 			(team) => team.slug,
-                    // 		),
-                    // 	users:
-                    // 		currentBranchProtections.data.required_pull_request_reviews.dismissal_restrictions?.users?.map(
-                    // 			(user) => user.login,
-                    // 		),
-                    // },
-                    require_code_owner_reviews: existingProtections.data.required_pull_request_reviews
-                        .require_code_owner_reviews,
-                    required_approving_review_count: existingProtections.data.required_pull_request_reviews
-                        .required_approving_review_count,
-                }
-                : null,
-            required_signatures: !!existingProtections.data.required_signatures?.enabled,
-            restrictions: existingProtections.data.restrictions
-                ? {
-                    apps: existingProtections.data.restrictions.apps.map(
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    (app) => app.slug),
-                    teams: existingProtections.data.restrictions.teams.map(
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    (team) => team.slug),
-                    users: existingProtections.data.restrictions.users.map(
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    (user) => user.login),
-                }
-                : null,
-            /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-            allow_fork_syncing: 
-            // @ts-expect-error -- Types seem to be missing this property?
-            !!existingProtections.data.allow_fork_syncing?.enabled,
-            // @ts-expect-error -- Types seem to be missing this property?
-            lock_branch: !!existingProtections.data.lock_branch?.enabled,
-            /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-            // @ts-expect-error -- The left types use 'null', while the right are 'undefined'...
-            required_status_checks: existingProtections.data
-                .required_status_checks
-                ? {
-                    checks: existingProtections.data.required_status_checks.checks.map((check) => ({
-                        app_id: check.app_id ?? undefined,
-                        context: check.context,
-                    })),
-                    strict: existingProtections.data.required_status_checks.strict,
-                }
-                : null,
-        }));
-    }
+    await deleteProtections({
+        branch,
+        existingProtections,
+        octokit,
+        requestData: commonRequestData,
+    });
+    await runReleaseIt();
+    await recreateProtections({
+        commonRequestData,
+        existingProtections,
+        octokit,
+    });
+}
+
+;// CONCATENATED MODULE: ./src/action/runReleaseItAction.ts
+
+
+
+
+async function runReleaseItAction() {
+    const gitUserName = core.getInput("git-user-name") || github.context.actor;
+    await releaseItAction({
+        branch: core.getInput("branch") || "main",
+        gitUserEmail: core.getInput("git-user-email") ||
+            `${gitUserName}@users.noreply.github.com`,
+        gitUserName,
+        githubToken: getTokenInput("github-token", "GITHUB_TOKEN"),
+        npmToken: getTokenInput("npm-token", "NPM_TOKEN"),
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        skipBranchProtections: core.getBooleanInput("skip-branch-protections"),
+    });
 }
 
 
@@ -14547,13 +14576,6 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("https");
 /***/ ((module) => {
 
 module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("net");
-
-/***/ }),
-
-/***/ 7742:
-/***/ ((module) => {
-
-module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:process");
 
 /***/ }),
 
@@ -14722,18 +14744,6 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	};
 /******/ })();
 /******/ 
-/******/ /* webpack/runtime/compat get default export */
-/******/ (() => {
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__nccwpck_require__.n = (module) => {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			() => (module['default']) :
-/******/ 			() => (module);
-/******/ 		__nccwpck_require__.d(getter, { a: getter });
-/******/ 		return getter;
-/******/ 	};
-/******/ })();
-/******/ 
 /******/ /* webpack/runtime/define property getters */
 /******/ (() => {
 /******/ 	// define getter functions for harmony exports
@@ -14760,6 +14770,6 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ // startup
 /******/ // Load entry module and return exports
 /******/ // This entry module used 'module' so it can't be inlined
-/******/ var __webpack_exports__ = __nccwpck_require__(5496);
+/******/ var __webpack_exports__ = __nccwpck_require__(7181);
 /******/ __webpack_exports__ = await __webpack_exports__;
 /******/ 
