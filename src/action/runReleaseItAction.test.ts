@@ -1,5 +1,5 @@
 import * as github from "@actions/github";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { runReleaseItAction } from "./runReleaseItAction.js";
 
