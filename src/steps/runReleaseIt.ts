@@ -6,7 +6,7 @@ import { tryCatchInfoAction } from "../tryCatchInfoAction.js";
 export async function runReleaseIt() {
 	await tryCatchInfoAction("running release-it", async () => {
 		try {
-			const { exitCode, stderr } = await $$`release-it --verbose`;
+			const { exitCode, stderr } = await $$`npx release-it --verbose`;
 			if (exitCode || stderr) {
 				throw new Error(stderr || `Exit code ${exitCode}.`);
 			}
