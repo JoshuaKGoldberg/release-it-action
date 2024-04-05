@@ -44,7 +44,7 @@
 		"execa": "^8.0.1"
 	},
 	"devDependencies": {
-		"@octokit/types": "^12.4.0",
+		"@octokit/types": "^13.0.0",
 		"@release-it/conventional-changelog": "^8.0.0",
 		"@types/eslint": "^8.44.3",
 		"@typescript-eslint/eslint-plugin": "^7.0.0",
