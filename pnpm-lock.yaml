@@ -90,7 +90,7 @@ devDependencies:
     version: 2.4.0
   knip:
     specifier: ^5.0.0
-    version: 5.9.1(@types/node@20.12.6)(typescript@5.4.4)
+    version: 5.9.2(@pnpm/logger@5.0.0)(@types/node@20.12.6)(typescript@5.4.4)
   lint-staged:
     specifier: ^15.0.0
     version: 15.2.2
@@ -1180,8 +1180,8 @@ packages:
       '@pnpm/types': 9.4.2
     dev: true
 
-  /@pnpm/error@5.0.3:
-    resolution: {integrity: sha512-ONJU5cUeoeJSy50qOYsMZQHTA/9QKmGgh1ATfEpCLgtbdwqUiwD9MxHNeXUYYI/pocBCz6r1ZCFqiQvO+8SUKA==}
+  /@pnpm/error@5.0.2:
+    resolution: {integrity: sha512-0TEm+tWNYm+9uh6DSKyRbv8pv/6b4NL0PastLvMxIoqZbBZ5Zj1cYi332R9xsSUi31ZOsu2wpgn/bC7DA9hrjg==}
     engines: {node: '>=16.14'}
     dependencies:
       '@pnpm/constants': 7.1.1
@@ -1237,14 +1237,14 @@ packages:
       validate-npm-package-name: 4.0.0
     dev: true
 
-  /@pnpm/npm-resolver@18.1.1(@pnpm/logger@5.0.0):
-    resolution: {integrity: sha512-NptzncmMD5ZMimbjWkGpMzuBRhlCY+sh7mzypPdBOTNlh5hmEQe/VaRKjNK4V9/b0C/llElkvIePL6acybu86w==}
+  /@pnpm/npm-resolver@18.1.0(@pnpm/logger@5.0.0):
+    resolution: {integrity: sha512-fUYKX/iHiHldL0VRVvkQI35YK2jWhZEkPO6rrGke8309+LKAo12v833nBttMDpQrtHefmqhB4mhCzQq6L2Xqmg==}
     engines: {node: '>=16.14'}
     peerDependencies:
       '@pnpm/logger': ^5.0.0
     dependencies:
       '@pnpm/core-loggers': 9.0.6(@pnpm/logger@5.0.0)
-      '@pnpm/error': 5.0.3
+      '@pnpm/error': 5.0.2
       '@pnpm/fetching-types': 5.0.0
       '@pnpm/graceful-fs': 3.2.0
       '@pnpm/logger': 5.0.0
@@ -1292,14 +1292,13 @@ packages:
     engines: {node: '>=16.14'}
     dev: true
 
-  /@pnpm/workspace.pkgs-graph@2.0.16(@pnpm/logger@5.0.0):
-    resolution: {integrity: sha512-WNsDLkDKm7/eht91s/Iif9ELLabdshAIqpH3svCwdp/xiRxGumfUWkCCeCODjLbBCQehrsl3ugSsboIvk0xiPw==}
+  /@pnpm/workspace.pkgs-graph@2.0.14(@pnpm/logger@5.0.0):
+    resolution: {integrity: sha512-SBXXyWDkPEoaLTjLRyQzRHoBYH+P0NLcIjX1yPUxuJiMTvGOMzjpLWTuxYNVe/P0V0VQMrjpJFaJPjlViNLhzg==}
     engines: {node: '>=16.14'}
     dependencies:
       '@pnpm/npm-package-arg': 1.0.0
-      '@pnpm/npm-resolver': 18.1.1(@pnpm/logger@5.0.0)
+      '@pnpm/npm-resolver': 18.1.0(@pnpm/logger@5.0.0)
       '@pnpm/resolve-workspace-range': 5.0.1
-      '@pnpm/types': 9.4.2
       ramda: /@pnpm/ramda@0.28.1
     transitivePeerDependencies:
       - '@pnpm/logger'
@@ -2966,7 +2965,7 @@ packages:
       has-property-descriptors: 1.0.2
       has-proto: 1.0.3
       has-symbols: 1.0.3
-      hasown: 2.0.1
+      hasown: 2.0.2
       internal-slot: 1.0.7
       is-array-buffer: 3.0.4
       is-callable: 1.2.7
@@ -3029,7 +3028,7 @@ packages:
     dependencies:
       get-intrinsic: 1.2.4
       has-tostringtag: 1.0.2
-      hasown: 2.0.1
+      hasown: 2.0.2
     dev: true
 
   /es-to-primitive@1.2.1:
@@ -3686,7 +3685,7 @@ packages:
       function-bind: 1.1.2
       has-proto: 1.0.3
       has-symbols: 1.0.3
-      hasown: 2.0.1
+      hasown: 2.0.2
     dev: true
 
   /get-stdin@9.0.0:
@@ -3992,8 +3991,8 @@ packages:
       has-symbols: 1.0.3
     dev: true
 
-  /hasown@2.0.1:
-    resolution: {integrity: sha512-1/th4MHjnwncwXsIW6QMzlvYL9kG5e/CpVvLRZe4XPa8TOUNbCELqmvhDmnkNsAjwaG4+I8gJJL0JBvTTLO9qA==}
+  /hasown@2.0.2:
+    resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
     dependencies:
       function-bind: 1.1.2
@@ -4170,7 +4169,7 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       es-errors: 1.3.0
-      hasown: 2.0.1
+      hasown: 2.0.2
       side-channel: 1.0.5
     dev: true
 
@@ -4259,7 +4258,7 @@ packages:
   /is-core-module@2.13.1:
     resolution: {integrity: sha512-hHrIjvZsftOsvKSn2TRYl63zvxsgE0K+0mYMoH6gD4omR5IWB2KynivBQczo3+wF1cCkjzvptnI9Q0sPU66ilw==}
     dependencies:
-      hasown: 2.0.1
+      hasown: 2.0.2
     dev: true
 
   /is-date-object@1.0.5:
@@ -4674,8 +4673,8 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /knip@5.9.1(@types/node@20.12.6)(typescript@5.4.4):
-    resolution: {integrity: sha512-OiUSEtLubLpJ2OH/kcwrB+SmPiRXHoFhSOIG8B6HDzeFPm8hDWipscKlrC5nSYSi9ix2igD7zhfC+qpbrO3zRQ==}
+  /knip@5.9.2(@pnpm/logger@5.0.0)(@types/node@20.12.6)(typescript@5.4.4):
+    resolution: {integrity: sha512-GyOUVyBEIZn2sgzxJ2maEBBMDQdyYVKEHDSQ1fUe5PktOxrp/W/z7hl8EYCDxBf2d2/t+PcpM+pHHfxq8vwiXQ==}
     engines: {node: '>=18.6.0'}
     hasBin: true
     peerDependencies:
@@ -4686,8 +4685,7 @@ packages:
       '@nodelib/fs.walk': 2.0.0
       '@npmcli/map-workspaces': 3.0.4
       '@npmcli/package-json': 5.0.0
-      '@pnpm/logger': 5.0.0
-      '@pnpm/workspace.pkgs-graph': 2.0.16(@pnpm/logger@5.0.0)
+      '@pnpm/workspace.pkgs-graph': 2.0.14(@pnpm/logger@5.0.0)
       '@snyk/github-codeowners': 1.1.0
       '@types/node': 20.12.6
       '@types/picomatch': 2.3.3
@@ -4708,6 +4706,7 @@ packages:
       zod: 3.22.4
       zod-validation-error: 3.1.0(zod@3.22.4)
     transitivePeerDependencies:
+      - '@pnpm/logger'
       - bluebird
       - domexception
     dev: true
