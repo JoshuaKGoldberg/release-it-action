@@ -21,7 +21,7 @@ dependencies:
 devDependencies:
   '@octokit/types':
     specifier: ^13.0.0
-    version: 13.2.0
+    version: 13.3.0
   '@release-it/conventional-changelog':
     specifier: ^8.0.0
     version: 8.0.1(release-it@17.1.1)
@@ -1144,8 +1144,8 @@ packages:
     dependencies:
       '@octokit/openapi-types': 20.0.0
 
-  /@octokit/types@13.2.0:
-    resolution: {integrity: sha512-K4rpfbIQLe4UimS/PWZAcImhZUC80lhe2f1NpAaaTulPJXv54QIAFFCQEEbdQdqTV/745QDmdvp8NI49LaI00A==}
+  /@octokit/types@13.3.0:
+    resolution: {integrity: sha512-L0Jd3e0FWSPNTmqtqiS61K4Qd9r9iAOCtqo1B12z/qe+KDjXvQF5FngLqSWzJ748lFfaPItjsv4+36dA4KrPVA==}
     dependencies:
       '@octokit/openapi-types': 22.0.1
     dev: true
