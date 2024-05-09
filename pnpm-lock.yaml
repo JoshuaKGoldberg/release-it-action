@@ -16,7 +16,7 @@ importers:
         version: 6.0.0
       '@types/node':
         specifier: ^20.8.0
-        version: 20.12.8
+        version: 20.12.10
       execa:
         specifier: ^8.0.1
         version: 8.0.1
@@ -92,7 +92,7 @@ importers:
         version: 2.4.0
       knip:
         specifier: ^5.0.0
-        version: 5.12.3(@types/node@20.12.8)(typescript@5.4.5)
+        version: 5.12.3(@types/node@20.12.10)(typescript@5.4.5)
       lint-staged:
         specifier: ^15.0.0
         version: 15.2.2
@@ -775,8 +775,8 @@ packages:
   '@types/minimist@1.2.5':
     resolution: {integrity: sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==}
 
-  '@types/node@20.12.8':
-    resolution: {integrity: sha512-NU0rJLJnshZWdE/097cdCBbyW1h4hEg0xpovcoAQYHl8dnEyp/NAOiE45pvc+Bd1Dt+2r94v2eGFpQJ4R7g+2w==}
+  '@types/node@20.12.10':
+    resolution: {integrity: sha512-Eem5pH9pmWBHoGAT8Dr5fdc5rYA+4NAovdM4EktRPVAAiJhmWWfQrA0cFhAbOsQdSfIHjAud6YdkbL69+zSKjw==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -4497,7 +4497,7 @@ snapshots:
 
   '@types/minimist@1.2.5': {}
 
-  '@types/node@20.12.8':
+  '@types/node@20.12.10':
     dependencies:
       undici-types: 5.26.5
 
@@ -6456,12 +6456,12 @@ snapshots:
 
   kind-of@6.0.3: {}
 
-  knip@5.12.3(@types/node@20.12.8)(typescript@5.4.5):
+  knip@5.12.3(@types/node@20.12.10)(typescript@5.4.5):
     dependencies:
       '@ericcornelissen/bash-parser': 0.5.2
       '@nodelib/fs.walk': 2.0.0
       '@snyk/github-codeowners': 1.1.0
-      '@types/node': 20.12.8
+      '@types/node': 20.12.10
       easy-table: 1.2.0
       fast-glob: 3.3.2
       file-entry-cache: 8.0.0
@@ -7761,14 +7761,14 @@ snapshots:
     dependencies:
       builtins: 5.1.0
 
-  vite-node@0.34.6(@types/node@20.12.8):
+  vite-node@0.34.6(@types/node@20.12.10):
     dependencies:
       cac: 6.7.14
       debug: 4.3.4
       mlly: 1.4.2
       pathe: 1.1.1
       picocolors: 1.0.0
-      vite: 4.4.9(@types/node@20.12.8)
+      vite: 4.4.9(@types/node@20.12.10)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -7779,20 +7779,20 @@ snapshots:
       - supports-color
       - terser
 
-  vite@4.4.9(@types/node@20.12.8):
+  vite@4.4.9(@types/node@20.12.10):
     dependencies:
       esbuild: 0.18.20
       postcss: 8.4.31
       rollup: 3.29.4
     optionalDependencies:
-      '@types/node': 20.12.8
+      '@types/node': 20.12.10
       fsevents: 2.3.3
 
   vitest@0.34.6:
     dependencies:
       '@types/chai': 4.3.6
       '@types/chai-subset': 1.3.3
-      '@types/node': 20.12.8
+      '@types/node': 20.12.10
       '@vitest/expect': 0.34.6
       '@vitest/runner': 0.34.6
       '@vitest/snapshot': 0.34.6
@@ -7811,8 +7811,8 @@ snapshots:
       strip-literal: 1.3.0
       tinybench: 2.5.1
       tinypool: 0.7.0
-      vite: 4.4.9(@types/node@20.12.8)
-      vite-node: 0.34.6(@types/node@20.12.8)
+      vite: 4.4.9(@types/node@20.12.10)
+      vite-node: 0.34.6(@types/node@20.12.10)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less
