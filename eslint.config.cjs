@@ -1,16 +1,15 @@
-const { fixupPluginRules } = require("@eslint/compat");
+const comments = require("@eslint-community/eslint-plugin-eslint-comments/configs");
 const eslint = require("@eslint/js");
 const stylisticTs = require("@stylistic/eslint-plugin-ts");
-const deprecationPlugin = require("eslint-plugin-deprecation");
-const jsdocPlugin = require("eslint-plugin-jsdoc");
-const jsoncPlugin = require("eslint-plugin-jsonc");
-const markdownPlugin = require("eslint-plugin-markdown");
-const nPlugin = require("eslint-plugin-n");
-const noOnlyTestsPlugin = require("eslint-plugin-no-only-tests");
-const perfectionistPlugin = require("eslint-plugin-perfectionist");
-const regexpPlugin = require("eslint-plugin-regexp");
-const vitestPlugin = require("eslint-plugin-vitest");
-const ymlPlugin = require("eslint-plugin-yml");
+const jsdoc = require("eslint-plugin-jsdoc");
+const jsonc = require("eslint-plugin-jsonc");
+const markdown = require("eslint-plugin-markdown");
+const n = require("eslint-plugin-n");
+const noOnlyTests = require("eslint-plugin-no-only-tests");
+const perfectionist = require("eslint-plugin-perfectionist");
+const regexp = require("eslint-plugin-regexp");
+const vitest = require("eslint-plugin-vitest");
+const yml = require("eslint-plugin-yml");
 const globals = require("globals");
 const tseslint = require("typescript-eslint");
 
@@ -26,13 +25,15 @@ module.exports = tseslint.config(
 			"pnpm-lock.yaml",
 		],
 	},
+	{ linterOptions: { reportUnusedDisableDirectives: "error" } },
 
 	eslint.configs.recommended,
-	nPlugin.configs["flat/recommended"],
-	perfectionistPlugin.configs["recommended-natural"],
-	regexpPlugin.configs["flat/recommended"],
-	vitestPlugin.configs.recommended,
-	markdownPlugin.configs.recommended,
+	comments.recommended,
+	n.configs["flat/recommended"],
+	perfectionist.configs["recommended-natural"],
+	regexp.configs["flat/recommended"],
+	vitest.configs.recommended,
+	markdown.configs.recommended,
 
 	{
 		files: ["**/*.{js,cjs,mjs,ts,cts,mts}"],
@@ -43,15 +44,11 @@ module.exports = tseslint.config(
 			},
 			parser: tseslint.parser,
 		},
-		linterOptions: {
-			reportUnusedDisableDirectives: true,
-		},
 		plugins: {
 			"@stylistic/ts": stylisticTs,
 			"@typescript-eslint": tseslint.plugin,
-			deprecation: fixupPluginRules(deprecationPlugin),
-			jsdoc: jsdocPlugin,
-			"no-only-tests": noOnlyTestsPlugin,
+			jsdoc: jsdoc,
+			"no-only-tests": noOnlyTests,
 		},
 		rules: {
 			// These off/less-strict-by-default rules work well for this repo and we like them on.
@@ -81,7 +78,7 @@ module.exports = tseslint.config(
 	},
 	{
 		extends: [
-			jsdocPlugin.configs["flat/recommended-typescript-error"],
+			jsdoc.configs["flat/recommended-typescript-error"],
 			tseslint.configs.strict,
 			tseslint.configs.stylistic,
 		],
@@ -116,13 +113,9 @@ module.exports = tseslint.config(
 				project: "./tsconfig.eslint.json",
 			},
 		},
-		rules: {
-			// These off-by-default rules work well for this repo and we like them on.
-			"deprecation/deprecation": "error",
-		},
 	},
 	{
-		extends: [jsoncPlugin.configs["flat/recommended-with-json"]],
+		extends: [jsonc.configs["flat/recommended-with-json"]],
 		files: ["*.json", "*.jsonc"],
 		ignores: ["package.json"],
 		rules: {
@@ -144,10 +137,7 @@ module.exports = tseslint.config(
 		},
 	},
 	{
-		extends: [
-			ymlPlugin.configs["flat/standard"],
-			ymlPlugin.configs["flat/prettier"],
-		],
+		extends: [yml.configs["flat/standard"], yml.configs["flat/prettier"]],
 		files: ["**/*.{yml,yaml}"],
 		rules: {
 			"yml/file-extension": ["error", { extension: "yml" }],
