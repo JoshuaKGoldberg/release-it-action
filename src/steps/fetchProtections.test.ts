@@ -20,7 +20,7 @@ describe("fetchProtections", () => {
 		const actual = await fetchProtections({
 			branch: "",
 			octokit: mockOctokit,
-			requestData: requestData,
+			requestData,
 			skipBranchProtections: false,
 		});
 
@@ -31,7 +31,7 @@ describe("fetchProtections", () => {
 		const actual = await fetchProtections({
 			branch: "",
 			octokit: mockOctokit,
-			requestData: requestData,
+			requestData,
 			skipBranchProtections: true,
 		});
 
