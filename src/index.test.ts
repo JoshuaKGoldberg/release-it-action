@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { ReleaseItActionOptions, releaseItAction } from "./index.js";
+import { releaseItAction, ReleaseItActionOptions } from "./index.js";
 
 const mock$$ = vi.fn();
 
@@ -58,9 +58,9 @@ vi.mock("./tryCatchInfoAction.js", () => ({
 
 const mockOptions = {
 	branch: "mock-branch",
+	githubToken: "mock-githubToken",
 	gitUserEmail: "mock-gitUserEmail",
 	gitUserName: "mock-gitUserName",
-	githubToken: "mock-githubToken",
 	npmToken: "mock-npmToken",
 	owner: "mock-owner",
 	repo: "mock-repo",

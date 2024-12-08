@@ -83,9 +83,9 @@ import { releaseItAction } from "release-it-action";
 
 await releaseItAction({
 	branch: "main",
+	githubToken: process.env.GITHUB_TOKEN,
 	gitUserEmail: "your@email.com",
 	gitUserName: "YourUsername",
-	githubToken: process.env.GITHUB_TOKEN,
 	npmToken: process.env.NPM_TOKEN,
 	owner: "YourUsername",
 	repo: "your-repository",

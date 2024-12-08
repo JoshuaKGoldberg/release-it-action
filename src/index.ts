@@ -10,9 +10,9 @@ import { tryCatchInfoAction } from "./tryCatchInfoAction.js";
 
 export interface ReleaseItActionOptions {
 	branch: string;
+	githubToken: string;
 	gitUserEmail: string;
 	gitUserName: string;
-	githubToken: string;
 	npmToken: string;
 	owner: string;
 	repo: string;
@@ -21,9 +21,9 @@ export interface ReleaseItActionOptions {
 
 export async function releaseItAction({
 	branch,
+	githubToken,
 	gitUserEmail,
 	gitUserName,
-	githubToken,
 	npmToken,
 	owner,
 	repo,

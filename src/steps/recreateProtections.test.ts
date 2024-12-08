@@ -20,7 +20,7 @@ const mockOctokit = { request: mockRequest } as unknown as Octokit;
 describe("recreateProtections", () => {
 	it("does not recreate protections when existingProtections is undefined", async () => {
 		await recreateProtections({
-			commonRequestData: commonRequestData,
+			commonRequestData,
 			existingProtections: undefined,
 			octokit: mockOctokit,
 		});
@@ -30,7 +30,7 @@ describe("recreateProtections", () => {
 
 	it("recreates protections when existingProtections is a minimal set of protections", async () => {
 		await recreateProtections({
-			commonRequestData: commonRequestData,
+			commonRequestData,
 			existingProtections: {},
 			octokit: mockOctokit,
 		});
@@ -63,7 +63,7 @@ describe("recreateProtections", () => {
 
 	it("recreates protections when existingProtections is a full set of protections", async () => {
 		await recreateProtections({
-			commonRequestData: commonRequestData,
+			commonRequestData,
 			existingProtections: {
 				allow_deletions: { enabled: true },
 				allow_force_pushes: { enabled: true },

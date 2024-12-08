@@ -28,7 +28,7 @@ describe("deleteProtections", () => {
 			branch: "",
 			existingProtections: {},
 			octokit: mockOctokit,
-			requestData: requestData,
+			requestData,
 		});
 
 		expect(mockInfo).not.toHaveBeenCalled();
@@ -51,7 +51,7 @@ describe("deleteProtections", () => {
 			branch: "",
 			existingProtections: undefined,
 			octokit: mockOctokit,
-			requestData: requestData,
+			requestData,
 		});
 
 		expect(mockInfo.mock.calls).toMatchInlineSnapshot(`
