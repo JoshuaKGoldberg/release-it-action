@@ -20,6 +20,7 @@
 		"npmjs",
 		"npmpackagejsonlintrc",
 		"outro",
-		"packagejson"
+		"packagejson",
+		"tseslint"
 	]
 }

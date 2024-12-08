@@ -9,11 +9,11 @@ export async function runReleaseItAction(context: typeof github.context) {
 
 	await releaseItAction({
 		branch: core.getInput("branch") || "main",
+		githubToken: getTokenInput("github-token", "GITHUB_TOKEN"),
 		gitUserEmail:
 			core.getInput("git-user-email") ||
 			`${gitUserName}@users.noreply.github.com`,
 		gitUserName,
-		githubToken: getTokenInput("github-token", "GITHUB_TOKEN"),
 		npmToken: getTokenInput("npm-token", "NPM_TOKEN"),
 		owner: context.repo.owner,
 		repo: context.repo.repo,

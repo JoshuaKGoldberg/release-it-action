@@ -8,7 +8,7 @@ export async function runReleaseIt() {
 		try {
 			const { exitCode, stderr } = await $$`npx release-it --verbose`;
 			if (exitCode || stderr) {
-				throw new Error(stderr || `Exit code ${exitCode}.`);
+				throw new Error(stderr || `Exit code ${exitCode.toString()}.`);
 			}
 		} catch (error) {
 			core.error(`Error running release-it: ${error as string}`);
