@@ -1,19 +1,19 @@
-const comments = require("@eslint-community/eslint-plugin-eslint-comments/configs");
-const eslint = require("@eslint/js");
-const stylisticTs = require("@stylistic/eslint-plugin-ts");
-const jsdoc = require("eslint-plugin-jsdoc");
-const jsonc = require("eslint-plugin-jsonc");
-const markdown = require("eslint-plugin-markdown");
-const n = require("eslint-plugin-n");
-const noOnlyTests = require("eslint-plugin-no-only-tests");
-const perfectionist = require("eslint-plugin-perfectionist");
-const regexp = require("eslint-plugin-regexp");
-const vitest = require("eslint-plugin-vitest");
-const yml = require("eslint-plugin-yml");
-const globals = require("globals");
-const tseslint = require("typescript-eslint");
+import comments from "@eslint-community/eslint-plugin-eslint-comments/configs";
+import eslint from "@eslint/js";
+import stylisticTs from "@stylistic/eslint-plugin-ts";
+import jsdoc from "eslint-plugin-jsdoc";
+import jsonc from "eslint-plugin-jsonc";
+import markdown from "eslint-plugin-markdown";
+import n from "eslint-plugin-n";
+import noOnlyTests from "eslint-plugin-no-only-tests";
+import perfectionist from "eslint-plugin-perfectionist";
+import regexp from "eslint-plugin-regexp";
+import vitest from "eslint-plugin-vitest";
+import yml from "eslint-plugin-yml";
+import globals from "globals";
+import tseslint from "typescript-eslint";
 
-module.exports = tseslint.config(
+export default tseslint.config(
 	// Global ignores
 	{
 		ignores: [
