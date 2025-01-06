@@ -100,4 +100,27 @@ describe("runReleaseIt", () => {
 		expect(mockError).not.toHaveBeenCalled();
 		expect(mockSetFailed).not.toHaveBeenCalled();
 	});
+
+	it("does not releaseItArgs when provided as an empty string", async () => {
+		mock$$.mockResolvedValue({ exitCode: 0 });
+
+		await runReleaseIt("");
+
+		expect(mock$$).toHaveBeenCalledWith(["npx release-it --verbose", ""], "");
+		expect(mockError).not.toHaveBeenCalled();
+		expect(mockSetFailed).not.toHaveBeenCalled();
+	});
+
+	it("includes releaseItArgs when provided as a non-empty string", async () => {
+		mock$$.mockResolvedValue({ exitCode: 0 });
+
+		await runReleaseIt("major --preRelease=beta");
+
+		expect(mock$$).toHaveBeenCalledWith(
+			["npx release-it --verbose", ""],
+			" major --preRelease=beta",
+		);
+		expect(mockError).not.toHaveBeenCalled();
+		expect(mockSetFailed).not.toHaveBeenCalled();
+	});
 });

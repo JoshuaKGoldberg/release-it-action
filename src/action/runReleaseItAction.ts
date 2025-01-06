@@ -16,6 +16,7 @@ export async function runReleaseItAction(context: typeof github.context) {
 		gitUserName,
 		npmToken: getTokenInput("npm-token", "NPM_TOKEN"),
 		owner: context.repo.owner,
+		releaseItArgs: core.getInput("release-it-args"),
 		repo: context.repo.repo,
 		skipBranchProtections: core.getBooleanInput("skip-branch-protections"),
 	});

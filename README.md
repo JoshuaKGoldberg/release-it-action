@@ -69,6 +69,7 @@ permissions:
 | `github-token`            | `string`  | `${GITHUB_TOKEN}`                             | GitHub token (PAT) with _repo_ and _workflow_ permissions.                              |
 | `npm-token`               | `string`  | `${NPM_TOKEN}`                                | npm access token with the _automation_ role.                                            |
 | `skip-branch-protections` | `boolean` | `false`                                       | Whether to skip deleting and recreating branch protections.                             |
+| `release-it-args`         | `string`  | `""`                                          | Any arbitrary arguments to pass to `npx release-it --verbose`.                          |
 
 ### Node API
 
@@ -88,6 +89,7 @@ await releaseItAction({
 	gitUserName: "YourUsername",
 	npmToken: process.env.NPM_TOKEN,
 	owner: "YourUsername",
+	releaseItArgs: "--preRelease=beta",
 	repo: "your-repository",
 });
 ```

@@ -15,6 +15,7 @@ export interface ReleaseItActionOptions {
 	gitUserName: string;
 	npmToken: string;
 	owner: string;
+	releaseItArgs?: string;
 	repo: string;
 	skipBranchProtections?: boolean;
 }
@@ -26,6 +27,7 @@ export async function releaseItAction({
 	gitUserName,
 	npmToken,
 	owner,
+	releaseItArgs,
 	repo,
 	skipBranchProtections,
 }: ReleaseItActionOptions) {
@@ -66,7 +68,7 @@ export async function releaseItAction({
 		requestData: commonRequestData,
 	});
 
-	await runReleaseIt();
+	await runReleaseIt(releaseItArgs);
 
 	await recreateProtections({
 		commonRequestData,
