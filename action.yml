@@ -14,6 +14,8 @@ inputs:
   skip-branch-protections:
     default: "false"
     description: Whether to skip deleting and recreating branch protections.
+  release-it-args:
+    description: Any arbitrary arguments to pass to `npx release-it --verbose`.
 name: release-it Action
 runs:
   main: dist/index.js
