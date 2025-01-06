@@ -1,1 +1,1 @@
-{"version":3,"file":"runReleaseItAction.d.ts","sourceRoot":"","sources":["file:///Users/josh/repos/release-it-action/src/action/runReleaseItAction.ts"],"names":[],"mappings":"AACA,OAAO,KAAK,MAAM,MAAM,iBAAiB,CAAC;AAK1C,wBAAsB,kBAAkB,CAAC,OAAO,EAAE,OAAO,MAAM,CAAC,OAAO,iBAetE"}
+{"version":3,"file":"runReleaseItAction.d.ts","sourceRoot":"","sources":["file:///Users/josh/repos/release-it-action/src/action/runReleaseItAction.ts"],"names":[],"mappings":"AACA,OAAO,KAAK,MAAM,MAAM,iBAAiB,CAAC;AAK1C,wBAAsB,kBAAkB,CAAC,OAAO,EAAE,OAAO,MAAM,CAAC,OAAO,iBAgBtE"}

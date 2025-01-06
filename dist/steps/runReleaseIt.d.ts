@@ -1,2 +1,2 @@
-export declare function runReleaseIt(): Promise<void>;
+export declare function runReleaseIt(releaseItArgs?: string): Promise<void>;
 //# sourceMappingURL=runReleaseIt.d.ts.map
