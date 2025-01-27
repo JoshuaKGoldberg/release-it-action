@@ -20,12 +20,11 @@
 
 ## Usage
 
-This action works by:
+This action works by running [`release-it`](https://github.com/release-it/release-it) for you.
+It works by:
 
 1. Checking [`should-semantic-release`](https://github.com/JoshuaKGoldberg/should-semantic-release) for whether a new release is necessary, and bailing if not
-2. Fetching any existing branch protections for the configured branch, and temporarily deleting them if found
-3. Running [`release-it`](https://github.com/release-it/release-it)
-4. Restoring any temporarily deleted branch protections
+2. Executing `npx release-it --verbose`
 
 Run `JoshuaKGoldberg/release-it-action` in a GitHub workflow after building your code and setting your npm token:
 
