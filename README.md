@@ -61,15 +61,14 @@ permissions:
 
 ## Options
 
-| Key                       | Type      | Default                                       | Description                                                                             |
-| ------------------------- | --------- | --------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `branch`                  | `string`  | `"main"`                                      | Branch to delete and recreate branch protections on (unless `skip-branch-protections`). |
-| `git-user-email`          | `string`  | `${<git-user-name>}@users.noreply.github.com` | `git config user.email` value for Git commits.                                          |
-| `git-user-name`           | `string`  | `${github.context.actor}`                     | `git config user.name` value for Git commits.                                           |
-| `github-token`            | `string`  | `${GITHUB_TOKEN}`                             | GitHub token (PAT) with _repo_ and _workflow_ permissions.                              |
-| `npm-token`               | `string`  | `${NPM_TOKEN}`                                | npm access token with the _automation_ role.                                            |
-| `skip-branch-protections` | `boolean` | `false`                                       | Whether to skip deleting and recreating branch protections.                             |
-| `release-it-args`         | `string`  | `""`                                          | Any arbitrary arguments to pass to `npx release-it --verbose`.                          |
+| Key                         | Type     | Default                                       | Description                                                    |
+| --------------------------- | -------- | --------------------------------------------- | -------------------------------------------------------------- |
+| `bypass-branch-protections` | `string` | _(none)_                                      | A branch delete and recreate branch protections on.            |
+| `git-user-email`            | `string` | `${<git-user-name>}@users.noreply.github.com` | `git config user.email` value for Git commits.                 |
+| `git-user-name`             | `string` | `${github.context.actor}`                     | `git config user.name` value for Git commits.                  |
+| `github-token`              | `string` | `${GITHUB_TOKEN}`                             | GitHub token (PAT) with _repo_ and _workflow_ permissions.     |
+| `npm-token`                 | `string` | `${NPM_TOKEN}`                                | npm access token with the _automation_ role.                   |
+| `release-it-args`           | `string` | `""`                                          | Any arbitrary arguments to pass to `npx release-it --verbose`. |
 
 ### Node API
 
@@ -103,7 +102,16 @@ Note that all non-`boolean` inputs are required and do not have default values i
 `release-it-action` needs to run on the latest commit on the default/release branch and with a [concurrency group](https://docs.github.com/en/actions/using-jobs/using-concurrency).
 Otherwise, if multiple workflows are triggered quickly, later workflows might not include release commits from earlier workflows.
 
-### Why does this delete and recreate branch protections?
+### Why is there an option to bypass branch protections?
+
+**The `bypass-branch-protections` option is not recommended.**
+
+Some repositories have strict legacy branch protections which make it difficult to automate tasks that require pushing to the `main` branch.
+Bypassing those branch protections can make it easier to configure `release-it` to create Git commits.
+
+It's recommended to instead use GitHub's newer and more granular [repository rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets).
+
+#### Why does the option delete and recreate branch protections?
 
 It would be great to instead either change which branch is protected or have a native GitHub API to disable a branch protection rule.
 Neither exist at time of writing.

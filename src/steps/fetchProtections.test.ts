@@ -16,25 +16,12 @@ const mockOctokit = { request: mockRequest } as unknown as Octokit;
 const requestData = { branch, owner: "test-owner", repo: "test-repo" };
 
 describe("fetchProtections", () => {
-	it("returns protections when skipBranchProtections is false", async () => {
+	it("returns protections", async () => {
 		const actual = await fetchProtections({
-			branch: "",
 			octokit: mockOctokit,
 			requestData,
-			skipBranchProtections: false,
 		});
 
 		expect(actual).toBe(mockProtections);
-	});
-
-	it("does not return protections when skipBranchProtections is true", async () => {
-		const actual = await fetchProtections({
-			branch: "",
-			octokit: mockOctokit,
-			requestData,
-			skipBranchProtections: true,
-		});
-
-		expect(actual).toBeUndefined();
 	});
 });

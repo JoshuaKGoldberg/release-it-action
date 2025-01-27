@@ -46,7 +46,7 @@ describe("runReleaseItAction", () => {
 			[
 			  [
 			    {
-			      "branch": "main",
+			      "bypassBranchProtections": undefined,
 			      "gitUserEmail": "undefined@users.noreply.github.com",
 			      "gitUserName": undefined,
 			      "githubToken": "mock-github-token",
@@ -54,7 +54,6 @@ describe("runReleaseItAction", () => {
 			      "owner": "context-owner",
 			      "releaseItArgs": undefined,
 			      "repo": "context-repo",
-			      "skipBranchProtections": false,
 			    },
 			  ],
 			]
@@ -70,7 +69,7 @@ describe("runReleaseItAction", () => {
 			[
 			  [
 			    {
-			      "branch": "mock-branch",
+			      "bypassBranchProtections": "mock-bypass-branch-protections",
 			      "gitUserEmail": "mock-git-user-email",
 			      "gitUserName": "mock-git-user-name",
 			      "githubToken": "mock-github-token",
@@ -78,7 +77,6 @@ describe("runReleaseItAction", () => {
 			      "owner": "context-owner",
 			      "releaseItArgs": "mock-release-it-args",
 			      "repo": "context-repo",
-			      "skipBranchProtections": false,
 			    },
 			  ],
 			]
