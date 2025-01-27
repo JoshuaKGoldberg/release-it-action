@@ -18,19 +18,11 @@ vi.mock("should-semantic-release", () => ({
 	},
 }));
 
-const mockFetchProtections = vi.fn();
+const mockRunBypassingBranchProtections = vi.fn();
 
-vi.mock("./steps/fetchProtections.js", () => ({
-	get fetchProtections() {
-		return mockFetchProtections;
-	},
-}));
-
-const mockDeleteProtections = vi.fn();
-
-vi.mock("./steps/deleteProtections.js", () => ({
-	get deleteProtections() {
-		return mockDeleteProtections;
+vi.mock("./runBypassingBranchProtections.js", () => ({
+	get runBypassingBranchProtections() {
+		return mockRunBypassingBranchProtections;
 	},
 }));
 
@@ -42,27 +34,21 @@ vi.mock("./steps/runReleaseIt.js", () => ({
 	},
 }));
 
-const mockRecreateProtections = vi.fn();
-
-vi.mock("./steps/recreateProtections.js", () => ({
-	get recreateProtections() {
-		return mockRecreateProtections;
-	},
-}));
-
 vi.mock("./tryCatchInfoAction.js", () => ({
 	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
 		return await action();
 	},
 }));
 
+const mockReleaseItArgs = "--debug";
+
 const mockOptions = {
-	branch: "mock-branch",
 	githubToken: "mock-githubToken",
 	gitUserEmail: "mock-gitUserEmail",
 	gitUserName: "mock-gitUserName",
 	npmToken: "mock-npmToken",
 	owner: "mock-owner",
+	releaseItArgs: mockReleaseItArgs,
 	repo: "mock-repo",
 } satisfies ReleaseItActionOptions;
 
@@ -73,9 +59,10 @@ describe("releaseItAction", () => {
 		await releaseItAction(mockOptions);
 
 		expect(mock$$).not.toHaveBeenCalled();
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
-	it("runs fully when shouldSemanticRelease returns true", async () => {
+	it("runs without bypassing branch protections when shouldSemanticRelease returns true and bypassBranchProtections is undefined", async () => {
 		mockShouldSemanticRelease.mockResolvedValueOnce(true);
 
 		await releaseItAction(mockOptions);
@@ -105,5 +92,43 @@ describe("releaseItAction", () => {
 			  ],
 			]
 		`);
+		expect(mockRunBypassingBranchProtections).not.toHaveBeenCalled();
+		expect(mockRunReleaseIt).toHaveBeenCalledWith(mockReleaseItArgs);
+	});
+
+	it("runs bypassing branch protections when shouldSemanticRelease returns true and bypassBranchProtections is a string", async () => {
+		mockShouldSemanticRelease.mockResolvedValueOnce(true);
+
+		await releaseItAction({
+			...mockOptions,
+			bypassBranchProtections: "example-branch",
+		});
+
+		expect(mock$$.mock.calls).toMatchInlineSnapshot(`
+			[
+			  [
+			    [
+			      "git config user.email ",
+			      "",
+			    ],
+			    "mock-gitUserEmail",
+			  ],
+			  [
+			    [
+			      "git config user.name ",
+			      "",
+			    ],
+			    "mock-gitUserName",
+			  ],
+			  [
+			    [
+			      "npm config set //registry.npmjs.org/:_authToken ",
+			      "",
+			    ],
+			    "mock-npmToken",
+			  ],
+			]
+		`);
+		expect(mockRunBypassingBranchProtections).toHaveBeenCalled();
 	});
 });

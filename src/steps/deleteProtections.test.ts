@@ -25,7 +25,6 @@ const requestData = { branch, owner: "test-owner", repo: "test-repo" };
 describe("deleteProtections", () => {
 	it("deletes protections when existingProtections exists", async () => {
 		await deleteProtections({
-			branch: "",
 			existingProtections: {},
 			octokit: mockOctokit,
 			requestData,
@@ -48,7 +47,6 @@ describe("deleteProtections", () => {
 
 	it("does not delete protections when existingProjections does not exist", async () => {
 		await deleteProtections({
-			branch: "",
 			existingProtections: undefined,
 			octokit: mockOctokit,
 			requestData,
@@ -57,7 +55,7 @@ describe("deleteProtections", () => {
 		expect(mockInfo.mock.calls).toMatchInlineSnapshot(`
 			[
 			  [
-			    "No existing branch protections found for .",
+			    "No existing branch protections found for test-branch.",
 			  ],
 			]
 		`);

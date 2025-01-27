@@ -8,7 +8,7 @@ export async function runReleaseItAction(context: typeof github.context) {
 	const gitUserName = core.getInput("git-user-name") || context.actor;
 
 	await releaseItAction({
-		branch: core.getInput("branch") || "main",
+		bypassBranchProtections: core.getInput("bypass-branch-protections"),
 		githubToken: getTokenInput("github-token", "GITHUB_TOKEN"),
 		gitUserEmail:
 			core.getInput("git-user-email") ||
@@ -18,6 +18,5 @@ export async function runReleaseItAction(context: typeof github.context) {
 		owner: context.repo.owner,
 		releaseItArgs: core.getInput("release-it-args"),
 		repo: context.repo.repo,
-		skipBranchProtections: core.getBooleanInput("skip-branch-protections"),
 	});
 }

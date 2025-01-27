@@ -1,8 +1,8 @@
 author: JoshuaKGoldberg
 description: Runs release-it as a GitHub Action, with handling for semantic releases and protected branches. 📤
 inputs:
-  branch:
-    description: Branch to delete and recreate branch protections on (unless `skip-branch-protections`).
+  bypass-branch-protections:
+    description: Branch to delete and recreate branch protections on.
   git-user-email:
     description: "`git config user.email` value for Git commits."
   git-user-name:
@@ -11,9 +11,6 @@ inputs:
     description: GitHub token (PAT) with repo and workflow permissions.
   npm-token:
     description: npm access token with the automation role.
-  skip-branch-protections:
-    default: "false"
-    description: Whether to skip deleting and recreating branch protections.
   release-it-args:
     description: Any arbitrary arguments to pass to `npx release-it --verbose`.
 name: release-it Action

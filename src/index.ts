@@ -2,14 +2,12 @@ import * as github from "@actions/github";
 import { shouldSemanticRelease } from "should-semantic-release";
 
 import { $$ } from "./execa.js";
-import { deleteProtections } from "./steps/deleteProtections.js";
-import { fetchProtections } from "./steps/fetchProtections.js";
-import { recreateProtections } from "./steps/recreateProtections.js";
+import { runBypassingBranchProtections } from "./runBypassingBranchProtections.js";
 import { runReleaseIt } from "./steps/runReleaseIt.js";
 import { tryCatchInfoAction } from "./tryCatchInfoAction.js";
 
 export interface ReleaseItActionOptions {
-	branch: string;
+	bypassBranchProtections?: string;
 	githubToken: string;
 	gitUserEmail: string;
 	gitUserName: string;
@@ -17,11 +15,10 @@ export interface ReleaseItActionOptions {
 	owner: string;
 	releaseItArgs?: string;
 	repo: string;
-	skipBranchProtections?: boolean;
 }
 
 export async function releaseItAction({
-	branch,
+	bypassBranchProtections,
 	githubToken,
 	gitUserEmail,
 	gitUserName,
@@ -29,7 +26,6 @@ export async function releaseItAction({
 	owner,
 	releaseItArgs,
 	repo,
-	skipBranchProtections,
 }: ReleaseItActionOptions) {
 	if (
 		(await tryCatchInfoAction(
@@ -44,35 +40,20 @@ export async function releaseItAction({
 	await $$`git config user.name ${gitUserName}`;
 	await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
 
-	const octokit = github.getOctokit(githubToken);
-	const commonRequestData = {
-		branch,
-		headers: {
-			"X-GitHub-Api-Version": "2022-11-28",
-		},
-		owner,
-		repo,
+	const run = async () => {
+		await runReleaseIt(releaseItArgs);
 	};
 
-	const existingProtections = await fetchProtections({
-		branch,
-		octokit,
-		requestData: commonRequestData,
-		skipBranchProtections,
-	});
+	if (!bypassBranchProtections) {
+		await run();
+		return;
+	}
 
-	await deleteProtections({
-		branch,
-		existingProtections,
-		octokit,
-		requestData: commonRequestData,
-	});
+	const octokit = github.getOctokit(githubToken);
 
-	await runReleaseIt(releaseItArgs);
-
-	await recreateProtections({
-		commonRequestData,
-		existingProtections,
+	await runBypassingBranchProtections(
+		{ branch: bypassBranchProtections, owner, repo },
 		octokit,
-	});
+		run,
+	);
 }
