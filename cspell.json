@@ -21,6 +21,7 @@
 		"npmpackagejsonlintrc",
 		"outro",
 		"packagejson",
+		"rulesets",
 		"tseslint"
 	]
 }

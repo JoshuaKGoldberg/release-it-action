@@ -63,7 +63,7 @@ permissions:
 
 | Key                         | Type     | Default                                       | Description                                                    |
 | --------------------------- | -------- | --------------------------------------------- | -------------------------------------------------------------- |
-| `bypass-branch-protections` | `string` | _(none)_                                      | A branch delete and recreate branch protections on.            |
+| `bypass-branch-protections` | `string` | _(none)_                                      | A branch to delete and recreate branch protections on.         |
 | `git-user-email`            | `string` | `${<git-user-name>}@users.noreply.github.com` | `git config user.email` value for Git commits.                 |
 | `git-user-name`             | `string` | `${github.context.actor}`                     | `git config user.name` value for Git commits.                  |
 | `github-token`              | `string` | `${GITHUB_TOKEN}`                             | GitHub token (PAT) with _repo_ and _workflow_ permissions.     |
