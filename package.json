@@ -47,7 +47,7 @@
 		"@eslint-community/eslint-plugin-eslint-comments": "^4.4.1",
 		"@eslint/js": "^9.16.0",
 		"@octokit/types": "^13.6.2",
-		"@release-it/conventional-changelog": "^9.0.0",
+		"@release-it/conventional-changelog": "^10.0.0",
 		"@types/eslint-plugin-markdown": "^2.0.2",
 		"@vercel/ncc": "^0.38.0",
 		"@vitest/coverage-v8": "^0.34.6",
