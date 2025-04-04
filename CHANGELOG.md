@@ -1,3 +1,11 @@
+# Changelog
+
+## [0.3.2](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.3.1...v0.3.2) (2025-04-04)
+
+### Bug Fixes
+
+- bump to create-typescript-app@2 with transitions action ([#479](https://github.com/JoshuaKGoldberg/release-it-action/issues/479)) ([cb1e69a](https://github.com/JoshuaKGoldberg/release-it-action/commit/cb1e69a2e3d5714d41858bbf55fee15604466ce9)), closes [#477](https://github.com/JoshuaKGoldberg/release-it-action/issues/477)
+
 # 0.1.0 (2023-10-01)
 
 ### Bug Fixes
