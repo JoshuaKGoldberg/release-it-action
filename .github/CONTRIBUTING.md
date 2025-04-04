@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in contributing to `release-it-action`! 💖
+Thanks for your interest in contributing to `release-it-action`! 📤
 
 > After this page, see [DEVELOPMENT.md](./DEVELOPMENT.md) for local development instructions.
 
@@ -31,7 +31,7 @@ If the issue you'd like to fix isn't found on the issue, see [Reporting Issues](
 We don't use any kind of issue claiming system.
 We've found in the past that they result in accidental ["licked cookie"](https://devblogs.microsoft.com/oldnewthing/20091201-00/?p=15843) situations where contributors claim an issue but run out of time or energy trying before sending a PR.
 
-If an issue has been marked as `status: accepting prs` and an open PR does not exist, feel free to send a PR.
+If an unassigned issue has been marked as `status: accepting prs` and an open PR does not exist, feel free to send a PR.
 Please don't post comments asking for permission or stating you will work on an issue.
 
 ### Sending a Pull Request
@@ -93,5 +93,5 @@ Please do ping the maintainer who merged your PR if that doesn't happen within 2
 ## Emojis & Appreciation
 
 If you made it all the way to the end, bravo dear user, we love you.
-Please include your favorite emoji in the bottom of your issues and PRs to signal to us that you did in fact read this file and are trying to conform to it as best as possible.
-💖 is a good starter if you're not sure which to use.
+Please include an emoji in the bottom of your issues and PRs to signal to us that you did in fact read this file and are trying to conform to it as best as possible.
+📤 is a good starter if you're not sure which to use.

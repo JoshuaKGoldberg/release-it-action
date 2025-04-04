@@ -24,7 +24,7 @@ describe("tryCatchInfoAction", () => {
 			    "Start: abc",
 			  ],
 			  [
-			    "Result from abc: \\"abc\\"",
+			    "Result from abc: "abc"",
 			  ],
 			]
 		`);

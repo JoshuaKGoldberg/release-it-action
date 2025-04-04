@@ -1,21 +1,21 @@
 <h1 align="center">release-it-action</h1>
 
-<p align="center">Runs release-it as a GitHub Action, with handling for semantic releases and protected branches. 📤</p>
+<p align="center">
+	Runs release-it as a GitHub Action, with handling for semantic releases and protected branches.
+	📤
+</p>
 
 <p align="center">
-	<a href="#contributors" target="_blank">
-<!-- prettier-ignore-start -->
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<img alt="All Contributors: 3" src="https://img.shields.io/badge/all_contributors-3-21bb42.svg" />
+	<!-- prettier-ignore-start -->
+	<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+	<a href="#contributors" target="_blank"><img alt="👪 All Contributors: 3" src="https://img.shields.io/badge/%F0%9F%91%AA_all_contributors-3-21bb42.svg" /></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
-<!-- prettier-ignore-end -->
-</a>
-	<a href="https://codecov.io/gh/JoshuaKGoldberg/release-it-action" target="_blank"><img alt="Codecov Test Coverage" src="https://codecov.io/gh/JoshuaKGoldberg/release-it-action/branch/main/graph/badge.svg"/></a>
-	<a href="https://github.com/JoshuaKGoldberg/release-it-action/blob/main/.github/CODE_OF_CONDUCT.md" target="_blank"><img alt="Contributor Covenant" src="https://img.shields.io/badge/code_of_conduct-enforced-21bb42" /></a>
-	<a href="https://github.com/JoshuaKGoldberg/release-it-action/blob/main/LICENSE.md" target="_blank"><img alt="License: MIT" src="https://img.shields.io/github/license/JoshuaKGoldberg/release-it-action?color=21bb42"></a>
-	<img alt="Style: Prettier" src="https://img.shields.io/badge/style-prettier-21bb42.svg" />
-	<img alt="TypeScript: Strict" src="https://img.shields.io/badge/typescript-strict-21bb42.svg" />
-	<img alt="npm package version" src="https://img.shields.io/npm/v/release-it-action?color=21bb42" />
+	<!-- prettier-ignore-end -->
+	<a href="https://github.com/JoshuaKGoldberg/release-it-action/blob/main/.github/CODE_OF_CONDUCT.md" target="_blank"><img alt="🤝 Code of Conduct: Kept" src="https://img.shields.io/badge/%F0%9F%A4%9D_code_of_conduct-kept-21bb42" /></a>
+	<a href="https://codecov.io/gh/JoshuaKGoldberg/release-it-action" target="_blank"><img alt="🧪 Coverage" src="https://img.shields.io/codecov/c/github/JoshuaKGoldberg/release-it-action?label=%F0%9F%A7%AA%20coverage" /></a>
+	<a href="https://github.com/JoshuaKGoldberg/release-it-action/blob/main/LICENSE.md" target="_blank"><img alt="📝 License: MIT" src="https://img.shields.io/badge/%F0%9F%93%9D_license-MIT-21bb42.svg" /></a>
+	<a href="http://npmjs.com/package/release-it-action" target="_blank"><img alt="📦 npm version" src="https://img.shields.io/npm/v/release-it-action?color=21bb42&label=%F0%9F%93%A6%20npm" /></a>
+	<img alt="💪 TypeScript: Strict" src="https://img.shields.io/badge/%F0%9F%92%AA_typescript-strict-21bb42.svg" />
 </p>
 
 ## Usage
@@ -121,6 +121,11 @@ See:
 - [#13](https://github.com/JoshuaKGoldberg/release-it-action/issues/13) for supporting bypassing PR allowances
 - [#14](https://github.com/JoshuaKGoldberg/release-it-action/issues/14) for supporting dismissal restrictions
 
+## Development
+
+See [`.github/CONTRIBUTING.md`](./.github/CONTRIBUTING.md), then [`.github/DEVELOPMENT.md`](./.github/DEVELOPMENT.md).
+Thanks! 📤
+
 ## Contributors
 
 <!-- spellchecker: disable -->
@@ -143,6 +148,4 @@ See:
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 <!-- spellchecker: enable -->
 
-<!-- You can remove this notice if you don't want it 🙂 no worries! -->
-
-> 💙 This package is based on [@JoshuaKGoldberg](https://github.com/JoshuaKGoldberg)'s [create-typescript-app](https://github.com/JoshuaKGoldberg/create-typescript-app).
+> 💝 This package was templated with [`create-typescript-app`](https://github.com/JoshuaKGoldberg/create-typescript-app) using the [Bingo engine](https://create.bingo).

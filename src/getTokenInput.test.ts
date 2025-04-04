@@ -10,7 +10,7 @@ vi.mock("@actions/core", () => ({
 	},
 }));
 
-const mockEnv = vi.fn<[], unknown>();
+const mockEnv = vi.fn<() => unknown>();
 
 vi.mock("node:process", () => ({
 	get env() {
@@ -47,7 +47,7 @@ describe("getTokenInput", () => {
 		expect(() =>
 			getTokenInput(name, backup),
 		).toThrowErrorMatchingInlineSnapshot(
-			'"No fake-name input or FAKE_BACKUP environment variable defined."',
+			`[Error: No fake-name input or FAKE_BACKUP environment variable defined.]`,
 		);
 	});
 });
