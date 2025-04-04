@@ -1,54 +1,43 @@
 {
-  "badgeTemplate": "<img alt=\"All Contributors: <%= contributors.length %>\" src=\"https://img.shields.io/badge/all_contributors-<%= contributors.length %>-21bb42.svg\" />",
-  "commit": false,
-  "commitConvention": "angular",
-  "contributors": [
-    {
-      "login": "JoshuaKGoldberg",
-      "name": "Josh Goldberg ✨",
-      "avatar_url": "https://avatars.githubusercontent.com/u/3335181?v=4",
-      "profile": "http://www.joshuakgoldberg.com/",
-      "contributions": [
-        "code",
-        "content",
-        "doc",
-        "ideas",
-        "infra",
-        "maintenance",
-        "projectManagement",
-        "tool",
-        "bug",
-        "test"
-      ]
-    },
-    {
-      "login": "markehvn",
-      "name": "markehvn",
-      "avatar_url": "https://avatars.githubusercontent.com/u/179693285?v=4",
-      "profile": "https://github.com/markEHVN",
-      "contributions": [
-        "tool"
-      ]
-    },
-    {
-      "login": "michaelfaith",
-      "name": "michael faith",
-      "avatar_url": "https://avatars.githubusercontent.com/u/8071845?v=4",
-      "profile": "https://github.com/michaelfaith",
-      "contributions": [
-        "bug"
-      ]
-    }
-  ],
-  "contributorsPerLine": 7,
-  "contributorsSortAlphabetically": true,
-  "files": [
-    "README.md"
-  ],
-  "imageSize": 100,
-  "projectName": "release-it-action",
-  "projectOwner": "JoshuaKGoldberg",
-  "repoHost": "https://github.com",
-  "repoType": "github",
-  "commitType": "docs"
+	"badgeTemplate": "\t<a href=\"#contributors\" target=\"_blank\"><img alt=\"👪 All Contributors: <%= contributors.length %>\" src=\"https://img.shields.io/badge/%F0%9F%91%AA_all_contributors-<%= contributors.length %>-21bb42.svg\" /></a>",
+	"contributors": [
+		{
+			"login": "JoshuaKGoldberg",
+			"name": "Josh Goldberg ✨",
+			"avatar_url": "https://avatars.githubusercontent.com/u/3335181?v=4",
+			"profile": "http://www.joshuakgoldberg.com/",
+			"contributions": [
+				"code",
+				"content",
+				"doc",
+				"ideas",
+				"infra",
+				"maintenance",
+				"projectManagement",
+				"tool",
+				"bug",
+				"test"
+			]
+		},
+		{
+			"login": "markehvn",
+			"name": "markehvn",
+			"avatar_url": "https://avatars.githubusercontent.com/u/179693285?v=4",
+			"profile": "https://github.com/markEHVN",
+			"contributions": ["tool"]
+		},
+		{
+			"login": "michaelfaith",
+			"name": "michael faith",
+			"avatar_url": "https://avatars.githubusercontent.com/u/8071845?v=4",
+			"profile": "https://github.com/michaelfaith",
+			"contributions": ["bug"]
+		}
+	],
+	"contributorsSortAlphabetically": true,
+	"projectName": "release-it-action",
+	"projectOwner": "JoshuaKGoldberg",
+	"repoType": "github",
+	"commitConvention": "angular"
 }
+

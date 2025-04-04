@@ -73,7 +73,7 @@ export async function recreateProtections({
 									required_approving_review_count:
 										existingProtections.required_pull_request_reviews
 											.required_approving_review_count,
-							  }
+								}
 							: null,
 					required_signatures:
 						!!existingProtections.required_signatures?.enabled,
@@ -91,7 +91,7 @@ export async function recreateProtections({
 									// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 									(user) => user.login!,
 								),
-						  }
+							}
 						: null,
 
 					// @ts-expect-error -- The left types use 'null', while the right are 'undefined'...
@@ -104,7 +104,7 @@ export async function recreateProtections({
 									}),
 								),
 								strict: existingProtections.required_status_checks.strict,
-						  }
+							}
 						: null,
 				},
 			),

@@ -10,7 +10,7 @@ vi.mock("@actions/core", () => ({
 	},
 }));
 
-const mockEnv = vi.fn<[], unknown>();
+const mockEnv = vi.fn<() => unknown>();
 
 vi.mock("node:process", () => ({
 	get env() {
