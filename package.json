@@ -21,7 +21,7 @@
 	],
 	"scripts": {
 		"build": "tsc",
-		"build:release": "ncc build src/index.ts -o dist",
+		"build:release": "ncc build src/action/index.ts -o dist",
 		"format": "prettier .",
 		"lint": "eslint . --max-warnings 0",
 		"lint:knip": "knip",
@@ -52,7 +52,7 @@
 		"@vitest/coverage-v8": "3.0.9",
 		"@vitest/eslint-plugin": "1.1.38",
 		"console-fail-test": "0.5.0",
-		"create-typescript-app": "^2.29.3",
+		"create-typescript-app": "^2.30.0",
 		"cspell": "8.17.5",
 		"eslint": "9.22.0",
 		"eslint-plugin-jsdoc": "50.6.8",

@@ -59277,7 +59277,7 @@ function wrappy (fn, cb) {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2819);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(4071);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(4677);
 
 
 await (0,_runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__/* .runReleaseItAction */ .k)(_actions_github__WEBPACK_IMPORTED_MODULE_0__.context);
@@ -59287,7 +59287,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 4071:
+/***/ 4677:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -59317,16 +59317,16 @@ var github = __nccwpck_require__(2819);
 var parseargs = __nccwpck_require__(9312);
 // EXTERNAL MODULE: ./node_modules/.pnpm/conventional-commits-parser@5.0.0/node_modules/conventional-commits-parser/index.js
 var conventional_commits_parser = __nccwpck_require__(2677);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.3.0/node_modules/should-semantic-release/lib/getCommitMeaning.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.3.3/node_modules/should-semantic-release/lib/getCommitMeaning.js
 
 const alwaysMeaningfulTypes = /* @__PURE__ */ new Set(["feat", "fix", "perf"]);
 const alwaysIgnoredTypes = /* @__PURE__ */ new Set(["docs", "refactor", "style", "test"]);
 const releaseCommitTester = /^(?:chore(?:\(.*\))?:?)?\s*release|v?\d+\.\d+\.\d+/;
 function getCommitMeaning(message) {
-  const { notes, type } = conventional_commits_parser.sync(message, {
+  const { header, notes, type } = conventional_commits_parser.sync(message, {
     breakingHeaderPattern: /^(\w*)(?:\((.*)\))?!: (.*)$/
   });
-  if (notes.some((note) => note.title.match(/^BREAKING[ -]CHANGE$/))) {
+  if (notes.some((note) => /^BREAKING[ -]CHANGE$/.exec(note.title)) || header?.match(/^BREAKING[ -]CHANGE(?: \([^)]+\))?:/)) {
     return "meaningful";
   }
   if (type) {
@@ -59343,16 +59343,16 @@ function getCommitMeaning(message) {
   return { type: type ?? void 0 };
 }
 
-//# sourceMappingURL=getCommitMeaning.js.map
+
 ;// CONCATENATED MODULE: external "node:child_process"
 const external_node_child_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:child_process");
 // EXTERNAL MODULE: external "node:util"
 var external_node_util_ = __nccwpck_require__(7975);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.3.0/node_modules/should-semantic-release/lib/utils.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.3.3/node_modules/should-semantic-release/lib/utils.js
 
 
-const exec = (0,external_node_util_.promisify)(external_node_child_process_namespaceObject.exec);
 async function execOrThrow(command) {
+  const exec = (0,external_node_util_.promisify)(external_node_child_process_namespaceObject.exec);
   const { stderr, stdout } = await exec(command);
   if (stderr) {
     throw new Error(stderr);
@@ -59360,8 +59360,8 @@ async function execOrThrow(command) {
   return stdout;
 }
 
-//# sourceMappingURL=utils.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.3.0/node_modules/should-semantic-release/lib/shouldSemanticRelease.js
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.3.3/node_modules/should-semantic-release/lib/shouldSemanticRelease.js
 
 
 async function shouldSemanticRelease_shouldSemanticRelease({
@@ -59379,12 +59379,12 @@ async function shouldSemanticRelease_shouldSemanticRelease({
     log(`Checking commit: ${message}`);
     const meaning = getCommitMeaning(message);
     switch (meaning) {
-      case "release":
-        log(`Found a release commit. Returning false.`);
-        return false;
       case "meaningful":
         log(`Found a meaningful commit. Returning true.`);
         return true;
+      case "release":
+        log(`Found a release commit. Returning false.`);
+        return false;
       default:
         log(`Found type ${meaning.type}. Continuing.`);
     }
@@ -59395,8 +59395,8 @@ async function shouldSemanticRelease_shouldSemanticRelease({
   return false;
 }
 
-//# sourceMappingURL=shouldSemanticRelease.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.3.0/node_modules/should-semantic-release/lib/cli.js
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.3.3/node_modules/should-semantic-release/lib/cli.js
 
 
 async function shouldSemanticReleaseCLI(args) {
@@ -59413,11 +59413,11 @@ async function shouldSemanticReleaseCLI(args) {
   });
 }
 
-//# sourceMappingURL=cli.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.3.0/node_modules/should-semantic-release/lib/index.js
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/should-semantic-release@0.3.3/node_modules/should-semantic-release/lib/index.js
 
 
-//# sourceMappingURL=index.js.map
+
 // EXTERNAL MODULE: external "node:buffer"
 var external_node_buffer_ = __nccwpck_require__(4573);
 ;// CONCATENATED MODULE: external "node:path"
