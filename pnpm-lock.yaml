@@ -28,7 +28,7 @@ importers:
         specifier: 9.22.0
         version: 9.22.0
       '@octokit/types':
-        specifier: ^13.6.2
+        specifier: 13.10.0
         version: 13.10.0
       '@release-it/conventional-changelog':
         specifier: 10.0.0
@@ -37,7 +37,7 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@vercel/ncc':
-        specifier: ^0.38.3
+        specifier: 0.38.3
         version: 0.38.3
       '@vitest/coverage-v8':
         specifier: 3.0.9
@@ -49,7 +49,7 @@ importers:
         specifier: 0.5.0
         version: 0.5.0
       create-typescript-app:
-        specifier: ^2.30.0
+        specifier: 2.30.0
         version: 2.30.0(bingo-systems@0.5.4)
       cspell:
         specifier: 8.17.5
@@ -115,7 +115,7 @@ importers:
         specifier: 0.3.0
         version: 0.3.0
       should-semantic-release:
-        specifier: ^0.3.0
+        specifier: 0.3.3
         version: 0.3.3
       typescript:
         specifier: 5.8.2
