@@ -1,43 +1,60 @@
 {
-	"badgeTemplate": "\t<a href=\"#contributors\" target=\"_blank\"><img alt=\"👪 All Contributors: <%= contributors.length %>\" src=\"https://img.shields.io/badge/%F0%9F%91%AA_all_contributors-<%= contributors.length %>-21bb42.svg\" /></a>",
-	"contributors": [
-		{
-			"login": "JoshuaKGoldberg",
-			"name": "Josh Goldberg ✨",
-			"avatar_url": "https://avatars.githubusercontent.com/u/3335181?v=4",
-			"profile": "http://www.joshuakgoldberg.com/",
-			"contributions": [
-				"code",
-				"content",
-				"doc",
-				"ideas",
-				"infra",
-				"maintenance",
-				"projectManagement",
-				"tool",
-				"bug",
-				"test"
-			]
-		},
-		{
-			"login": "markehvn",
-			"name": "markehvn",
-			"avatar_url": "https://avatars.githubusercontent.com/u/179693285?v=4",
-			"profile": "https://github.com/markEHVN",
-			"contributions": ["tool"]
-		},
-		{
-			"login": "michaelfaith",
-			"name": "michael faith",
-			"avatar_url": "https://avatars.githubusercontent.com/u/8071845?v=4",
-			"profile": "https://github.com/michaelfaith",
-			"contributions": ["bug"]
-		}
-	],
-	"contributorsSortAlphabetically": true,
-	"projectName": "release-it-action",
-	"projectOwner": "JoshuaKGoldberg",
-	"repoType": "github",
-	"commitConvention": "angular"
+  "badgeTemplate": "\t<a href=\"#contributors\" target=\"_blank\"><img alt=\"👪 All Contributors: <%= contributors.length %>\" src=\"https://img.shields.io/badge/%F0%9F%91%AA_all_contributors-<%= contributors.length %>-21bb42.svg\" /></a>",
+  "contributors": [
+    {
+      "login": "JoshuaKGoldberg",
+      "name": "Josh Goldberg ✨",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3335181?v=4",
+      "profile": "http://www.joshuakgoldberg.com/",
+      "contributions": [
+        "code",
+        "content",
+        "doc",
+        "ideas",
+        "infra",
+        "maintenance",
+        "projectManagement",
+        "tool",
+        "bug",
+        "test"
+      ]
+    },
+    {
+      "login": "markehvn",
+      "name": "markehvn",
+      "avatar_url": "https://avatars.githubusercontent.com/u/179693285?v=4",
+      "profile": "https://github.com/markEHVN",
+      "contributions": [
+        "tool"
+      ]
+    },
+    {
+      "login": "michaelfaith",
+      "name": "michael faith",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8071845?v=4",
+      "profile": "https://github.com/michaelfaith",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "navin-moorthy",
+      "name": "Navin Moorthy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/39694575?v=4",
+      "profile": "https://navinmoorthy.me/",
+      "contributions": [
+        "tool"
+      ]
+    }
+  ],
+  "contributorsSortAlphabetically": true,
+  "projectName": "release-it-action",
+  "projectOwner": "JoshuaKGoldberg",
+  "repoType": "github",
+  "commitConvention": "angular",
+  "files": [
+    "README.md"
+  ],
+  "commitType": "docs",
+  "contributorsPerLine": 7
 }
-
