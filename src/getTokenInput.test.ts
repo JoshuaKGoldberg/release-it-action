@@ -47,7 +47,7 @@ describe("getTokenInput", () => {
 		expect(() =>
 			getTokenInput(name, backup),
 		).toThrowErrorMatchingInlineSnapshot(
-			'"No fake-name input or FAKE_BACKUP environment variable defined."',
+			`[Error: No fake-name input or FAKE_BACKUP environment variable defined.]`,
 		);
 	});
 });
