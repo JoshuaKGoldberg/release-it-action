@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.3](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.3.2...v0.3.3) (2025-10-28)
+
+### Bug Fixes
+
+- **deps:** update dependency node to v24 ([#682](https://github.com/JoshuaKGoldberg/release-it-action/issues/682)) ([67abfe6](https://github.com/JoshuaKGoldberg/release-it-action/commit/67abfe6d077a19020f1d7ff14e0a3827695a9f5a))
+
 ## [0.3.2](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.3.1...v0.3.2) (2025-04-04)
 
 ### Bug Fixes
