@@ -1,1 +1,3 @@
-export declare const $$: import("execa").Execa$<string>;
+export declare const $$: import("execa").ExecaScriptMethod<{
+    stdio: "inherit";
+}>;

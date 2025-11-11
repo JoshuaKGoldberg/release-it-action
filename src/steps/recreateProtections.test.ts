@@ -14,6 +14,19 @@ const commonRequestData = {
 	owner: "test-owner",
 	repo: "test-repo",
 };
+const mockTeam = {
+	description: null,
+	html_url: "",
+	id: 0,
+	members_url: "",
+	name: "",
+	node_id: "",
+	parent: null,
+	permission: "",
+	repositories_url: "",
+	type: "enterprise",
+	url: "",
+} as const;
 const mockRequest = vi.fn();
 const mockOctokit = { request: mockRequest } as unknown as Octokit;
 
@@ -96,7 +109,7 @@ describe("recreateProtections", () => {
 				restrictions: {
 					apps: [{ slug: "app-slug" }],
 					apps_url: "apps-url",
-					teams: [{ slug: "team-slug" }],
+					teams: [{ ...mockTeam, slug: "team-slug" }],
 					teams_url: "teams-url",
 					url: "url",
 					users: [{ login: "user-login" }],

@@ -49,7 +49,7 @@ describe("runBypassingBranchProtections", () => {
 			  [
 			    {
 			      "octokit": {
-			        "request": [MockFunction spy],
+			        "request": [MockFunction],
 			      },
 			      "requestData": {
 			        "branch": "",
@@ -69,7 +69,7 @@ describe("runBypassingBranchProtections", () => {
 			    {
 			      "existingProtections": undefined,
 			      "octokit": {
-			        "request": [MockFunction spy],
+			        "request": [MockFunction],
 			      },
 			      "requestData": {
 			        "branch": "",
@@ -97,7 +97,7 @@ describe("runBypassingBranchProtections", () => {
 			      },
 			      "existingProtections": undefined,
 			      "octokit": {
-			        "request": [MockFunction spy],
+			        "request": [MockFunction],
 			      },
 			    },
 			  ],

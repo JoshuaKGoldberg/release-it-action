@@ -84,8 +84,7 @@ export async function recreateProtections({
 									(app) => app.slug!,
 								),
 								teams: existingProtections.restrictions.teams.map(
-									// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-									(team) => team.slug!,
+									(team) => team.slug,
 								),
 								users: existingProtections.restrictions.users.map(
 									// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
