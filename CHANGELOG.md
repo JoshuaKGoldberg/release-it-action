@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.4](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.3.3...v0.3.4) (2025-11-11)
+
+### Bug Fixes
+
+- bump should-semantic-release to 0.3.5 ([#694](https://github.com/JoshuaKGoldberg/release-it-action/issues/694)) ([140c195](https://github.com/JoshuaKGoldberg/release-it-action/commit/140c19546aa7b6a6a026e2af1d6af7b5267ecee5)), closes [#693](https://github.com/JoshuaKGoldberg/release-it-action/issues/693)
+
 ## [0.3.3](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.3.2...v0.3.3) (2025-10-28)
 
 ### Bug Fixes
