@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.5](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.3.4...v0.3.5) (2025-11-11)
+
+### Bug Fixes
+
+- empty commit to bump new patch version with built dist/ ([fe107a4](https://github.com/JoshuaKGoldberg/release-it-action/commit/fe107a4b694fcfc30d674ef2d456d16e3d826be9))
+
 ## [0.3.4](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.3.3...v0.3.4) (2025-11-11)
 
 ### Bug Fixes
