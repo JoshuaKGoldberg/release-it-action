@@ -1,8 +1,8 @@
 import * as github from "@actions/github";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { runReleaseItAction } from "./runReleaseItAction.js";
 import { getOptionalTokenInput } from "../getTokenInput.js";
+import { runReleaseItAction } from "./runReleaseItAction.js";
 
 process.env.GITHUB_REPOSITORY = "mock-github-repository";
 
@@ -17,11 +17,10 @@ vi.mock("@actions/core", () => ({
 
 vi.mock("../getTokenInput.js", () => ({
 	getOptionalTokenInput: vi.fn(),
-	getTokenInput(tokenName: string) {
+	getRequiredTokenInput(tokenName: string) {
 		return `mock-${tokenName}`;
 	},
 }));
-
 const mockGetOptionalTokenInput = vi.mocked(getOptionalTokenInput);
 
 const mockReleaseItAction = vi.fn();

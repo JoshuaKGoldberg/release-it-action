@@ -9,8 +9,8 @@ export function getOptionalTokenInput(
 	return token;
 }
 
-export function getTokenInput(name: string, backup: string): string {
-	const token = core.getInput(name) || process.env[backup];
+export function getRequiredTokenInput(name: string, backup: string): string {
+	const token = getOptionalTokenInput(name, backup);
 	if (!token) {
 		throw new Error(
 			`No ${name} input or ${backup} environment variable defined.`,
