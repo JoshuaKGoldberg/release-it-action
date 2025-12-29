@@ -3,7 +3,7 @@ export interface ReleaseItActionOptions {
     githubToken: string;
     gitUserEmail: string;
     gitUserName: string;
-    npmToken: string;
+    npmToken: string | undefined;
     owner: string;
     releaseItArgs?: string;
     repo: string;
