@@ -5,7 +5,7 @@
 	},
 	"github": { "release": true, "releaseName": "v${version}" },
 	"npm": {
-		"publishArgs": ["--access public", "--provenance"],
+		"publishArgs": ["--provenance"],
 		"skipChecks": true
 	},
 	"plugins": {
