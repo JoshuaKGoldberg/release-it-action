@@ -1,3 +1,4 @@
+import * as core from "@actions/core";
 import { describe, expect, it, vi } from "vitest";
 
 import { releaseItAction, ReleaseItActionOptions } from "./index.js";
@@ -39,6 +40,11 @@ vi.mock("./tryCatchInfoAction.js", () => ({
 		return await action();
 	},
 }));
+
+vi.mock("@actions/core", () => ({
+	info: vi.fn(),
+}));
+const mockCore = vi.mocked(core);
 
 const mockReleaseItArgs = "--debug";
 
@@ -130,5 +136,33 @@ describe("releaseItAction", () => {
 			]
 		`);
 		expect(mockRunBypassingBranchProtections).toHaveBeenCalled();
+	});
+
+	it("should log an info message and not set authToken if no npm token was provided", async () => {
+		mockShouldSemanticRelease.mockResolvedValueOnce(true);
+
+		await releaseItAction({ ...mockOptions, npmToken: undefined });
+
+		expect(mock$$.mock.calls).toMatchInlineSnapshot(`
+			[
+			  [
+			    [
+			      "git config user.email ",
+			      "",
+			    ],
+			    "mock-gitUserEmail",
+			  ],
+			  [
+			    [
+			      "git config user.name ",
+			      "",
+			    ],
+			    "mock-gitUserName",
+			  ],
+			]
+		`);
+		expect(mockCore.info).toHaveBeenCalledWith(
+			"No npm token provided. This is required unless you're using Trusted Publishing.",
+		);
 	});
 });

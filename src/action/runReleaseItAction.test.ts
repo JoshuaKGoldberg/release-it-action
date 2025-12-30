@@ -1,6 +1,7 @@
 import * as github from "@actions/github";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { getOptionalTokenInput } from "../getTokenInput.js";
 import { runReleaseItAction } from "./runReleaseItAction.js";
 
 process.env.GITHUB_REPOSITORY = "mock-github-repository";
@@ -15,10 +16,12 @@ vi.mock("@actions/core", () => ({
 }));
 
 vi.mock("../getTokenInput.js", () => ({
-	getTokenInput(tokenName: string) {
+	getOptionalTokenInput: vi.fn(),
+	getRequiredTokenInput(tokenName: string) {
 		return `mock-${tokenName}`;
 	},
 }));
+const mockGetOptionalTokenInput = vi.mocked(getOptionalTokenInput);
 
 const mockReleaseItAction = vi.fn();
 
@@ -37,8 +40,13 @@ const mockContext = {
 } as unknown as typeof github.context;
 
 describe("runReleaseItAction", () => {
+	beforeEach(() => {
+		mockGetOptionalTokenInput.mockReturnValue("mock-npm-token");
+	});
+
 	it("runs when no optional core inputs are required", async () => {
 		mockGetInput.mockReturnValue(undefined);
+		mockGetOptionalTokenInput.mockReturnValue(undefined);
 
 		await runReleaseItAction(mockContext);
 
@@ -50,7 +58,7 @@ describe("runReleaseItAction", () => {
 			      "gitUserEmail": "undefined@users.noreply.github.com",
 			      "gitUserName": undefined,
 			      "githubToken": "mock-github-token",
-			      "npmToken": "mock-npm-token",
+			      "npmToken": undefined,
 			      "owner": "context-owner",
 			      "releaseItArgs": undefined,
 			      "repo": "context-repo",

@@ -1,3 +1,4 @@
+import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { shouldSemanticRelease } from "should-semantic-release";
 
@@ -11,7 +12,7 @@ export interface ReleaseItActionOptions {
 	githubToken: string;
 	gitUserEmail: string;
 	gitUserName: string;
-	npmToken: string;
+	npmToken: string | undefined;
 	owner: string;
 	releaseItArgs?: string;
 	repo: string;
@@ -38,7 +39,13 @@ export async function releaseItAction({
 
 	await $$`git config user.email ${gitUserEmail}`;
 	await $$`git config user.name ${gitUserName}`;
-	await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
+	if (npmToken) {
+		await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
+	} else {
+		core.info(
+			"No npm token provided. This is required unless you're using Trusted Publishing.",
+		);
+	}
 
 	const run = async () => {
 		await runReleaseIt(releaseItArgs);
