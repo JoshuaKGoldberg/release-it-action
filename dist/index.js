@@ -2172,7 +2172,7 @@ const Context = __importStar(__nccwpck_require__(3077));
 const Utils = __importStar(__nccwpck_require__(8399));
 // octokit + plugins
 const core_1 = __nccwpck_require__(1772);
-const plugin_rest_endpoint_methods_1 = __nccwpck_require__(6363);
+const plugin_rest_endpoint_methods_1 = __nccwpck_require__(6316);
 const plugin_paginate_rest_1 = __nccwpck_require__(8633);
 exports.context = new Context.Context();
 const baseUrl = Utils.getApiBaseUrl();
@@ -5628,7 +5628,7 @@ paginateRest.VERSION = VERSION;
 
 /***/ }),
 
-/***/ 6363:
+/***/ 6316:
 /***/ ((module) => {
 
 
@@ -42685,7 +42685,7 @@ async function releaseItAction({ bypassBranchProtections, githubToken, gitUserEm
         await $$ `npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
     }
     else {
-        core.info("No npm token provided!  This is required unless you're using Trusted Publishing.");
+        core.info("No npm token provided. This is required unless you're using Trusted Publishing.");
     }
     const run = async () => {
         await runReleaseIt(releaseItArgs);

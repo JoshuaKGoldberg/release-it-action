@@ -162,7 +162,7 @@ describe("releaseItAction", () => {
 			]
 		`);
 		expect(mockCore.info).toHaveBeenCalledWith(
-			"No npm token provided!  This is required unless you're using Trusted Publishing.",
+			"No npm token provided. This is required unless you're using Trusted Publishing.",
 		);
 	});
 });

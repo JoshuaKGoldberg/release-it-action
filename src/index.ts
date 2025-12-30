@@ -43,7 +43,7 @@ export async function releaseItAction({
 		await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
 	} else {
 		core.info(
-			"No npm token provided!  This is required unless you're using Trusted Publishing.",
+			"No npm token provided. This is required unless you're using Trusted Publishing.",
 		);
 	}
 
