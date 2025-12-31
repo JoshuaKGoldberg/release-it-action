@@ -14,7 +14,7 @@ jobs:
       - env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        uses: JoshuaKGoldberg/release-it-action@9b30a3f725202a34a53534a0dc6bd54f76f9c5dd
+        uses: JoshuaKGoldberg/release-it-action@4c3d8c10b9a338d06694860466ddf4c97883c25b
 
 name: Release
 
