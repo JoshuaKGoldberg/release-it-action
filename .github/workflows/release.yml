@@ -13,8 +13,7 @@ jobs:
       - uses: ./.github/actions/prepare
       - env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        uses: JoshuaKGoldberg/release-it-action@60d24c789ba597353ffc1c3cf3e9e448c2475c2a
+        run: node dist/index.js
 
 name: Release
 
