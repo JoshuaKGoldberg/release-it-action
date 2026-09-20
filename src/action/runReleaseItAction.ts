@@ -22,6 +22,13 @@ export async function runReleaseItAction(context: typeof github.context) {
 		owner: context.repo.owner,
 		releaseItArgs: core.getInput("release-it-args"),
 		repo: context.repo.repo,
-		skipNpmPublish: core.getBooleanInput("skip-npm-publish"),
+		skipNpmPublish: getOptionalBooleanInput("skip-npm-publish"),
 	});
+}
+
+// core.getBooleanInput throws on an empty string, which is what an input
+// resolves to when the action is run directly (e.g. `node dist/index.js`)
+// instead of through `uses:`, since action.yml defaults only apply there.
+function getOptionalBooleanInput(name: string) {
+	return core.getInput(name) ? core.getBooleanInput(name) : false;
 }

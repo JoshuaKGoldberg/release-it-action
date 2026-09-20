@@ -74,9 +74,26 @@ describe("runReleaseItAction", () => {
 		`);
 	});
 
+	it("passes skipNpmPublish as false without calling getBooleanInput when the skip-npm-publish input is empty", async () => {
+		mockGetBooleanInput.mockImplementation(() => {
+			throw new Error(
+				'Input does not meet YAML 1.2 "Core Schema" specification',
+			);
+		});
+		mockGetInput.mockReturnValue("");
+
+		await runReleaseItAction(mockContext);
+
+		expect(mockReleaseItAction).toHaveBeenCalledWith(
+			expect.objectContaining({ skipNpmPublish: false }),
+		);
+	});
+
 	it("passes skipNpmPublish as true when the skip-npm-publish input is true", async () => {
 		mockGetBooleanInput.mockReturnValue(true);
-		mockGetInput.mockReturnValue(undefined);
+		mockGetInput.mockImplementation((name: string) =>
+			name === "skip-npm-publish" ? "true" : undefined,
+		);
 
 		await runReleaseItAction(mockContext);
 
