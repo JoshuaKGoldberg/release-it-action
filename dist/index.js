@@ -42665,20 +42665,26 @@ async function runReleaseIt(releaseItArgs) {
 
 
 
-async function releaseItAction({ bypassBranchProtections, githubToken, gitUserEmail, gitUserName, npmToken, owner, releaseItArgs, repo, }) {
+async function releaseItAction({ bypassBranchProtections, githubToken, gitUserEmail, gitUserName, npmPublish = true, npmToken, owner, releaseItArgs, repo, }) {
     if ((await tryCatchInfoAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true }))) === false) {
         return;
     }
     await $$ `git config user.email ${gitUserEmail}`;
     await $$ `git config user.name ${gitUserName}`;
-    if (npmToken) {
+    if (!npmPublish) {
+        core.info("npmPublish is false. Skipping npm publish.");
+    }
+    else if (npmToken) {
         await $$ `npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
     }
     else {
         core.info("No npm token provided. This is required unless you're using Trusted Publishing.");
     }
+    const args = [!npmPublish && "--no-npm.publish", releaseItArgs]
+        .filter(Boolean)
+        .join(" ");
     const run = async () => {
-        await runReleaseIt(releaseItArgs);
+        await runReleaseIt(args);
     };
     if (!bypassBranchProtections) {
         await run();
@@ -42700,6 +42706,7 @@ async function runReleaseItAction(context) {
         gitUserEmail: core.getInput("git-user-email") ||
             `${gitUserName}@users.noreply.github.com`,
         gitUserName,
+        npmPublish: core.getBooleanInput("npm-publish"),
         npmToken: getOptionalTokenInput("npm-token", "NPM_TOKEN"),
         owner: context.repo.owner,
         releaseItArgs: core.getInput("release-it-args"),

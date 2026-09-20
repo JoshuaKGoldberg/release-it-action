@@ -12,6 +12,7 @@ export interface ReleaseItActionOptions {
 	githubToken: string;
 	gitUserEmail: string;
 	gitUserName: string;
+	npmPublish?: boolean;
 	npmToken: string | undefined;
 	owner: string;
 	releaseItArgs?: string;
@@ -23,6 +24,7 @@ export async function releaseItAction({
 	githubToken,
 	gitUserEmail,
 	gitUserName,
+	npmPublish = true,
 	npmToken,
 	owner,
 	releaseItArgs,
@@ -39,7 +41,9 @@ export async function releaseItAction({
 
 	await $$`git config user.email ${gitUserEmail}`;
 	await $$`git config user.name ${gitUserName}`;
-	if (npmToken) {
+	if (!npmPublish) {
+		core.info("npmPublish is false. Skipping npm publish.");
+	} else if (npmToken) {
 		await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
 	} else {
 		core.info(
@@ -47,8 +51,12 @@ export async function releaseItAction({
 		);
 	}
 
+	const args = [!npmPublish && "--no-npm.publish", releaseItArgs]
+		.filter(Boolean)
+		.join(" ");
+
 	const run = async () => {
-		await runReleaseIt(releaseItArgs);
+		await runReleaseIt(args);
 	};
 
 	if (!bypassBranchProtections) {

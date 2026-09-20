@@ -17,6 +17,7 @@ export async function runReleaseItAction(context: typeof github.context) {
 			core.getInput("git-user-email") ||
 			`${gitUserName}@users.noreply.github.com`,
 		gitUserName,
+		npmPublish: core.getBooleanInput("npm-publish"),
 		npmToken: getOptionalTokenInput("npm-token", "NPM_TOKEN"),
 		owner: context.repo.owner,
 		releaseItArgs: core.getInput("release-it-args"),

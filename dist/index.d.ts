@@ -3,9 +3,10 @@ export interface ReleaseItActionOptions {
     githubToken: string;
     gitUserEmail: string;
     gitUserName: string;
+    npmPublish?: boolean;
     npmToken: string | undefined;
     owner: string;
     releaseItArgs?: string;
     repo: string;
 }
-export declare function releaseItAction({ bypassBranchProtections, githubToken, gitUserEmail, gitUserName, npmToken, owner, releaseItArgs, repo, }: ReleaseItActionOptions): Promise<void>;
+export declare function releaseItAction({ bypassBranchProtections, githubToken, gitUserEmail, gitUserName, npmPublish, npmToken, owner, releaseItArgs, repo, }: ReleaseItActionOptions): Promise<void>;

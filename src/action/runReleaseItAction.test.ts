@@ -6,10 +6,13 @@ import { runReleaseItAction } from "./runReleaseItAction.js";
 
 process.env.GITHUB_REPOSITORY = "mock-github-repository";
 
+const mockGetBooleanInput = vi.fn();
 const mockGetInput = vi.fn();
 
 vi.mock("@actions/core", () => ({
-	getBooleanInput: () => false,
+	get getBooleanInput() {
+		return mockGetBooleanInput;
+	},
 	get getInput() {
 		return mockGetInput;
 	},
@@ -41,6 +44,7 @@ const mockContext = {
 
 describe("runReleaseItAction", () => {
 	beforeEach(() => {
+		mockGetBooleanInput.mockReturnValue(true);
 		mockGetOptionalTokenInput.mockReturnValue("mock-npm-token");
 	});
 
@@ -58,6 +62,7 @@ describe("runReleaseItAction", () => {
 			      "gitUserEmail": "undefined@users.noreply.github.com",
 			      "gitUserName": undefined,
 			      "githubToken": "mock-github-token",
+			      "npmPublish": true,
 			      "npmToken": undefined,
 			      "owner": "context-owner",
 			      "releaseItArgs": undefined,
@@ -66,6 +71,17 @@ describe("runReleaseItAction", () => {
 			  ],
 			]
 		`);
+	});
+
+	it("passes npmPublish as false when the npm-publish input is false", async () => {
+		mockGetBooleanInput.mockReturnValue(false);
+		mockGetInput.mockReturnValue(undefined);
+
+		await runReleaseItAction(mockContext);
+
+		expect(mockReleaseItAction).toHaveBeenCalledWith(
+			expect.objectContaining({ npmPublish: false }),
+		);
 	});
 
 	it("runs when all optional core inputs are required", async () => {
@@ -81,6 +97,7 @@ describe("runReleaseItAction", () => {
 			      "gitUserEmail": "mock-git-user-email",
 			      "gitUserName": "mock-git-user-name",
 			      "githubToken": "mock-github-token",
+			      "npmPublish": true,
 			      "npmToken": "mock-npm-token",
 			      "owner": "context-owner",
 			      "releaseItArgs": "mock-release-it-args",
