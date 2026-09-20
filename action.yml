@@ -3,6 +3,8 @@ description: Runs release-it as a GitHub Action, with handling for semantic rele
 inputs:
   bypass-branch-protections:
     description: Branch to delete and recreate branch protections on.
+  bypass-branch-rulesets:
+    description: Branch to temporarily disable and re-enable repository rulesets on.
   git-user-email:
     description: "`git config user.email` value for Git commits."
   git-user-name:

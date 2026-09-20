@@ -59,6 +59,7 @@ describe("runReleaseItAction", () => {
 			  [
 			    {
 			      "bypassBranchProtections": undefined,
+			      "bypassBranchRulesets": undefined,
 			      "gitUserEmail": "undefined@users.noreply.github.com",
 			      "gitUserName": undefined,
 			      "githubToken": "mock-github-token",
@@ -94,6 +95,7 @@ describe("runReleaseItAction", () => {
 			  [
 			    {
 			      "bypassBranchProtections": "mock-bypass-branch-protections",
+			      "bypassBranchRulesets": "mock-bypass-branch-rulesets",
 			      "gitUserEmail": "mock-git-user-email",
 			      "gitUserName": "mock-git-user-name",
 			      "githubToken": "mock-github-token",

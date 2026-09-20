@@ -4,11 +4,13 @@ import { shouldSemanticRelease } from "should-semantic-release";
 
 import { $$ } from "./execa.js";
 import { runBypassingBranchProtections } from "./runBypassingBranchProtections.js";
+import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
 import { runReleaseIt } from "./steps/runReleaseIt.js";
 import { tryCatchInfoAction } from "./tryCatchInfoAction.js";
 
 export interface ReleaseItActionOptions {
 	bypassBranchProtections?: string;
+	bypassBranchRulesets?: string;
 	githubToken: string;
 	gitUserEmail: string;
 	gitUserName: string;
@@ -21,6 +23,7 @@ export interface ReleaseItActionOptions {
 
 export async function releaseItAction({
 	bypassBranchProtections,
+	bypassBranchRulesets,
 	githubToken,
 	gitUserEmail,
 	gitUserName,
@@ -55,16 +58,31 @@ export async function releaseItAction({
 		.filter(Boolean)
 		.join(" ");
 
-	const run = async () => {
+	const runReleaseItWithArgs = async () => {
 		await runReleaseIt(args);
 	};
+
+	if (!bypassBranchProtections && !bypassBranchRulesets) {
+		await runReleaseItWithArgs();
+		return;
+	}
+
+	const octokit = github.getOctokit(githubToken);
+
+	const run = bypassBranchRulesets
+		? async () => {
+				await runBypassingBranchRulesets(
+					{ branch: bypassBranchRulesets, owner, repo },
+					octokit,
+					runReleaseItWithArgs,
+				);
+			}
+		: runReleaseItWithArgs;
 
 	if (!bypassBranchProtections) {
 		await run();
 		return;
 	}
-
-	const octokit = github.getOctokit(githubToken);
 
 	await runBypassingBranchProtections(
 		{ branch: bypassBranchProtections, owner, repo },
