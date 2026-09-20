@@ -1,5 +1,17 @@
 # Changelog
 
+# [0.5.0](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.4.0...v0.5.0) (2026-09-20)
+
+### Bug Fixes
+
+- recreate bypass_pull_request_allowances and dismissal_restrictions ([#773](https://github.com/JoshuaKGoldberg/release-it-action/issues/773)) ([ed1156a](https://github.com/JoshuaKGoldberg/release-it-action/commit/ed1156a2c7d4853c9f2f0180f7d67a1e3f5dd387)), closes [#13](https://github.com/JoshuaKGoldberg/release-it-action/issues/13) [#14](https://github.com/JoshuaKGoldberg/release-it-action/issues/14)
+- treat an empty skip-npm-publish input as false ([#787](https://github.com/JoshuaKGoldberg/release-it-action/issues/787)) ([8eb7ab9](https://github.com/JoshuaKGoldberg/release-it-action/commit/8eb7ab9d04772c294906ef182bc844840e2185a4)), closes [#775](https://github.com/JoshuaKGoldberg/release-it-action/issues/775) [#775](https://github.com/JoshuaKGoldberg/release-it-action/issues/775)
+
+### Features
+
+- add bypass-branch-rulesets option ([#780](https://github.com/JoshuaKGoldberg/release-it-action/issues/780)) ([37705b0](https://github.com/JoshuaKGoldberg/release-it-action/commit/37705b0737eb9584d9a510703df367c313ebde67)), closes [#391](https://github.com/JoshuaKGoldberg/release-it-action/issues/391)
+- add skip-npm-publish option ([#775](https://github.com/JoshuaKGoldberg/release-it-action/issues/775)) ([e9330ed](https://github.com/JoshuaKGoldberg/release-it-action/commit/e9330edadbc2c6c668ca11982cf9dffd9534a17b)), closes [#476](https://github.com/JoshuaKGoldberg/release-it-action/issues/476) [#741](https://github.com/JoshuaKGoldberg/release-it-action/issues/741)
+
 ## [0.3.5](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.3.4...v0.3.5) (2025-11-11)
 
 ### Bug Fixes
