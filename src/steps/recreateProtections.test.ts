@@ -27,6 +27,38 @@ const mockTeam = {
 	type: "enterprise",
 	url: "",
 } as const;
+const mockUser = {
+	avatar_url: "",
+	events_url: "",
+	followers_url: "",
+	following_url: "",
+	gists_url: "",
+	gravatar_id: null,
+	html_url: "",
+	id: 0,
+	node_id: "",
+	organizations_url: "",
+	received_events_url: "",
+	repos_url: "",
+	site_admin: false,
+	starred_url: "",
+	subscriptions_url: "",
+	type: "User",
+	url: "",
+} as const;
+const mockApp = {
+	created_at: "",
+	description: null,
+	events: [],
+	external_url: "",
+	html_url: "",
+	id: 0,
+	name: "",
+	node_id: "",
+	owner: { ...mockUser, login: "app-owner" },
+	permissions: {},
+	updated_at: "",
+};
 const mockRequest = vi.fn();
 const mockOctokit = { request: mockRequest } as unknown as Octokit;
 
@@ -74,6 +106,32 @@ describe("recreateProtections", () => {
 		`);
 	});
 
+	it("omits review restrictions when existingProtections has required_pull_request_reviews without them", async () => {
+		await recreateProtections({
+			commonRequestData,
+			existingProtections: {
+				required_pull_request_reviews: {
+					dismiss_stale_reviews: false,
+					require_code_owner_reviews: false,
+				},
+			},
+			octokit: mockOctokit,
+		});
+
+		expect(mockRequest).toHaveBeenCalledWith(
+			"PUT /repos/{owner}/{repo}/branches/{branch}/protection",
+			expect.objectContaining({
+				required_pull_request_reviews: {
+					bypass_pull_request_allowances: undefined,
+					dismiss_stale_reviews: false,
+					dismissal_restrictions: undefined,
+					require_code_owner_reviews: false,
+					required_approving_review_count: undefined,
+				},
+			}),
+		);
+	});
+
 	it("recreates protections when existingProtections is a full set of protections", async () => {
 		await recreateProtections({
 			commonRequestData,
@@ -87,7 +145,24 @@ describe("recreateProtections", () => {
 				required_conversation_resolution: { enabled: true },
 				required_linear_history: { enabled: true },
 				required_pull_request_reviews: {
+					bypass_pull_request_allowances: {
+						apps: [
+							null,
+							{ ...mockApp },
+							{ ...mockApp, slug: "bypass-app-slug" },
+						],
+						teams: [{ ...mockTeam, slug: "bypass-team-slug" }],
+						users: [{ ...mockUser, login: "bypass-user-login" }],
+					},
 					dismiss_stale_reviews: true,
+					dismissal_restrictions: {
+						apps: [{ ...mockApp, slug: "dismissal-app-slug" }],
+						teams: [{ ...mockTeam, slug: "dismissal-team-slug" }],
+						teams_url: "dismissal-teams-url",
+						url: "dismissal-url",
+						users: [{ ...mockUser, login: "dismissal-user-login" }],
+						users_url: "dismissal-users-url",
+					},
 					require_code_owner_reviews: true,
 					required_approving_review_count: 1,
 				},
@@ -136,7 +211,29 @@ describe("recreateProtections", () => {
 			      "required_conversation_resolution": true,
 			      "required_linear_history": true,
 			      "required_pull_request_reviews": {
+			        "bypass_pull_request_allowances": {
+			          "apps": [
+			            "bypass-app-slug",
+			          ],
+			          "teams": [
+			            "bypass-team-slug",
+			          ],
+			          "users": [
+			            "bypass-user-login",
+			          ],
+			        },
 			        "dismiss_stale_reviews": true,
+			        "dismissal_restrictions": {
+			          "apps": [
+			            "dismissal-app-slug",
+			          ],
+			          "teams": [
+			            "dismissal-team-slug",
+			          ],
+			          "users": [
+			            "dismissal-user-login",
+			          ],
+			        },
 			        "require_code_owner_reviews": true,
 			        "required_approving_review_count": 1,
 			      },
