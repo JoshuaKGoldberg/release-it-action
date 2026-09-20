@@ -138,10 +138,10 @@ describe("releaseItAction", () => {
 		expect(mockRunBypassingBranchProtections).toHaveBeenCalled();
 	});
 
-	it("logs an info message, does not set authToken, and passes --no-npm.publish when npmPublish is false", async () => {
+	it("logs an info message, does not set authToken, and passes --no-npm.publish when skipNpmPublish is true", async () => {
 		mockShouldSemanticRelease.mockResolvedValueOnce(true);
 
-		await releaseItAction({ ...mockOptions, npmPublish: false });
+		await releaseItAction({ ...mockOptions, skipNpmPublish: true });
 
 		expect(mock$$.mock.calls).toMatchInlineSnapshot(`
 			[
@@ -162,7 +162,7 @@ describe("releaseItAction", () => {
 			]
 		`);
 		expect(mockCore.info).toHaveBeenCalledWith(
-			"npmPublish is false. Skipping npm publish.",
+			"skipNpmPublish is true. Skipping npm publish.",
 		);
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
 			`--no-npm.publish ${mockReleaseItArgs}`,

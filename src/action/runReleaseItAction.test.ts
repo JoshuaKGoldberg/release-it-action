@@ -44,7 +44,7 @@ const mockContext = {
 
 describe("runReleaseItAction", () => {
 	beforeEach(() => {
-		mockGetBooleanInput.mockReturnValue(true);
+		mockGetBooleanInput.mockReturnValue(false);
 		mockGetOptionalTokenInput.mockReturnValue("mock-npm-token");
 	});
 
@@ -62,25 +62,25 @@ describe("runReleaseItAction", () => {
 			      "gitUserEmail": "undefined@users.noreply.github.com",
 			      "gitUserName": undefined,
 			      "githubToken": "mock-github-token",
-			      "npmPublish": true,
 			      "npmToken": undefined,
 			      "owner": "context-owner",
 			      "releaseItArgs": undefined,
 			      "repo": "context-repo",
+			      "skipNpmPublish": false,
 			    },
 			  ],
 			]
 		`);
 	});
 
-	it("passes npmPublish as false when the npm-publish input is false", async () => {
-		mockGetBooleanInput.mockReturnValue(false);
+	it("passes skipNpmPublish as true when the skip-npm-publish input is true", async () => {
+		mockGetBooleanInput.mockReturnValue(true);
 		mockGetInput.mockReturnValue(undefined);
 
 		await runReleaseItAction(mockContext);
 
 		expect(mockReleaseItAction).toHaveBeenCalledWith(
-			expect.objectContaining({ npmPublish: false }),
+			expect.objectContaining({ skipNpmPublish: true }),
 		);
 	});
 
@@ -97,11 +97,11 @@ describe("runReleaseItAction", () => {
 			      "gitUserEmail": "mock-git-user-email",
 			      "gitUserName": "mock-git-user-name",
 			      "githubToken": "mock-github-token",
-			      "npmPublish": true,
 			      "npmToken": "mock-npm-token",
 			      "owner": "context-owner",
 			      "releaseItArgs": "mock-release-it-args",
 			      "repo": "context-repo",
+			      "skipNpmPublish": false,
 			    },
 			  ],
 			]

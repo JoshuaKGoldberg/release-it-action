@@ -66,9 +66,9 @@ permissions:
 | `git-user-email`            | `string`  | `${<git-user-name>}@users.noreply.github.com` | `git config user.email` value for Git commits.                 |
 | `git-user-name`             | `string`  | `${github.context.actor}`                     | `git config user.name` value for Git commits.                  |
 | `github-token`              | `string`  | `${GITHUB_TOKEN}`                             | GitHub token (PAT) with _repo_ and _workflow_ permissions.     |
-| `npm-publish`               | `boolean` | `true`                                        | Whether to publish to npm (set to `false` to skip publishing). |
 | `npm-token`                 | `string`  | `${NPM_TOKEN}`                                | npm access token with the _automation_ role.                   |
 | `release-it-args`           | `string`  | `""`                                          | Any arbitrary arguments to pass to `npx release-it --verbose`. |
+| `skip-npm-publish`          | `boolean` | `false`                                       | Whether to skip publishing to npm.                             |
 
 ### Node API
 

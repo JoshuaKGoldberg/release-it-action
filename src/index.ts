@@ -12,11 +12,11 @@ export interface ReleaseItActionOptions {
 	githubToken: string;
 	gitUserEmail: string;
 	gitUserName: string;
-	npmPublish?: boolean;
 	npmToken: string | undefined;
 	owner: string;
 	releaseItArgs?: string;
 	repo: string;
+	skipNpmPublish?: boolean;
 }
 
 export async function releaseItAction({
@@ -24,11 +24,11 @@ export async function releaseItAction({
 	githubToken,
 	gitUserEmail,
 	gitUserName,
-	npmPublish = true,
 	npmToken,
 	owner,
 	releaseItArgs,
 	repo,
+	skipNpmPublish = false,
 }: ReleaseItActionOptions) {
 	if (
 		(await tryCatchInfoAction(
@@ -41,8 +41,8 @@ export async function releaseItAction({
 
 	await $$`git config user.email ${gitUserEmail}`;
 	await $$`git config user.name ${gitUserName}`;
-	if (!npmPublish) {
-		core.info("npmPublish is false. Skipping npm publish.");
+	if (skipNpmPublish) {
+		core.info("skipNpmPublish is true. Skipping npm publish.");
 	} else if (npmToken) {
 		await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
 	} else {
@@ -51,7 +51,7 @@ export async function releaseItAction({
 		);
 	}
 
-	const args = [!npmPublish && "--no-npm.publish", releaseItArgs]
+	const args = [skipNpmPublish && "--no-npm.publish", releaseItArgs]
 		.filter(Boolean)
 		.join(" ");
 

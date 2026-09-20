@@ -9,13 +9,13 @@ inputs:
     description: "`git config user.name` value for Git commits."
   github-token:
     description: GitHub token (PAT) with repo and workflow permissions.
-  npm-publish:
-    default: "true"
-    description: Whether to publish to npm (set to `false` to skip publishing).
   npm-token:
     description: npm access token with the automation role.
   release-it-args:
     description: Any arbitrary arguments to pass to `npx release-it --verbose`.
+  skip-npm-publish:
+    default: "false"
+    description: Whether to skip publishing to npm.
 name: release-it Action
 runs:
   main: dist/index.js
