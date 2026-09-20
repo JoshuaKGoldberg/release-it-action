@@ -9,6 +9,15 @@ export interface RecreateProtectionsOptions {
 	octokit: Octokit;
 }
 
+type ExistingPullRequestReviews = NonNullable<
+	ExistingProtections["required_pull_request_reviews"]
+>;
+
+type ExistingReviewRestrictions = NonNullable<
+	| ExistingPullRequestReviews["bypass_pull_request_allowances"]
+	| ExistingPullRequestReviews["dismissal_restrictions"]
+>;
+
 export async function recreateProtections({
 	commonRequestData,
 	existingProtections,
@@ -38,35 +47,17 @@ export async function recreateProtections({
 					required_pull_request_reviews:
 						existingProtections.required_pull_request_reviews
 							? {
-									// TODO: https://github.com/JoshuaKGoldberg/release-it-action/issues/13
-									// bypass_pull_request_allowances: {
-									// 	apps: currentBranchProtections.data.required_pull_request_reviews
-									// 		.bypass_pull_request_allowances?.apps,
-									// 	teams:
-									// 		currentBranchProtections.data.required_pull_request_reviews
-									// 			.bypass_pull_request_allowances?.teams,
-									// 	users:
-									// 		currentBranchProtections.data.required_pull_request_reviews
-									// 			.bypass_pull_request_allowances?.users,
-									// },
+									bypass_pull_request_allowances: mapReviewRestrictions(
+										existingProtections.required_pull_request_reviews
+											.bypass_pull_request_allowances,
+									),
 									dismiss_stale_reviews:
 										existingProtections.required_pull_request_reviews
 											.dismiss_stale_reviews,
-									// TODO: https://github.com/JoshuaKGoldberg/release-it-action/issues/14
-									// dismissal_restrictions: {
-									// 	apps: currentBranchProtections.data.required_pull_request_reviews.dismissal_restrictions?.apps?.map(
-									// 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-									// 		(app) => app.slug!,
-									// 	),
-									// 	teams:
-									// 		currentBranchProtections.data.required_pull_request_reviews.dismissal_restrictions?.teams?.map(
-									// 			(team) => team.slug,
-									// 		),
-									// 	users:
-									// 		currentBranchProtections.data.required_pull_request_reviews.dismissal_restrictions?.users?.map(
-									// 			(user) => user.login,
-									// 		),
-									// },
+									dismissal_restrictions: mapReviewRestrictions(
+										existingProtections.required_pull_request_reviews
+											.dismissal_restrictions,
+									),
 									require_code_owner_reviews:
 										existingProtections.required_pull_request_reviews
 											.require_code_owner_reviews,
@@ -108,4 +99,25 @@ export async function recreateProtections({
 				},
 			),
 	);
+}
+
+/**
+ * Converts the users, teams, and apps returned by the GET protection API into
+ * the logins and slugs expected by the PUT protection API.
+ * Returns undefined when the setting wasn't present, so it stays omitted.
+ */
+function mapReviewRestrictions(
+	restrictions: ExistingReviewRestrictions | undefined,
+) {
+	if (!restrictions) {
+		return undefined;
+	}
+
+	return {
+		apps: restrictions.apps
+			?.map((app) => app?.slug)
+			.filter((slug) => slug !== undefined),
+		teams: restrictions.teams?.map((team) => team.slug),
+		users: restrictions.users?.map((user) => user.login),
+	};
 }
