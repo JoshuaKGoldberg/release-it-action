@@ -32709,7 +32709,7 @@ function wrappy (fn, cb) {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(4903);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(9765);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(7570);
 
 
 await (0,_runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__/* .runReleaseItAction */ .k)(_actions_github__WEBPACK_IMPORTED_MODULE_0__.context);
@@ -32719,7 +32719,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 9765:
+/***/ 7570:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -42635,6 +42635,87 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
     });
 }
 
+;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
+
+
+async function fetchRulesets({ octokit, requestData, }) {
+    const rules = await tryCatchInfoAction(`fetching existing branch rules for ${requestData.branch}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rules/branches/{branch}", requestData)).data);
+    if (!rules) {
+        return undefined;
+    }
+    const rulesetIds = new Set();
+    for (const rule of rules) {
+        if (rule.ruleset_id === undefined) {
+            continue;
+        }
+        // Only repository rulesets can be updated with a repository-scoped token.
+        if (rule.ruleset_source_type === "Repository") {
+            rulesetIds.add(rule.ruleset_id);
+        }
+        else {
+            core.info(`Skipping ${rule.ruleset_source_type ?? "unknown"} ruleset ${rule.ruleset_id.toString()} (${rule.ruleset_source ?? "unknown source"}): only repository rulesets can be bypassed.`);
+        }
+    }
+    const rulesets = [];
+    for (const rulesetId of rulesetIds) {
+        const ruleset = await tryCatchInfoAction(`fetching existing ruleset ${rulesetId.toString()}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+            ...requestData,
+            ruleset_id: rulesetId,
+        })).data);
+        if (ruleset) {
+            rulesets.push(ruleset);
+        }
+    }
+    return rulesets;
+}
+
+;// CONCATENATED MODULE: ./src/steps/updateRulesetsEnforcement.ts
+
+
+async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, }) {
+    if (!existingRulesets?.length) {
+        core.info("No existing repository rulesets found to update.");
+        return;
+    }
+    for (const existingRuleset of existingRulesets) {
+        const nextEnforcement = enforcement(existingRuleset);
+        await tryCatchInfoAction(`setting ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`, async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+            ...commonRequestData,
+            enforcement: nextEnforcement,
+            ruleset_id: existingRuleset.id,
+        }));
+    }
+}
+
+;// CONCATENATED MODULE: ./src/runBypassingBranchRulesets.ts
+
+
+async function runBypassingBranchRulesets(commonData, octokit, run) {
+    const commonRequestData = {
+        ...commonData,
+        headers: {
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    };
+    const existingRulesets = await fetchRulesets({
+        octokit,
+        requestData: commonRequestData,
+    });
+    await updateRulesetsEnforcement({
+        commonRequestData,
+        enforcement: () => "disabled",
+        existingRulesets,
+        octokit,
+    });
+    await run();
+    await updateRulesetsEnforcement({
+        commonRequestData,
+        enforcement: (ruleset) => ruleset.enforcement,
+        existingRulesets,
+        octokit,
+    });
+}
+
 ;// CONCATENATED MODULE: ./src/steps/runReleaseIt.ts
 
 
@@ -42665,7 +42746,8 @@ async function runReleaseIt(releaseItArgs) {
 
 
 
-async function releaseItAction({ bypassBranchProtections, githubToken, gitUserEmail, gitUserName, npmToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
+
+async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, githubToken, gitUserEmail, gitUserName, npmToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
     if ((await tryCatchInfoAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true }))) === false) {
         return;
     }
@@ -42683,14 +42765,23 @@ async function releaseItAction({ bypassBranchProtections, githubToken, gitUserEm
     const args = [skipNpmPublish && "--no-npm.publish", releaseItArgs]
         .filter(Boolean)
         .join(" ");
-    const run = async () => {
+    const runReleaseItWithArgs = async () => {
         await runReleaseIt(args);
     };
+    if (!bypassBranchProtections && !bypassBranchRulesets) {
+        await runReleaseItWithArgs();
+        return;
+    }
+    const octokit = github.getOctokit(githubToken);
+    const run = bypassBranchRulesets
+        ? async () => {
+            await runBypassingBranchRulesets({ branch: bypassBranchRulesets, owner, repo }, octokit, runReleaseItWithArgs);
+        }
+        : runReleaseItWithArgs;
     if (!bypassBranchProtections) {
         await run();
         return;
     }
-    const octokit = github.getOctokit(githubToken);
     await runBypassingBranchProtections({ branch: bypassBranchProtections, owner, repo }, octokit, run);
 }
 
@@ -42702,6 +42793,7 @@ async function runReleaseItAction(context) {
     const gitUserName = core.getInput("git-user-name") || context.actor;
     await releaseItAction({
         bypassBranchProtections: core.getInput("bypass-branch-protections"),
+        bypassBranchRulesets: core.getInput("bypass-branch-rulesets"),
         githubToken: getRequiredTokenInput("github-token", "GITHUB_TOKEN"),
         gitUserEmail: core.getInput("git-user-email") ||
             `${gitUserName}@users.noreply.github.com`,

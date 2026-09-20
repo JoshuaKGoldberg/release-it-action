@@ -63,6 +63,7 @@ permissions:
 | Key                         | Type      | Default                                       | Description                                                    |
 | --------------------------- | --------- | --------------------------------------------- | -------------------------------------------------------------- |
 | `bypass-branch-protections` | `string`  | _(none)_                                      | A branch to delete and recreate branch protections on.         |
+| `bypass-branch-rulesets`    | `string`  | _(none)_                                      | A branch to temporarily disable repository rulesets on.        |
 | `git-user-email`            | `string`  | `${<git-user-name>}@users.noreply.github.com` | `git config user.email` value for Git commits.                 |
 | `git-user-name`             | `string`  | `${github.context.actor}`                     | `git config user.name` value for Git commits.                  |
 | `github-token`              | `string`  | `${GITHUB_TOKEN}`                             | GitHub token (PAT) with _repo_ and _workflow_ permissions.     |
@@ -121,6 +122,16 @@ See:
 
 - [#13](https://github.com/JoshuaKGoldberg/release-it-action/issues/13) for supporting bypassing PR allowances
 - [#14](https://github.com/JoshuaKGoldberg/release-it-action/issues/14) for supporting dismissal restrictions
+
+### Why is there an option to bypass branch rulesets?
+
+**The `bypass-branch-rulesets` option is not recommended.**
+
+Repository [rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets) can natively allow specific actors to bypass them.
+It's recommended to instead add the user or app behind your `github-token` to the ruleset's bypass list.
+
+If that isn't possible, `bypass-branch-rulesets` will find each repository ruleset that applies to the branch, set its enforcement to `disabled`, run `release-it`, and then restore each ruleset's original enforcement.
+Only repository-level rulesets are changed: organization-level rulesets are logged and left as-is.
 
 ## Development
 

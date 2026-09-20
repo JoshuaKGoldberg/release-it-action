@@ -27,6 +27,14 @@ vi.mock("./runBypassingBranchProtections.js", () => ({
 	},
 }));
 
+const mockRunBypassingBranchRulesets = vi.fn();
+
+vi.mock("./runBypassingBranchRulesets.js", () => ({
+	get runBypassingBranchRulesets() {
+		return mockRunBypassingBranchRulesets;
+	},
+}));
+
 const mockRunReleaseIt = vi.fn();
 
 vi.mock("./steps/runReleaseIt.js", () => ({
@@ -99,6 +107,7 @@ describe("releaseItAction", () => {
 			]
 		`);
 		expect(mockRunBypassingBranchProtections).not.toHaveBeenCalled();
+		expect(mockRunBypassingBranchRulesets).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(mockReleaseItArgs);
 	});
 
@@ -136,6 +145,60 @@ describe("releaseItAction", () => {
 			]
 		`);
 		expect(mockRunBypassingBranchProtections).toHaveBeenCalled();
+	});
+
+	it("runs bypassing branch rulesets when shouldSemanticRelease returns true and bypassBranchRulesets is a string", async () => {
+		mockShouldSemanticRelease.mockResolvedValueOnce(true);
+		mockRunBypassingBranchRulesets.mockImplementationOnce(
+			async (_: unknown, __: unknown, run: () => Promise<void>) => {
+				await run();
+			},
+		);
+
+		await releaseItAction({
+			...mockOptions,
+			bypassBranchRulesets: "example-branch",
+		});
+
+		expect(mockRunBypassingBranchProtections).not.toHaveBeenCalled();
+		expect(mockRunBypassingBranchRulesets).toHaveBeenCalledWith(
+			{ branch: "example-branch", owner: "mock-owner", repo: "mock-repo" },
+			expect.anything(),
+			expect.any(Function),
+		);
+		expect(mockRunReleaseIt).toHaveBeenCalledWith(mockReleaseItArgs);
+	});
+
+	it("runs bypassing branch rulesets inside bypassing branch protections when both are strings", async () => {
+		mockShouldSemanticRelease.mockResolvedValueOnce(true);
+		mockRunBypassingBranchProtections.mockImplementationOnce(
+			async (_: unknown, __: unknown, run: () => Promise<void>) => {
+				await run();
+			},
+		);
+		mockRunBypassingBranchRulesets.mockImplementationOnce(
+			async (_: unknown, __: unknown, run: () => Promise<void>) => {
+				await run();
+			},
+		);
+
+		await releaseItAction({
+			...mockOptions,
+			bypassBranchProtections: "protections-branch",
+			bypassBranchRulesets: "rulesets-branch",
+		});
+
+		expect(mockRunBypassingBranchProtections).toHaveBeenCalledWith(
+			{ branch: "protections-branch", owner: "mock-owner", repo: "mock-repo" },
+			expect.anything(),
+			expect.any(Function),
+		);
+		expect(mockRunBypassingBranchRulesets).toHaveBeenCalledWith(
+			{ branch: "rulesets-branch", owner: "mock-owner", repo: "mock-repo" },
+			expect.anything(),
+			expect.any(Function),
+		);
+		expect(mockRunReleaseIt).toHaveBeenCalledWith(mockReleaseItArgs);
 	});
 
 	it("logs an info message, does not set authToken, and passes --no-npm.publish when skipNpmPublish is true", async () => {
