@@ -13,6 +13,9 @@ inputs:
     description: npm access token with the automation role.
   release-it-args:
     description: Any arbitrary arguments to pass to `npx release-it --verbose`.
+  skip-npm-publish:
+    default: "false"
+    description: Whether to skip publishing to npm.
 name: release-it Action
 runs:
   main: dist/index.js

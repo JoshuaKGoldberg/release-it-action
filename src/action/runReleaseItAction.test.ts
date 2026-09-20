@@ -6,10 +6,13 @@ import { runReleaseItAction } from "./runReleaseItAction.js";
 
 process.env.GITHUB_REPOSITORY = "mock-github-repository";
 
+const mockGetBooleanInput = vi.fn();
 const mockGetInput = vi.fn();
 
 vi.mock("@actions/core", () => ({
-	getBooleanInput: () => false,
+	get getBooleanInput() {
+		return mockGetBooleanInput;
+	},
 	get getInput() {
 		return mockGetInput;
 	},
@@ -41,6 +44,7 @@ const mockContext = {
 
 describe("runReleaseItAction", () => {
 	beforeEach(() => {
+		mockGetBooleanInput.mockReturnValue(false);
 		mockGetOptionalTokenInput.mockReturnValue("mock-npm-token");
 	});
 
@@ -62,10 +66,22 @@ describe("runReleaseItAction", () => {
 			      "owner": "context-owner",
 			      "releaseItArgs": undefined,
 			      "repo": "context-repo",
+			      "skipNpmPublish": false,
 			    },
 			  ],
 			]
 		`);
+	});
+
+	it("passes skipNpmPublish as true when the skip-npm-publish input is true", async () => {
+		mockGetBooleanInput.mockReturnValue(true);
+		mockGetInput.mockReturnValue(undefined);
+
+		await runReleaseItAction(mockContext);
+
+		expect(mockReleaseItAction).toHaveBeenCalledWith(
+			expect.objectContaining({ skipNpmPublish: true }),
+		);
 	});
 
 	it("runs when all optional core inputs are required", async () => {
@@ -85,6 +101,7 @@ describe("runReleaseItAction", () => {
 			      "owner": "context-owner",
 			      "releaseItArgs": "mock-release-it-args",
 			      "repo": "context-repo",
+			      "skipNpmPublish": false,
 			    },
 			  ],
 			]

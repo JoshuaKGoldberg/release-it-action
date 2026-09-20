@@ -21,5 +21,6 @@ export async function runReleaseItAction(context: typeof github.context) {
 		owner: context.repo.owner,
 		releaseItArgs: core.getInput("release-it-args"),
 		repo: context.repo.repo,
+		skipNpmPublish: core.getBooleanInput("skip-npm-publish"),
 	});
 }

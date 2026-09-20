@@ -16,6 +16,7 @@ export interface ReleaseItActionOptions {
 	owner: string;
 	releaseItArgs?: string;
 	repo: string;
+	skipNpmPublish?: boolean;
 }
 
 export async function releaseItAction({
@@ -27,6 +28,7 @@ export async function releaseItAction({
 	owner,
 	releaseItArgs,
 	repo,
+	skipNpmPublish = false,
 }: ReleaseItActionOptions) {
 	if (
 		(await tryCatchInfoAction(
@@ -39,7 +41,9 @@ export async function releaseItAction({
 
 	await $$`git config user.email ${gitUserEmail}`;
 	await $$`git config user.name ${gitUserName}`;
-	if (npmToken) {
+	if (skipNpmPublish) {
+		core.info("skipNpmPublish is true. Skipping npm publish.");
+	} else if (npmToken) {
 		await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
 	} else {
 		core.info(
@@ -47,8 +51,12 @@ export async function releaseItAction({
 		);
 	}
 
+	const args = [skipNpmPublish && "--no-npm.publish", releaseItArgs]
+		.filter(Boolean)
+		.join(" ");
+
 	const run = async () => {
-		await runReleaseIt(releaseItArgs);
+		await runReleaseIt(args);
 	};
 
 	if (!bypassBranchProtections) {

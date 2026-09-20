@@ -7,5 +7,6 @@ export interface ReleaseItActionOptions {
     owner: string;
     releaseItArgs?: string;
     repo: string;
+    skipNpmPublish?: boolean;
 }
-export declare function releaseItAction({ bypassBranchProtections, githubToken, gitUserEmail, gitUserName, npmToken, owner, releaseItArgs, repo, }: ReleaseItActionOptions): Promise<void>;
+export declare function releaseItAction({ bypassBranchProtections, githubToken, gitUserEmail, gitUserName, npmToken, owner, releaseItArgs, repo, skipNpmPublish, }: ReleaseItActionOptions): Promise<void>;

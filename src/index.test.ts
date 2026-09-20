@@ -138,6 +138,37 @@ describe("releaseItAction", () => {
 		expect(mockRunBypassingBranchProtections).toHaveBeenCalled();
 	});
 
+	it("logs an info message, does not set authToken, and passes --no-npm.publish when skipNpmPublish is true", async () => {
+		mockShouldSemanticRelease.mockResolvedValueOnce(true);
+
+		await releaseItAction({ ...mockOptions, skipNpmPublish: true });
+
+		expect(mock$$.mock.calls).toMatchInlineSnapshot(`
+			[
+			  [
+			    [
+			      "git config user.email ",
+			      "",
+			    ],
+			    "mock-gitUserEmail",
+			  ],
+			  [
+			    [
+			      "git config user.name ",
+			      "",
+			    ],
+			    "mock-gitUserName",
+			  ],
+			]
+		`);
+		expect(mockCore.info).toHaveBeenCalledWith(
+			"skipNpmPublish is true. Skipping npm publish.",
+		);
+		expect(mockRunReleaseIt).toHaveBeenCalledWith(
+			`--no-npm.publish ${mockReleaseItArgs}`,
+		);
+	});
+
 	it("should log an info message and not set authToken if no npm token was provided", async () => {
 		mockShouldSemanticRelease.mockResolvedValueOnce(true);
 
