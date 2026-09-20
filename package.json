@@ -45,7 +45,7 @@
 		"@release-it/conventional-changelog": "10.0.1",
 		"@types/eslint-plugin-markdown": "2.0.2",
 		"@types/node": "24.10.0",
-		"@vercel/ncc": "0.38.4",
+		"@vercel/ncc": "0.45.0",
 		"@vitest/coverage-v8": "4.0.8",
 		"@vitest/eslint-plugin": "1.6.1",
 		"console-fail-test": "0.6.0",
