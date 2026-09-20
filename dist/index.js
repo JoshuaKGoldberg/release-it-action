@@ -42594,11 +42594,6 @@ async function recreateProtections({ commonRequestData, existingProtections, oct
             : null,
     }));
 }
-/**
- * Converts the users, teams, and apps returned by the GET protection API into
- * the logins and slugs expected by the PUT protection API.
- * Returns undefined when the setting wasn't present, so it stays omitted.
- */
 function mapReviewRestrictions(restrictions) {
     if (!restrictions) {
         return undefined;

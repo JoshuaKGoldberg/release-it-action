@@ -101,11 +101,6 @@ export async function recreateProtections({
 	);
 }
 
-/**
- * Converts the users, teams, and apps returned by the GET protection API into
- * the logins and slugs expected by the PUT protection API.
- * Returns undefined when the setting wasn't present, so it stays omitted.
- */
 function mapReviewRestrictions(
 	restrictions: ExistingReviewRestrictions | undefined,
 ) {
