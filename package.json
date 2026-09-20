@@ -39,7 +39,7 @@
 		"execa": "^9.6.0"
 	},
 	"devDependencies": {
-		"@eslint-community/eslint-plugin-eslint-comments": "4.5.0",
+		"@eslint-community/eslint-plugin-eslint-comments": "4.8.1",
 		"@eslint/js": "9.39.1",
 		"@octokit/types": "16.0.0",
 		"@release-it/conventional-changelog": "10.0.1",
