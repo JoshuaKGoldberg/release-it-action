@@ -18,8 +18,8 @@ importers:
         specifier: ^24.10.0
         version: 24.10.0
       execa:
-        specifier: ^9.6.0
-        version: 9.6.1
+        specifier: ^10.0.0
+        version: 10.0.1
     devDependencies:
       '@eslint-community/eslint-plugin-eslint-comments':
         specifier: 4.8.1
