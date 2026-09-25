@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.1](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.0...v0.5.1) (2026-09-25)
+
+### Bug Fixes
+
+- **deps:** update dependency @actions/core to v3 ([#817](https://github.com/JoshuaKGoldberg/release-it-action/issues/817)) ([d86070c](https://github.com/JoshuaKGoldberg/release-it-action/commit/d86070cb0714c9bd1a38227138c1b89e7ae1eaf8)), closes [#8203](https://github.com/JoshuaKGoldberg/release-it-action/issues/8203)
+
 # [0.5.0](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.4.0...v0.5.0) (2026-09-20)
 
 ### Bug Fixes
