@@ -44109,10 +44109,6 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
 ;// CONCATENATED MODULE: ./src/steps/checkSuperseded.ts
 
 const $quiet = $({ reject: false });
-async function getHeadSha() {
-    const { exitCode, stdout } = await $quiet `git rev-parse HEAD`;
-    return exitCode ? undefined : stdout;
-}
 async function checkSuperseded(startSha) {
     const branch = await $quiet `git rev-parse --abbrev-ref HEAD`;
     if (branch.exitCode || branch.stdout === "HEAD") {
@@ -44133,6 +44129,10 @@ async function checkSuperseded(startSha) {
     }
     const isAncestor = await $quiet `git merge-base --is-ancestor ${localSha} ${remoteSha}`;
     return isAncestor.exitCode !== 0;
+}
+async function getHeadSha() {
+    const { exitCode, stdout } = await $quiet `git rev-parse HEAD`;
+    return exitCode ? undefined : stdout;
 }
 
 ;// CONCATENATED MODULE: ./src/steps/runReleaseIt.ts

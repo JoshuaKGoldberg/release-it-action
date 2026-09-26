@@ -2,11 +2,6 @@ import { $ } from "execa";
 
 const $quiet = $({ reject: false });
 
-export async function getHeadSha() {
-	const { exitCode, stdout } = await $quiet`git rev-parse HEAD`;
-	return exitCode ? undefined : stdout;
-}
-
 export async function checkSuperseded(startSha: string) {
 	const branch = await $quiet`git rev-parse --abbrev-ref HEAD`;
 	if (branch.exitCode || branch.stdout === "HEAD") {
@@ -32,4 +27,9 @@ export async function checkSuperseded(startSha: string) {
 	const isAncestor =
 		await $quiet`git merge-base --is-ancestor ${localSha} ${remoteSha}`;
 	return isAncestor.exitCode !== 0;
+}
+
+export async function getHeadSha() {
+	const { exitCode, stdout } = await $quiet`git rev-parse HEAD`;
+	return exitCode ? undefined : stdout;
 }
