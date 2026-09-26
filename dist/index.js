@@ -44113,9 +44113,6 @@ async function getHeadSha() {
     const { exitCode, stdout } = await $quiet `git rev-parse HEAD`;
     return exitCode ? undefined : stdout;
 }
-// A run is superseded when its branch moved past the commit it started from
-// without including this run's release commit. Whatever moved the branch was
-// itself a push, so its own release run is queued and will release everything.
 async function checkSuperseded(startSha) {
     const branch = await $quiet `git rev-parse --abbrev-ref HEAD`;
     if (branch.exitCode || branch.stdout === "HEAD") {
