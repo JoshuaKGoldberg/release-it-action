@@ -35,6 +35,22 @@ vi.mock("./runBypassingBranchRulesets.js", () => ({
 	},
 }));
 
+const mockGetUnpublishedVersion = vi.fn();
+
+vi.mock("./steps/getUnpublishedVersion.js", () => ({
+	get getUnpublishedVersion() {
+		return mockGetUnpublishedVersion;
+	},
+}));
+
+const mockHasGitHubRelease = vi.fn();
+
+vi.mock("./steps/hasGitHubRelease.js", () => ({
+	get hasGitHubRelease() {
+		return mockHasGitHubRelease;
+	},
+}));
+
 const mockRunReleaseIt = vi.fn();
 
 vi.mock("./steps/runReleaseIt.js", () => ({
@@ -51,6 +67,7 @@ vi.mock("./tryCatchInfoAction.js", () => ({
 
 vi.mock("@actions/core", () => ({
 	info: vi.fn(),
+	setFailed: vi.fn(),
 }));
 const mockCore = vi.mocked(core);
 
@@ -67,13 +84,71 @@ const mockOptions = {
 } satisfies ReleaseItActionOptions;
 
 describe("releaseItAction", () => {
-	it("does nothing when shouldSemanticRelease returns false", async () => {
+	it("does not run release-it when shouldSemanticRelease returns false", async () => {
 		mockShouldSemanticRelease.mockResolvedValueOnce(false);
 
 		await releaseItAction(mockOptions);
 
-		expect(mock$$).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
+	});
+
+	it("fails without releasing when an older tagged version was never published", async () => {
+		mockGetUnpublishedVersion.mockResolvedValueOnce({
+			headTag: undefined,
+			version: "1.2.3",
+		});
+
+		await releaseItAction(mockOptions);
+
+		expect(mockCore.setFailed).toHaveBeenCalledWith(
+			"Version 1.2.3 was tagged but never published to npm. Publish it before releasing a newer version.",
+		);
+		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
+	});
+
+	it("publishes a version tagged at HEAD that was never published, without recreating its GitHub release", async () => {
+		mockGetUnpublishedVersion.mockResolvedValueOnce({
+			headTag: "v1.2.3",
+			version: "1.2.3",
+		});
+		mockHasGitHubRelease.mockResolvedValueOnce(true);
+
+		await releaseItAction(mockOptions);
+
+		expect(mockHasGitHubRelease).toHaveBeenCalledWith(
+			expect.objectContaining({
+				owner: "mock-owner",
+				repo: "mock-repo",
+				tag: "v1.2.3",
+			}),
+		);
+		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
+		expect(mockRunReleaseIt).toHaveBeenCalledWith(
+			"--no-increment --no-git --npm.publish --no-github.release",
+		);
+	});
+
+	it("publishes a version tagged at HEAD that was never published and creates its missing GitHub release", async () => {
+		mockGetUnpublishedVersion.mockResolvedValueOnce({
+			headTag: "v1.2.3",
+			version: "1.2.3",
+		});
+		mockHasGitHubRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		expect(mockRunReleaseIt).toHaveBeenCalledWith(
+			"--no-increment --no-git --npm.publish",
+		);
+	});
+
+	it("does not check for an unpublished version when skipNpmPublish is true", async () => {
+		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction({ ...mockOptions, skipNpmPublish: true });
+
+		expect(mockGetUnpublishedVersion).not.toHaveBeenCalled();
 	});
 
 	it("runs without bypassing branch protections when shouldSemanticRelease returns true and bypassBranchProtections is undefined", async () => {
