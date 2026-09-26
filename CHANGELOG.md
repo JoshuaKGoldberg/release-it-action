@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.2](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.1...v0.5.2) (2026-09-25)
+
+### Bug Fixes
+
+- **deps:** update dependency @actions/github to v9 ([#818](https://github.com/JoshuaKGoldberg/release-it-action/issues/818)) ([68f147c](https://github.com/JoshuaKGoldberg/release-it-action/commit/68f147ced55e1699dcc3dde09073db96e7047b2c)), closes [#8203](https://github.com/JoshuaKGoldberg/release-it-action/issues/8203)
+
 ## [0.5.1](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.0...v0.5.1) (2026-09-25)
 
 ### Bug Fixes
