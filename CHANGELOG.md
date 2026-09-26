@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.4](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.3...v0.5.4) (2026-09-26)
+
+### Bug Fixes
+
+- push release commits before publishing to npm ([#824](https://github.com/JoshuaKGoldberg/release-it-action/issues/824)) ([a1a2282](https://github.com/JoshuaKGoldberg/release-it-action/commit/a1a2282261232ad4f6b4777a8465c6631b98a5ea)), closes [JoshuaKGoldberg/create-typescript-app#2483](https://github.com/JoshuaKGoldberg/create-typescript-app/issues/2483) [#822](https://github.com/JoshuaKGoldberg/release-it-action/issues/822) [#823](https://github.com/JoshuaKGoldberg/release-it-action/issues/823)
+
 ## [0.5.3](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.2...v0.5.3) (2026-09-26)
 
 ### Bug Fixes
