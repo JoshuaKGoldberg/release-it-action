@@ -3,11 +3,15 @@ import { describe, expect, it, vi } from "vitest";
 import { runReleaseIt } from "./runReleaseIt.js";
 
 const mockError = vi.fn();
+const mockInfo = vi.fn();
 const mockSetFailed = vi.fn();
 
 vi.mock("@actions/core", () => ({
 	get error() {
 		return mockError;
+	},
+	get info() {
+		return mockInfo;
 	},
 	get setFailed() {
 		return mockSetFailed;
@@ -19,6 +23,18 @@ const mock$$ = vi.fn();
 vi.mock("../execa.js", () => ({
 	get $$() {
 		return mock$$;
+	},
+}));
+
+const mockCheckSuperseded = vi.fn();
+const mockGetHeadSha = vi.fn();
+
+vi.mock("./checkSuperseded.js", () => ({
+	get checkSuperseded() {
+		return mockCheckSuperseded;
+	},
+	get getHeadSha() {
+		return mockGetHeadSha;
 	},
 }));
 
@@ -90,6 +106,46 @@ describe("runReleaseIt", () => {
 			  ],
 			]
 		`);
+	});
+
+	it("logs info instead of an error if release-it fails and the branch was superseded", async () => {
+		mock$$.mockResolvedValue({ exitCode: 1 });
+		mockGetHeadSha.mockResolvedValue("start-sha");
+		mockCheckSuperseded.mockResolvedValue(true);
+
+		await runReleaseIt();
+
+		expect(mockCheckSuperseded).toHaveBeenCalledWith("start-sha");
+		expect(mockInfo.mock.calls).toMatchInlineSnapshot(`
+			[
+			  [
+			    "release-it failed, but the branch has moved past start-sha. A newer release run will handle releasing: Error: Exit code 1.",
+			  ],
+			]
+		`);
+		expect(mockError).not.toHaveBeenCalled();
+		expect(mockSetFailed).not.toHaveBeenCalled();
+	});
+
+	it("logs an error if release-it fails and the branch was not superseded", async () => {
+		mock$$.mockResolvedValue({ exitCode: 1 });
+		mockGetHeadSha.mockResolvedValue("start-sha");
+		mockCheckSuperseded.mockResolvedValue(false);
+
+		await runReleaseIt();
+
+		expect(mockError).toHaveBeenCalled();
+		expect(mockSetFailed).toHaveBeenCalled();
+	});
+
+	it("logs an error without checking for superseding if the starting sha is unknown", async () => {
+		mock$$.mockResolvedValue({ exitCode: 1 });
+		mockGetHeadSha.mockResolvedValue(undefined);
+
+		await runReleaseIt();
+
+		expect(mockCheckSuperseded).not.toHaveBeenCalled();
+		expect(mockSetFailed).toHaveBeenCalled();
 	});
 
 	it("does not log an error if running release-it runs smoothly", async () => {

@@ -30291,7 +30291,7 @@ module.exports = {
 
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8036);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(8169);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(815);
 
 
 await (0,_runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__/* .runReleaseItAction */ .k)(_actions_github__WEBPACK_IMPORTED_MODULE_0__/* .context */ ._);
@@ -30301,7 +30301,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 8169:
+/***/ 815:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -44106,13 +44106,44 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
     });
 }
 
+;// CONCATENATED MODULE: ./src/steps/checkSuperseded.ts
+
+const $quiet = $({ reject: false });
+async function checkSuperseded(startSha) {
+    const branch = await $quiet `git rev-parse --abbrev-ref HEAD`;
+    if (branch.exitCode || branch.stdout === "HEAD") {
+        return false;
+    }
+    const fetch = await $quiet `git fetch origin ${branch.stdout}`;
+    if (fetch.exitCode) {
+        return false;
+    }
+    const remoteSha = (await $quiet `git rev-parse FETCH_HEAD`).stdout;
+    if (!remoteSha || remoteSha === startSha) {
+        return false;
+    }
+    // release-it resets HEAD back to startSha when it rolls back a failed push.
+    const localSha = await getHeadSha();
+    if (!localSha || localSha === startSha) {
+        return true;
+    }
+    const isAncestor = await $quiet `git merge-base --is-ancestor ${localSha} ${remoteSha}`;
+    return isAncestor.exitCode !== 0;
+}
+async function getHeadSha() {
+    const { exitCode, stdout } = await $quiet `git rev-parse HEAD`;
+    return exitCode ? undefined : stdout;
+}
+
 ;// CONCATENATED MODULE: ./src/steps/runReleaseIt.ts
+
 
 
 
 async function runReleaseIt(releaseItArgs) {
     const args = releaseItArgs ? ` ${releaseItArgs}` : "";
     await tryCatchInfoAction("running release-it", async () => {
+        const startSha = await getHeadSha();
         try {
             const { exitCode, stderr } = await $$ `npx release-it --verbose${args}`;
             /* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/restrict-template-expressions */
@@ -44122,6 +44153,10 @@ async function runReleaseIt(releaseItArgs) {
             /* eslint-enable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/restrict-template-expressions */
         }
         catch (error) {
+            if (startSha && (await checkSuperseded(startSha))) {
+                info(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${error}`);
+                return;
+            }
             core_error(`Error running release-it: ${error}`);
             setFailed(error);
         }
