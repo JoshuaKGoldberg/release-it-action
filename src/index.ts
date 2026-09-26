@@ -5,6 +5,8 @@ import { shouldSemanticRelease } from "should-semantic-release";
 import { $$ } from "./execa.js";
 import { runBypassingBranchProtections } from "./runBypassingBranchProtections.js";
 import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
+import { getUnpublishedVersion } from "./steps/getUnpublishedVersion.js";
+import { hasGitHubRelease } from "./steps/hasGitHubRelease.js";
 import { runReleaseIt } from "./steps/runReleaseIt.js";
 import { tryCatchInfoAction } from "./tryCatchInfoAction.js";
 
@@ -33,15 +35,6 @@ export async function releaseItAction({
 	repo,
 	skipNpmPublish = false,
 }: ReleaseItActionOptions) {
-	if (
-		(await tryCatchInfoAction(
-			"should-semantic-release",
-			async () => await shouldSemanticRelease({ verbose: true }),
-		)) === false
-	) {
-		return;
-	}
-
 	await $$`git config user.email ${gitUserEmail}`;
 	await $$`git config user.name ${gitUserName}`;
 	if (skipNpmPublish) {
@@ -52,6 +45,55 @@ export async function releaseItAction({
 		core.info(
 			"No npm token provided. This is required unless you're using Trusted Publishing.",
 		);
+	}
+
+	const octokit = github.getOctokit(githubToken);
+
+	const unpublishedVersion = skipNpmPublish
+		? undefined
+		: await tryCatchInfoAction(
+				"checking for a version that was pushed but not published",
+				getUnpublishedVersion,
+			);
+
+	if (unpublishedVersion) {
+		const { headTag, version } = unpublishedVersion;
+
+		if (!headTag) {
+			core.setFailed(
+				`Version ${version} was tagged but never published to npm. Publish it before releasing a newer version.`,
+			);
+			return;
+		}
+
+		const hasRelease = await tryCatchInfoAction(
+			`checking for a GitHub release for ${headTag}`,
+			async () =>
+				await hasGitHubRelease({ octokit, owner, repo, tag: headTag }),
+		);
+
+		core.info(
+			`Version ${version} was pushed but never published to npm. Publishing it now.`,
+		);
+
+		await runReleaseIt(
+			[
+				"--no-increment --no-git --npm.publish",
+				hasRelease !== false && "--no-github.release",
+			]
+				.filter(Boolean)
+				.join(" "),
+		);
+		return;
+	}
+
+	if (
+		(await tryCatchInfoAction(
+			"should-semantic-release",
+			async () => await shouldSemanticRelease({ verbose: true }),
+		)) === false
+	) {
+		return;
 	}
 
 	const args = [skipNpmPublish && "--no-npm.publish", releaseItArgs]
@@ -66,8 +108,6 @@ export async function releaseItAction({
 		await runReleaseItWithArgs();
 		return;
 	}
-
-	const octokit = github.getOctokit(githubToken);
 
 	const run = bypassBranchRulesets
 		? async () => {

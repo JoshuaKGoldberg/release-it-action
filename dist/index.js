@@ -30291,7 +30291,7 @@ module.exports = {
 
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8036);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(815);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(3339);
 
 
 await (0,_runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__/* .runReleaseItAction */ .k)(_actions_github__WEBPACK_IMPORTED_MODULE_0__/* .context */ ._);
@@ -30301,7 +30301,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 815:
+/***/ 3339:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -44106,19 +44106,71 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
     });
 }
 
-;// CONCATENATED MODULE: ./src/steps/checkSuperseded.ts
+;// CONCATENATED MODULE: ./src/steps/getUnpublishedVersion.ts
+
 
 const $quiet = $({ reject: false });
+async function getUnpublishedVersion() {
+    const { name, private: isPrivate, publishConfig, version, } = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    if (isPrivate || !name || !version) {
+        return undefined;
+    }
+    const registryArgs = publishConfig?.registry
+        ? ["--registry", publishConfig.registry]
+        : [];
+    const view = await $quiet `npm view ${name}@${version} version --json ${registryArgs}`;
+    if (!view.exitCode) {
+        return undefined;
+    }
+    if (!view.stdout.includes('"E404"')) {
+        throw new Error(`Could not check npm for ${name}@${version}.`);
+    }
+    const tagNames = [version, `v${version}`];
+    const existingTags = (await $quiet `git tag --list ${tagNames}`).stdout
+        .split("\n")
+        .filter(Boolean);
+    // A version that was never tagged was never released, e.g. a new package.
+    if (!existingTags.length) {
+        return undefined;
+    }
+    const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
+    return {
+        headTag: existingTags.find((tag) => headTags.includes(tag)),
+        version,
+    };
+}
+
+;// CONCATENATED MODULE: ./src/steps/hasGitHubRelease.ts
+async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
+    try {
+        await octokit.request("GET /repos/{owner}/{repo}/releases/tags/{tag}", {
+            owner,
+            repo,
+            tag,
+        });
+        return true;
+    }
+    catch (error) {
+        if (error.status === 404) {
+            return false;
+        }
+        throw error;
+    }
+}
+
+;// CONCATENATED MODULE: ./src/steps/checkSuperseded.ts
+
+const checkSuperseded_$quiet = $({ reject: false });
 async function checkSuperseded(startSha) {
-    const branch = await $quiet `git rev-parse --abbrev-ref HEAD`;
+    const branch = await checkSuperseded_$quiet `git rev-parse --abbrev-ref HEAD`;
     if (branch.exitCode || branch.stdout === "HEAD") {
         return false;
     }
-    const fetch = await $quiet `git fetch origin ${branch.stdout}`;
+    const fetch = await checkSuperseded_$quiet `git fetch origin ${branch.stdout}`;
     if (fetch.exitCode) {
         return false;
     }
-    const remoteSha = (await $quiet `git rev-parse FETCH_HEAD`).stdout;
+    const remoteSha = (await checkSuperseded_$quiet `git rev-parse FETCH_HEAD`).stdout;
     if (!remoteSha || remoteSha === startSha) {
         return false;
     }
@@ -44127,11 +44179,11 @@ async function checkSuperseded(startSha) {
     if (!localSha || localSha === startSha) {
         return true;
     }
-    const isAncestor = await $quiet `git merge-base --is-ancestor ${localSha} ${remoteSha}`;
+    const isAncestor = await checkSuperseded_$quiet `git merge-base --is-ancestor ${localSha} ${remoteSha}`;
     return isAncestor.exitCode !== 0;
 }
 async function getHeadSha() {
-    const { exitCode, stdout } = await $quiet `git rev-parse HEAD`;
+    const { exitCode, stdout } = await checkSuperseded_$quiet `git rev-parse HEAD`;
     return exitCode ? undefined : stdout;
 }
 
@@ -44172,10 +44224,9 @@ async function runReleaseIt(releaseItArgs) {
 
 
 
+
+
 async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, githubToken, gitUserEmail, gitUserName, npmToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
-    if ((await tryCatchInfoAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true }))) === false) {
-        return;
-    }
     await $$ `git config user.email ${gitUserEmail}`;
     await $$ `git config user.name ${gitUserName}`;
     if (skipNpmPublish) {
@@ -44187,6 +44238,29 @@ async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, 
     else {
         info("No npm token provided. This is required unless you're using Trusted Publishing.");
     }
+    const octokit = github/* getOctokit */.Q(githubToken);
+    const unpublishedVersion = skipNpmPublish
+        ? undefined
+        : await tryCatchInfoAction("checking for a version that was pushed but not published", getUnpublishedVersion);
+    if (unpublishedVersion) {
+        const { headTag, version } = unpublishedVersion;
+        if (!headTag) {
+            setFailed(`Version ${version} was tagged but never published to npm. Publish it before releasing a newer version.`);
+            return;
+        }
+        const hasRelease = await tryCatchInfoAction(`checking for a GitHub release for ${headTag}`, async () => await hasGitHubRelease({ octokit, owner, repo, tag: headTag }));
+        info(`Version ${version} was pushed but never published to npm. Publishing it now.`);
+        await runReleaseIt([
+            "--no-increment --no-git --npm.publish",
+            hasRelease !== false && "--no-github.release",
+        ]
+            .filter(Boolean)
+            .join(" "));
+        return;
+    }
+    if ((await tryCatchInfoAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true }))) === false) {
+        return;
+    }
     const args = [skipNpmPublish && "--no-npm.publish", releaseItArgs]
         .filter(Boolean)
         .join(" ");
@@ -44197,7 +44271,6 @@ async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, 
         await runReleaseItWithArgs();
         return;
     }
-    const octokit = github/* getOctokit */.Q(githubToken);
     const run = bypassBranchRulesets
         ? async () => {
             await runBypassingBranchRulesets({ branch: bypassBranchRulesets, owner, repo }, octokit, runReleaseItWithArgs);
