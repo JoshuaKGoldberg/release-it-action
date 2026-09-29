@@ -1,5 +1,5 @@
 import * as core from "@actions/core";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { releaseItAction, ReleaseItActionOptions } from "./index.js";
 
@@ -84,6 +84,28 @@ const mockOptions = {
 } satisfies ReleaseItActionOptions;
 
 describe("releaseItAction", () => {
+	afterEach(() => {
+		vi.unstubAllEnvs();
+	});
+
+	it("provides githubToken as GITHUB_TOKEN when the environment variable is not set", async () => {
+		vi.stubEnv("GITHUB_TOKEN", undefined);
+		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		expect(process.env.GITHUB_TOKEN).toBe("mock-githubToken");
+	});
+
+	it("does not overwrite an existing GITHUB_TOKEN environment variable", async () => {
+		vi.stubEnv("GITHUB_TOKEN", "mock-environment-token");
+		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		expect(process.env.GITHUB_TOKEN).toBe("mock-environment-token");
+	});
+
 	it("does not run release-it when shouldSemanticRelease returns false", async () => {
 		mockShouldSemanticRelease.mockResolvedValueOnce(false);
 

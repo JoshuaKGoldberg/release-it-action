@@ -44315,6 +44315,8 @@ async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, 
     else {
         info("No npm token provided. This is required unless you're using Trusted Publishing.");
     }
+    // release-it reads the token from the environment, not from this process.
+    process.env.GITHUB_TOKEN ??= githubToken;
     const octokit = github/* getOctokit */.Q(githubToken);
     const unpublishedVersion = skipNpmPublish
         ? undefined
