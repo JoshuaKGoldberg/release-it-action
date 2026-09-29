@@ -23,8 +23,7 @@
 [`release-it`](https://github.com/release-it/release-it) is a great tool for releasing packages.
 But running it in CI takes more work than `npx release-it`.
 You need to set up Git and npm first.
-You probably don't want a new version for every push.
-Releases can also fail partway through when pushes land close together.
+You probably want safe handling for consecutive branch pushes during your release flow.
 
 This action handles all of that for you.
 
@@ -38,7 +37,7 @@ Each time it runs, the action:
 4. Stops if [`should-semantic-release`](https://github.com/JoshuaKGoldberg/should-semantic-release) says there's nothing to release
 5. Runs `npx release-it --verbose`
 
-If a [newer commit lands during step 5](#what-happens-when-a-newer-commit-lands-during-a-release), the action exits without failing.
+It also adds in safe handling for common corner cases such as npm being slow to recognize new versions.
 
 ## Usage
 
