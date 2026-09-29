@@ -18,15 +18,30 @@
 	<img alt="💪 TypeScript: Strict" src="https://img.shields.io/badge/%F0%9F%92%AA_typescript-strict-21bb42.svg" />
 </p>
 
+## Why?
+
+[`release-it`](https://github.com/release-it/release-it) is a great tool for releasing packages.
+But running it in CI takes more work than `npx release-it`.
+You need to set up Git and npm first.
+You probably want safe handling for consecutive branch pushes during your release flow.
+
+This action handles all of that for you.
+
+## What It Does
+
+Each time it runs, the action:
+
+1. Sets up the Git user for release commits
+2. Sets up your npm token, if you gave one
+3. Finishes any [earlier release that didn't make it to npm](#what-happens-when-a-release-gets-pushed-but-not-published), then stops
+4. Stops if [`should-semantic-release`](https://github.com/JoshuaKGoldberg/should-semantic-release) says there's nothing to release
+5. Runs `npx release-it --verbose`
+
+It also adds in safe handling for common corner cases such as npm being slow to recognize new versions.
+
 ## Usage
 
-This action works by running [`release-it`](https://github.com/release-it/release-it) for you.
-It works by:
-
-1. Checking [`should-semantic-release`](https://github.com/JoshuaKGoldberg/should-semantic-release) for whether a new release is necessary, and bailing if not
-2. Executing `npx release-it --verbose`
-
-Run `JoshuaKGoldberg/release-it-action` in a GitHub workflow after building your code and setting your npm token:
+Run `JoshuaKGoldberg/release-it-action` in a GitHub workflow after building your code:
 
 ```yml
 concurrency:
@@ -36,15 +51,15 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: main
-      - run: npm build
+      - run: npm run build
       - env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        uses: JoshuaKGoldberg/release-it-action@v0.2.2
+        uses: JoshuaKGoldberg/release-it-action@v0.5.6
 
 name: Release
 
@@ -58,6 +73,30 @@ permissions:
   id-token: write
 ```
 
+You can leave out `NPM_TOKEN` if you use npm's [Trusted Publishing](https://docs.npmjs.com/trusted-publishers).
+
+### Recommended `release-it` Config
+
+It's recommended to have `release-it` push before it publishes to npm.
+Then if a newer push wins the race, nothing gets published.
+It also lets step 3 finish any release that fails to publish.
+
+```json
+{
+	"git": {
+		"pushArgs": ["--follow-tags", "--atomic"]
+	},
+	"hooks": {
+		"after:git:release": "npm publish"
+	},
+	"npm": {
+		"publish": false
+	}
+}
+```
+
+Skip this if you set `skip-npm-publish`, since the hook would still publish.
+
 ## Options
 
 | Key                         | Type      | Default                                       | Description                                                    |
@@ -67,7 +106,7 @@ permissions:
 | `git-user-email`            | `string`  | `${<git-user-name>}@users.noreply.github.com` | `git config user.email` value for Git commits.                 |
 | `git-user-name`             | `string`  | `${github.context.actor}`                     | `git config user.name` value for Git commits.                  |
 | `github-token`              | `string`  | `${GITHUB_TOKEN}`                             | GitHub token (PAT) with _repo_ and _workflow_ permissions.     |
-| `npm-token`                 | `string`  | `${NPM_TOKEN}`                                | npm access token with the _automation_ role.                   |
+| `npm-token`                 | `string`  | `${NPM_TOKEN}`                                | npm access token (not needed with Trusted Publishing)          |
 | `release-it-args`           | `string`  | `""`                                          | Any arbitrary arguments to pass to `npx release-it --verbose`. |
 | `skip-npm-publish`          | `boolean` | `false`                                       | Whether to skip publishing to npm.                             |
 
@@ -83,7 +122,6 @@ npm i release-it-action
 import { releaseItAction } from "release-it-action";
 
 await releaseItAction({
-	branch: "main",
 	githubToken: process.env.GITHUB_TOKEN,
 	gitUserEmail: "your@email.com",
 	gitUserName: "YourUsername",
@@ -94,44 +132,52 @@ await releaseItAction({
 });
 ```
 
-Note that all non-`boolean` inputs are required and do not have default values in the Node API.
+The Node API doesn't read action inputs or environment variables.
 
 ## FAQs
 
 ### Why does the checkout action run on the branch with full history?
 
-`release-it-action` needs to run on the latest commit on the default/release branch and with a [concurrency group](https://docs.github.com/en/actions/using-jobs/using-concurrency).
-Otherwise, if multiple workflows are triggered quickly, later workflows might not include release commits from earlier workflows.
+The action needs the latest commit of your release branch.
+The [concurrency group](https://docs.github.com/en/actions/using-jobs/using-concurrency) keeps later runs from missing earlier release commits.
+
+### What happens when a release gets pushed but not published?
+
+Sometimes a release gets pushed to GitHub without making it to npm.
+The next run publishes that version without making a new commit or tag.
+It also creates the GitHub release if it's missing.
+
+This only works if the version's Git tag is on the latest commit.
+Otherwise the action fails until you publish that version yourself.
+
+### What happens when a newer commit lands during a release?
+
+Two pushes close together can start two release runs.
+The first run's push fails because the branch has a newer commit.
+The action exits without failing so the newer run can do the release.
 
 ### Why is there an option to bypass branch protections?
 
 **The `bypass-branch-protections` option is not recommended.**
 
-Some repositories have strict legacy branch protections which make it difficult to automate tasks that require pushing to the `main` branch.
-Bypassing those branch protections can make it easier to configure `release-it` to create Git commits.
-
-It's recommended to instead use GitHub's newer and more granular [repository rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets).
+Some repositories have strict older branch protections that block pushes to `main`.
+This option lets `release-it` push anyway.
+Use GitHub's newer [repository rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets) instead.
 
 #### Why does the option delete and recreate branch protections?
 
-It would be great to instead either change which branch is protected or have a native GitHub API to disable a branch protection rule.
-Neither exist at time of writing.
-If you know that one now exists, please do file an issue!
-
-See:
-
-- [#13](https://github.com/JoshuaKGoldberg/release-it-action/issues/13) for supporting bypassing PR allowances
-- [#14](https://github.com/JoshuaKGoldberg/release-it-action/issues/14) for supporting dismissal restrictions
+GitHub doesn't have an API to turn off a branch protection rule.
+Deleting and recreating it is the only way at time of writing.
+If you know of one, please do file an issue!
 
 ### Why is there an option to bypass branch rulesets?
 
 **The `bypass-branch-rulesets` option is not recommended.**
 
-Repository [rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets) can natively allow specific actors to bypass them.
-It's recommended to instead add the user or app behind your `github-token` to the ruleset's bypass list.
-
-If that isn't possible, `bypass-branch-rulesets` will find each repository ruleset that applies to the branch, set its enforcement to `disabled`, run `release-it`, and then restore each ruleset's original enforcement.
-Only repository-level rulesets are changed: organization-level rulesets are logged and left as-is.
+Rulesets can let specific users or apps bypass them.
+Add the user or app behind your `github-token` to the ruleset's bypass list instead.
+If you can't, this option disables the branch's repository rulesets while `release-it` runs.
+Organization rulesets aren't changed.
 
 ## Development
 
