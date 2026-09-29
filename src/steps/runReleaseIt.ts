@@ -1,13 +1,20 @@
 import * as core from "@actions/core";
 import { parseCommandString } from "execa";
 
-import { $$ } from "../execa.js";
+import { $$captured } from "../execa.js";
 import { tryCatchInfoAction } from "../tryCatchInfoAction.js";
 import { checkSuperseded, getHeadSha } from "./checkSuperseded.js";
 
+export interface RunReleaseItOptions {
+	allowPublishConflict?: boolean;
+}
+
+const publishConflict =
+	/cannot publish over (?:the )?previously (?:published|staged) version/i;
+
 export async function runReleaseIt(
 	releaseItArgs?: string,
-	isAlreadyPublished?: () => Promise<boolean>,
+	{ allowPublishConflict }: RunReleaseItOptions = {},
 ) {
 	const args = parseCommandString(releaseItArgs ?? "");
 
@@ -15,12 +22,10 @@ export async function runReleaseIt(
 		const startSha = await getHeadSha();
 
 		try {
-			const { exitCode, stderr } = await $$`npx release-it --verbose ${args}`;
-			/* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/restrict-template-expressions */
-			if (exitCode || stderr) {
-				throw new Error(stderr || `Exit code ${exitCode?.toString()}.`);
+			const { exitCode } = await $$captured`npx release-it --verbose ${args}`;
+			if (exitCode) {
+				throw new Error(`Exit code ${exitCode.toString()}.`);
 			}
-			/* eslint-enable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/restrict-template-expressions */
 		} catch (error) {
 			if (startSha && (await checkSuperseded(startSha))) {
 				core.info(
@@ -29,9 +34,12 @@ export async function runReleaseIt(
 				return;
 			}
 
-			if (await isAlreadyPublished?.()) {
+			if (
+				allowPublishConflict &&
+				publishConflict.test((error as { all?: string }).all ?? "")
+			) {
 				core.info(
-					`release-it failed, but the version is now on npm. A previous release run must have published it: ${error as string}`,
+					`release-it failed because npm already has this version. A previous release run must have published it: ${error as string}`,
 				);
 				return;
 			}

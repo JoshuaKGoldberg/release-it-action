@@ -30291,7 +30291,7 @@ module.exports = {
 
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(4782);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(2627);
 
 
 await (0,_runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__/* .runReleaseItAction */ .k)(_actions_github__WEBPACK_IMPORTED_MODULE_0__/* .context */ ._);
@@ -30301,7 +30301,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 4782:
+/***/ 2627:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -43933,6 +43933,12 @@ const {
 ;// CONCATENATED MODULE: ./src/execa.ts
 
 const $$ = $({ stdio: "inherit" });
+const $$captured = $({
+    all: true,
+    stderr: ["inherit", "pipe"],
+    stdin: "inherit",
+    stdout: ["inherit", "pipe"],
+});
 
 ;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
 
@@ -44259,25 +44265,25 @@ async function getHeadSha() {
 
 
 
-async function runReleaseIt(releaseItArgs, isAlreadyPublished) {
+const publishConflict = /cannot publish over (?:the )?previously (?:published|staged) version/i;
+async function runReleaseIt(releaseItArgs, { allowPublishConflict } = {}) {
     const args = parseCommandString(releaseItArgs ?? "");
     await tryCatchInfoAction("running release-it", async () => {
         const startSha = await getHeadSha();
         try {
-            const { exitCode, stderr } = await $$ `npx release-it --verbose ${args}`;
-            /* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/restrict-template-expressions */
-            if (exitCode || stderr) {
-                throw new Error(stderr || `Exit code ${exitCode?.toString()}.`);
+            const { exitCode } = await $$captured `npx release-it --verbose ${args}`;
+            if (exitCode) {
+                throw new Error(`Exit code ${exitCode.toString()}.`);
             }
-            /* eslint-enable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/restrict-template-expressions */
         }
         catch (error) {
             if (startSha && (await checkSuperseded(startSha))) {
                 info(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${error}`);
                 return;
             }
-            if (await isAlreadyPublished?.()) {
-                info(`release-it failed, but the version is now on npm. A previous release run must have published it: ${error}`);
+            if (allowPublishConflict &&
+                publishConflict.test(error.all ?? "")) {
+                info(`release-it failed because npm already has this version. A previous release run must have published it: ${error}`);
                 return;
             }
             core_error(`Error running release-it: ${error}`);
@@ -44286,27 +44292,7 @@ async function runReleaseIt(releaseItArgs, isAlreadyPublished) {
     });
 }
 
-;// CONCATENATED MODULE: ./src/steps/waitForPublished.ts
-
-async function waitForPublished(attempts = 6, delayMs = 10_000) {
-    for (let attempt = 0; attempt < attempts; attempt += 1) {
-        if (attempt) {
-            await new Promise((resolve) => setTimeout(resolve, delayMs));
-        }
-        try {
-            if (!(await getUnpublishedVersion())) {
-                return true;
-            }
-        }
-        catch {
-            // npm view can fail transiently; keep checking.
-        }
-    }
-    return false;
-}
-
 ;// CONCATENATED MODULE: ./src/index.ts
-
 
 
 
@@ -44346,7 +44332,7 @@ async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, 
             hasRelease !== false && "--no-github.release",
         ]
             .filter(Boolean)
-            .join(" "), waitForPublished);
+            .join(" "), { allowPublishConflict: true });
         return;
     }
     if ((await tryCatchInfoAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true }))) === false) {
