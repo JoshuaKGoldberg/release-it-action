@@ -1,7 +1,11 @@
 import type { RequestParameters } from "@octokit/types";
 import { ExistingProtections, Octokit } from "../types.js";
 export interface RecreateProtectionsOptions {
-    commonRequestData: RequestParameters;
+    commonRequestData: RequestParameters & {
+        branch: string;
+        owner: string;
+        repo: string;
+    };
     existingProtections: ExistingProtections | undefined;
     octokit: Octokit;
 }
