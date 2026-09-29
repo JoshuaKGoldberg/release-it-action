@@ -107,6 +107,19 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
+	it("removes the npm token even when the run fails early", async () => {
+		mockGetUnpublishedVersion.mockResolvedValueOnce({
+			headTag: undefined,
+			version: "1.2.3",
+		});
+
+		await releaseItAction(mockOptions);
+
+		expect(mock$$.mock.calls.at(-1)).toEqual([
+			["npm config delete //registry.npmjs.org/:_authToken"],
+		]);
+	});
+
 	it("publishes a version tagged at HEAD that was never published, without recreating its GitHub release", async () => {
 		mockGetUnpublishedVersion.mockResolvedValueOnce({
 			headTag: "v1.2.3",
@@ -181,6 +194,11 @@ describe("releaseItAction", () => {
 			    ],
 			    "mock-npmToken",
 			  ],
+			  [
+			    [
+			      "npm config delete //registry.npmjs.org/:_authToken",
+			    ],
+			  ],
 			]
 		`);
 		expect(mockRunBypassingBranchProtections).not.toHaveBeenCalled();
@@ -218,6 +236,11 @@ describe("releaseItAction", () => {
 			      "",
 			    ],
 			    "mock-npmToken",
+			  ],
+			  [
+			    [
+			      "npm config delete //registry.npmjs.org/:_authToken",
+			    ],
 			  ],
 			]
 		`);
