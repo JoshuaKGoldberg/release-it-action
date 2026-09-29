@@ -26,7 +26,7 @@ export async function checkSuperseded(startSha: string) {
 
 	const isAncestor =
 		await $quiet`git merge-base --is-ancestor ${localSha} ${remoteSha}`;
-	return isAncestor.exitCode !== 0;
+	return isAncestor.exitCode === 1;
 }
 
 export async function getHeadSha() {

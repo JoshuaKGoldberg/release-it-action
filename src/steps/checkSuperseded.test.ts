@@ -101,4 +101,15 @@ describe("checkSuperseded", () => {
 
 		expect(await checkSuperseded(startSha)).toBe(false);
 	});
+
+	it("returns false when checking for an ancestor fails altogether", async () => {
+		mockCommands({
+			"git merge-base --is-ancestor local-sha remote-sha": { exitCode: 128 },
+			"git rev-parse --abbrev-ref HEAD": { stdout: "main" },
+			"git rev-parse FETCH_HEAD": { stdout: "remote-sha" },
+			"git rev-parse HEAD": { stdout: "local-sha" },
+		});
+
+		expect(await checkSuperseded(startSha)).toBe(false);
+	});
 });

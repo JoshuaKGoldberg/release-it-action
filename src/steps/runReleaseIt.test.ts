@@ -5,6 +5,7 @@ import { runReleaseIt } from "./runReleaseIt.js";
 const mockError = vi.fn();
 const mockInfo = vi.fn();
 const mockSetFailed = vi.fn();
+const mockWarning = vi.fn();
 
 vi.mock("@actions/core", () => ({
 	get error() {
@@ -15,6 +16,9 @@ vi.mock("@actions/core", () => ({
 	},
 	get setFailed() {
 		return mockSetFailed;
+	},
+	get warning() {
+		return mockWarning;
 	},
 }));
 
@@ -96,7 +100,7 @@ describe("runReleaseIt", () => {
 		`);
 	});
 
-	it("logs info instead of an error if release-it fails and the branch was superseded", async () => {
+	it("logs a warning instead of an error if release-it fails and the branch was superseded", async () => {
 		mock$$.mockResolvedValue({ exitCode: 1 });
 		mockGetHeadSha.mockResolvedValue("start-sha");
 		mockCheckSuperseded.mockResolvedValue(true);
@@ -104,7 +108,7 @@ describe("runReleaseIt", () => {
 		await runReleaseIt();
 
 		expect(mockCheckSuperseded).toHaveBeenCalledWith("start-sha");
-		expect(mockInfo.mock.calls).toMatchInlineSnapshot(`
+		expect(mockWarning.mock.calls).toMatchInlineSnapshot(`
 			[
 			  [
 			    "release-it failed, but the branch has moved past start-sha. A newer release run will handle releasing: Error: Exit code 1.",
