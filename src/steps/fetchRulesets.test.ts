@@ -22,8 +22,12 @@ vi.mock("../tryCatchInfoAction.js", () => ({
 }));
 
 const branch = "test-branch";
+const mockPaginate = vi.fn();
 const mockRequest = vi.fn();
-const mockOctokit = { request: mockRequest } as unknown as Octokit;
+const mockOctokit = {
+	paginate: mockPaginate,
+	request: mockRequest,
+} as unknown as Octokit;
 const requestData = { branch, owner: "test-owner", repo: "test-repo" };
 
 describe("fetchRulesets", () => {
@@ -32,70 +36,66 @@ describe("fetchRulesets", () => {
 	});
 
 	it("returns undefined when fetching branch rules fails", async () => {
-		mockRequest.mockRejectedValueOnce(new Error("Oh no!"));
+		mockPaginate.mockRejectedValueOnce(new Error("Oh no!"));
 
 		const actual = await fetchRulesets({ octokit: mockOctokit, requestData });
 
 		expect(actual).toBeUndefined();
-		expect(mockRequest).toHaveBeenCalledTimes(1);
+		expect(mockPaginate).toHaveBeenCalledTimes(1);
+		expect(mockRequest).not.toHaveBeenCalled();
 	});
 
 	it("returns an empty array when no rules apply to the branch", async () => {
-		mockRequest.mockResolvedValueOnce({ data: [] });
+		mockPaginate.mockResolvedValueOnce([]);
 
 		const actual = await fetchRulesets({ octokit: mockOctokit, requestData });
 
 		expect(actual).toEqual([]);
-		expect(mockRequest).toHaveBeenCalledTimes(1);
+		expect(mockPaginate).toHaveBeenCalledTimes(1);
+		expect(mockRequest).not.toHaveBeenCalled();
 	});
 
 	it("fetches each unique repository ruleset and skips others", async () => {
 		const rulesetA = { enforcement: "active", id: 1, name: "A" };
 		const rulesetB = { enforcement: "evaluate", id: 2, name: "B" };
 
+		mockPaginate.mockResolvedValueOnce([
+			{
+				ruleset_id: 1,
+				ruleset_source_type: "Repository",
+				type: "deletion",
+			},
+			{
+				ruleset_id: 1,
+				ruleset_source_type: "Repository",
+				type: "pull_request",
+			},
+			{
+				ruleset_id: 3,
+				ruleset_source: "test-owner",
+				ruleset_source_type: "Organization",
+				type: "deletion",
+			},
+			{ type: "non_fast_forward" },
+			{
+				ruleset_id: 2,
+				ruleset_source_type: "Repository",
+				type: "deletion",
+			},
+		]);
 		mockRequest
-			.mockResolvedValueOnce({
-				data: [
-					{
-						ruleset_id: 1,
-						ruleset_source_type: "Repository",
-						type: "deletion",
-					},
-					{
-						ruleset_id: 1,
-						ruleset_source_type: "Repository",
-						type: "pull_request",
-					},
-					{
-						ruleset_id: 3,
-						ruleset_source: "test-owner",
-						ruleset_source_type: "Organization",
-						type: "deletion",
-					},
-					{ type: "non_fast_forward" },
-					{
-						ruleset_id: 2,
-						ruleset_source_type: "Repository",
-						type: "deletion",
-					},
-				],
-			})
 			.mockResolvedValueOnce({ data: rulesetA })
 			.mockResolvedValueOnce({ data: rulesetB });
 
 		const actual = await fetchRulesets({ octokit: mockOctokit, requestData });
 
 		expect(actual).toEqual([rulesetA, rulesetB]);
+		expect(mockPaginate).toHaveBeenCalledWith(
+			"GET /repos/{owner}/{repo}/rules/branches/{branch}",
+			{ ...requestData, per_page: 100 },
+		);
 		expect(mockRequest.mock.calls).toMatchInlineSnapshot(`
 			[
-			  [
-			    "GET /repos/{owner}/{repo}/rules/branches/{branch}",
-			    {
-			      "branch": "test-branch",
-			      "owner": "test-owner",
-			      "repo": "test-repo",
-			    },
-			  ],
 			  [
 			    "GET /repos/{owner}/{repo}/rulesets/{ruleset_id}",
 			    {
@@ -128,21 +128,19 @@ describe("fetchRulesets", () => {
 	it("omits rulesets that fail to be fetched", async () => {
 		const rulesetB = { enforcement: "active", id: 2, name: "B" };
 
+		mockPaginate.mockResolvedValueOnce([
+			{
+				ruleset_id: 1,
+				ruleset_source_type: "Repository",
+				type: "deletion",
+			},
+			{
+				ruleset_id: 2,
+				ruleset_source_type: "Repository",
+				type: "deletion",
+			},
+		]);
 		mockRequest
-			.mockResolvedValueOnce({
-				data: [
-					{
-						ruleset_id: 1,
-						ruleset_source_type: "Repository",
-						type: "deletion",
-					},
-					{
-						ruleset_id: 2,
-						ruleset_source_type: "Repository",
-						type: "deletion",
-					},
-				],
-			})
 			.mockRejectedValueOnce(new Error("Oh no!"))
 			.mockResolvedValueOnce({ data: rulesetB });
 

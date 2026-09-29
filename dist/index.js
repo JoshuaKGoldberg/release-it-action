@@ -44072,7 +44072,10 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
 
 
 async function fetchRulesets({ octokit, requestData, }) {
-    const rules = await tryCatchInfoAction(`fetching existing branch rules for ${requestData.branch}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rules/branches/{branch}", requestData)).data);
+    const rules = await tryCatchInfoAction(`fetching existing branch rules for ${requestData.branch}`, async () => await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
+        ...requestData,
+        per_page: 100,
+    }));
     if (!rules) {
         return undefined;
     }
