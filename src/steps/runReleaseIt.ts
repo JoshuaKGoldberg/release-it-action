@@ -1,17 +1,18 @@
 import * as core from "@actions/core";
+import { parseCommandString } from "execa";
 
 import { $$ } from "../execa.js";
 import { tryCatchInfoAction } from "../tryCatchInfoAction.js";
 import { checkSuperseded, getHeadSha } from "./checkSuperseded.js";
 
 export async function runReleaseIt(releaseItArgs?: string) {
-	const args = releaseItArgs ? ` ${releaseItArgs}` : "";
+	const args = parseCommandString(releaseItArgs ?? "");
 
 	await tryCatchInfoAction("running release-it", async () => {
 		const startSha = await getHeadSha();
 
 		try {
-			const { exitCode, stderr } = await $$`npx release-it --verbose${args}`;
+			const { exitCode, stderr } = await $$`npx release-it --verbose ${args}`;
 			/* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/restrict-template-expressions */
 			if (exitCode || stderr) {
 				throw new Error(stderr || `Exit code ${exitCode?.toString()}.`);

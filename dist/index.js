@@ -30291,7 +30291,7 @@ module.exports = {
 
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8036);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(3339);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1821);
 
 
 await (0,_runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__/* .runReleaseItAction */ .k)(_actions_github__WEBPACK_IMPORTED_MODULE_0__/* .context */ ._);
@@ -30301,7 +30301,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 3339:
+/***/ 1821:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -44158,6 +44158,35 @@ async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
     }
 }
 
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/methods/command.js
+// Convert `command` string into an array of file or arguments to pass to $`${...fileOrCommandArguments}`
+const parseCommandString = command => {
+	if (typeof command !== 'string') {
+		throw new TypeError(`The command must be a string: ${String(command)}.`);
+	}
+
+	const trimmedCommand = command.trim();
+	if (trimmedCommand === '') {
+		return [];
+	}
+
+	const tokens = [];
+	for (const token of trimmedCommand.split(SPACES_REGEXP)) {
+		// Allow spaces to be escaped by a backslash if not meant as a delimiter
+		const previousToken = tokens.at(-1);
+		if (previousToken && previousToken.endsWith('\\')) {
+			// Merge previous token with current one
+			tokens[tokens.length - 1] = `${previousToken.slice(0, -1)} ${token}`;
+		} else {
+			tokens.push(token);
+		}
+	}
+
+	return tokens;
+};
+
+const SPACES_REGEXP = / +/g;
+
 ;// CONCATENATED MODULE: ./src/steps/checkSuperseded.ts
 
 const checkSuperseded_$quiet = $({ reject: false });
@@ -44192,12 +44221,13 @@ async function getHeadSha() {
 
 
 
+
 async function runReleaseIt(releaseItArgs) {
-    const args = releaseItArgs ? ` ${releaseItArgs}` : "";
+    const args = parseCommandString(releaseItArgs ?? "");
     await tryCatchInfoAction("running release-it", async () => {
         const startSha = await getHeadSha();
         try {
-            const { exitCode, stderr } = await $$ `npx release-it --verbose${args}`;
+            const { exitCode, stderr } = await $$ `npx release-it --verbose ${args}`;
             /* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-nullish-coalescing, @typescript-eslint/restrict-template-expressions */
             if (exitCode || stderr) {
                 throw new Error(stderr || `Exit code ${exitCode?.toString()}.`);
