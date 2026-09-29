@@ -125,7 +125,7 @@ describe("releaseItAction", () => {
 		);
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			"--no-increment --no-git --npm.publish --no-github.release",
+			"--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
 			{ allowPublishConflict: true },
 		);
 	});
@@ -140,7 +140,7 @@ describe("releaseItAction", () => {
 		await releaseItAction(mockOptions);
 
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			"--no-increment --no-git --npm.publish",
+			"--no-increment --no-git --npm.publish --npm.skipChecks",
 			{ allowPublishConflict: true },
 		);
 	});
