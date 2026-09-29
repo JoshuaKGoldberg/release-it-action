@@ -44158,9 +44158,13 @@ async function getUnpublishedVersion() {
     if (isPrivate || !name || !version) {
         return undefined;
     }
-    const registryArgs = publishConfig?.registry
-        ? ["--registry", publishConfig.registry]
-        : [];
+    const scopedRegistry = name.startsWith("@")
+        ? publishConfig?.[`${name.split("/")[0]}:registry`]
+        : undefined;
+    const registry = typeof scopedRegistry === "string" && scopedRegistry
+        ? scopedRegistry
+        : publishConfig?.registry;
+    const registryArgs = registry ? ["--registry", registry] : [];
     const view = await $quiet `npm view ${name}@${version} version --json ${registryArgs}`;
     if (!view.exitCode) {
         return undefined;
