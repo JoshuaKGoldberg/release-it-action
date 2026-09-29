@@ -80,6 +80,7 @@ export async function releaseItAction({
 			[
 				"--no-increment --no-git --npm.publish",
 				hasRelease !== false && "--no-github.release",
+				releaseItArgs,
 			]
 				.filter(Boolean)
 				.join(" "),

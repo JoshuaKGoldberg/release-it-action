@@ -44330,6 +44330,7 @@ async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, 
         await runReleaseIt([
             "--no-increment --no-git --npm.publish",
             hasRelease !== false && "--no-github.release",
+            releaseItArgs,
         ]
             .filter(Boolean)
             .join(" "), { allowPublishConflict: true });
