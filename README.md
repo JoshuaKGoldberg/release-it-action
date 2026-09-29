@@ -77,9 +77,13 @@ You can leave out `NPM_TOKEN` if you use npm's [Trusted Publishing](https://docs
 
 ### Recommended `release-it` Config
 
-It's recommended to have `release-it` push before it publishes to npm.
+It's strongly recommended to have `release-it` push before it publishes to npm.
 Then if a newer push wins the race, nothing gets published.
 It also lets step 3 finish any release that fails to publish.
+
+Without this config, `release-it` publishes to npm first and treats a failed push afterwards as a success.
+That leaves a version on npm whose release commit never landed, which the action can't recover from: every later run computes the same version and npm rejects it.
+The `--atomic` flag matters too: it keeps the commit and tag together, which the handling for superseded runs relies on.
 
 ```json
 {
@@ -155,6 +159,8 @@ Otherwise the action fails until you publish that version yourself.
 Two pushes close together can start two release runs.
 The first run's push fails because the branch has a newer commit.
 The action exits without failing so the newer run can do the release.
+
+This relies on the [recommended config](#recommended-release-it-config) pushing before publishing.
 
 ### Why is there an option to bypass branch protections?
 
