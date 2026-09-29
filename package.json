@@ -26,6 +26,7 @@
 		"lint:packages": "pnpm dedupe --check",
 		"lint:spelling": "cspell \"**\" \".github/**/*\"",
 		"prepare": "husky",
+		"prepublishOnly": "pnpm build",
 		"test": "vitest",
 		"tsc": "tsc"
 	},
@@ -35,13 +36,14 @@
 	"dependencies": {
 		"@actions/core": "^3.0.0",
 		"@actions/github": "^9.0.0",
+		"@octokit/types": "^18.0.0",
 		"@types/node": "^24.10.0",
-		"execa": "^10.0.0"
+		"execa": "^10.0.0",
+		"should-semantic-release": "^0.3.5"
 	},
 	"devDependencies": {
 		"@eslint-community/eslint-plugin-eslint-comments": "4.8.1",
 		"@eslint/js": "10.0.1",
-		"@octokit/types": "18.0.0",
 		"@release-it/conventional-changelog": "12.0.2",
 		"@types/eslint-plugin-markdown": "2.0.2",
 		"@types/node": "24.19.0",
@@ -71,7 +73,6 @@
 		"prettier-plugin-sh": "0.20.0",
 		"release-it": "21.1.0",
 		"sentences-per-line": "0.3.0",
-		"should-semantic-release": "0.3.5",
 		"typescript": "5.9.3",
 		"typescript-eslint": "8.70.0",
 		"vitest": "5.0.1"
