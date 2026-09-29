@@ -138,6 +138,35 @@ describe("runReleaseIt", () => {
 		expect(mockSetFailed).toHaveBeenCalled();
 	});
 
+	it("logs info instead of an error if release-it fails and the version is now published", async () => {
+		mock$$.mockResolvedValue({ exitCode: 1 });
+		mockGetHeadSha.mockResolvedValue("start-sha");
+		mockCheckSuperseded.mockResolvedValue(false);
+
+		await runReleaseIt("", () => Promise.resolve(true));
+
+		expect(mockInfo.mock.calls).toMatchInlineSnapshot(`
+			[
+			  [
+			    "release-it failed, but the version is now on npm. A previous release run must have published it: Error: Exit code 1.",
+			  ],
+			]
+		`);
+		expect(mockError).not.toHaveBeenCalled();
+		expect(mockSetFailed).not.toHaveBeenCalled();
+	});
+
+	it("logs an error if release-it fails and the version is still not published", async () => {
+		mock$$.mockResolvedValue({ exitCode: 1 });
+		mockGetHeadSha.mockResolvedValue("start-sha");
+		mockCheckSuperseded.mockResolvedValue(false);
+
+		await runReleaseIt("", () => Promise.resolve(false));
+
+		expect(mockError).toHaveBeenCalled();
+		expect(mockSetFailed).toHaveBeenCalled();
+	});
+
 	it("logs an error without checking for superseding if the starting sha is unknown", async () => {
 		mock$$.mockResolvedValue({ exitCode: 1 });
 		mockGetHeadSha.mockResolvedValue(undefined);

@@ -5,7 +5,10 @@ import { $$ } from "../execa.js";
 import { tryCatchInfoAction } from "../tryCatchInfoAction.js";
 import { checkSuperseded, getHeadSha } from "./checkSuperseded.js";
 
-export async function runReleaseIt(releaseItArgs?: string) {
+export async function runReleaseIt(
+	releaseItArgs?: string,
+	isAlreadyPublished?: () => Promise<boolean>,
+) {
 	const args = parseCommandString(releaseItArgs ?? "");
 
 	await tryCatchInfoAction("running release-it", async () => {
@@ -22,6 +25,13 @@ export async function runReleaseIt(releaseItArgs?: string) {
 			if (startSha && (await checkSuperseded(startSha))) {
 				core.info(
 					`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${error as string}`,
+				);
+				return;
+			}
+
+			if (await isAlreadyPublished?.()) {
+				core.info(
+					`release-it failed, but the version is now on npm. A previous release run must have published it: ${error as string}`,
 				);
 				return;
 			}

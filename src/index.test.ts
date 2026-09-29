@@ -59,6 +59,14 @@ vi.mock("./steps/runReleaseIt.js", () => ({
 	},
 }));
 
+const mockWaitForPublished = vi.fn();
+
+vi.mock("./steps/waitForPublished.js", () => ({
+	get waitForPublished() {
+		return mockWaitForPublished;
+	},
+}));
+
 vi.mock("./tryCatchInfoAction.js", () => ({
 	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
 		return await action();
@@ -126,6 +134,7 @@ describe("releaseItAction", () => {
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
 			"--no-increment --no-git --npm.publish --no-github.release",
+			mockWaitForPublished,
 		);
 	});
 
@@ -140,6 +149,7 @@ describe("releaseItAction", () => {
 
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
 			"--no-increment --no-git --npm.publish",
+			mockWaitForPublished,
 		);
 	});
 

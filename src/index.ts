@@ -8,6 +8,7 @@ import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
 import { getUnpublishedVersion } from "./steps/getUnpublishedVersion.js";
 import { hasGitHubRelease } from "./steps/hasGitHubRelease.js";
 import { runReleaseIt } from "./steps/runReleaseIt.js";
+import { waitForPublished } from "./steps/waitForPublished.js";
 import { tryCatchInfoAction } from "./tryCatchInfoAction.js";
 
 export interface ReleaseItActionOptions {
@@ -83,6 +84,7 @@ export async function releaseItAction({
 			]
 				.filter(Boolean)
 				.join(" "),
+			waitForPublished,
 		);
 		return;
 	}
