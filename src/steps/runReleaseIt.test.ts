@@ -21,7 +21,7 @@ vi.mock("@actions/core", () => ({
 const mock$$ = vi.fn();
 
 vi.mock("../execa.js", () => ({
-	get $$() {
+	get $$captured() {
 		return mock$$;
 	},
 }));
@@ -66,25 +66,13 @@ describe("runReleaseIt", () => {
 		`);
 	});
 
-	it("logs an error if running release-it has stderr output", async () => {
-		mock$$.mockResolvedValue({ stderr: "Oh no!" });
+	it("does not log an error if running release-it succeeds with stderr output", async () => {
+		mock$$.mockResolvedValue({ exitCode: 0, stderr: "npm notice" });
 
 		await runReleaseIt();
 
-		expect(mockError.mock.calls).toMatchInlineSnapshot(`
-			[
-			  [
-			    "Error running release-it: Error: Oh no!",
-			  ],
-			]
-		`);
-		expect(mockSetFailed.mock.calls).toMatchInlineSnapshot(`
-			[
-			  [
-			    [Error: Oh no!],
-			  ],
-			]
-		`);
+		expect(mockError).not.toHaveBeenCalled();
+		expect(mockSetFailed).not.toHaveBeenCalled();
 	});
 
 	it("logs an error if running release-it crashes altogether", async () => {
@@ -138,30 +126,49 @@ describe("runReleaseIt", () => {
 		expect(mockSetFailed).toHaveBeenCalled();
 	});
 
-	it("logs info instead of an error if release-it fails and the version is now published", async () => {
-		mock$$.mockResolvedValue({ exitCode: 1 });
+	it.each([
+		"npm error 403 403 Forbidden - PUT https://registry.npmjs.org/test - You cannot publish over the previously published versions: 1.2.3.",
+		'npm error 409 Conflict - PUT https://registry.npmjs.org/test - Cannot publish over previously staged version "1.2.3".',
+	])(
+		"logs info instead of an error if release-it fails with a publish conflict that is allowed: %s",
+		async (all) => {
+			mock$$.mockRejectedValue(Object.assign(new Error("Oh no!"), { all }));
+			mockGetHeadSha.mockResolvedValue("start-sha");
+			mockCheckSuperseded.mockResolvedValue(false);
+
+			await runReleaseIt("", { allowPublishConflict: true });
+
+			expect(mockInfo).toHaveBeenCalledWith(
+				"release-it failed because npm already has this version. A previous release run must have published it: Error: Oh no!",
+			);
+			expect(mockError).not.toHaveBeenCalled();
+			expect(mockSetFailed).not.toHaveBeenCalled();
+		},
+	);
+
+	it("logs an error if release-it fails with a publish conflict that is not allowed", async () => {
+		mock$$.mockRejectedValue(
+			Object.assign(new Error("Oh no!"), {
+				all: 'Cannot publish over previously staged version "1.2.3".',
+			}),
+		);
 		mockGetHeadSha.mockResolvedValue("start-sha");
 		mockCheckSuperseded.mockResolvedValue(false);
 
-		await runReleaseIt("", () => Promise.resolve(true));
+		await runReleaseIt("");
 
-		expect(mockInfo.mock.calls).toMatchInlineSnapshot(`
-			[
-			  [
-			    "release-it failed, but the version is now on npm. A previous release run must have published it: Error: Exit code 1.",
-			  ],
-			]
-		`);
-		expect(mockError).not.toHaveBeenCalled();
-		expect(mockSetFailed).not.toHaveBeenCalled();
+		expect(mockError).toHaveBeenCalled();
+		expect(mockSetFailed).toHaveBeenCalled();
 	});
 
-	it("logs an error if release-it fails and the version is still not published", async () => {
-		mock$$.mockResolvedValue({ exitCode: 1 });
+	it("logs an error if release-it fails without a publish conflict when one is allowed", async () => {
+		mock$$.mockRejectedValue(
+			Object.assign(new Error("Oh no!"), { all: "npm error code E401" }),
+		);
 		mockGetHeadSha.mockResolvedValue("start-sha");
 		mockCheckSuperseded.mockResolvedValue(false);
 
-		await runReleaseIt("", () => Promise.resolve(false));
+		await runReleaseIt("", { allowPublishConflict: true });
 
 		expect(mockError).toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalled();
