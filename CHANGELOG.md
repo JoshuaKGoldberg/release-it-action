@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.5](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.4...v0.5.5) (2026-09-29)
+
+### Bug Fixes
+
+- pass release-it arguments separately ([#828](https://github.com/JoshuaKGoldberg/release-it-action/issues/828)) ([9991a44](https://github.com/JoshuaKGoldberg/release-it-action/commit/9991a4401936ecc09bfe2085e1b8d89fb6fedd80)), closes [#827](https://github.com/JoshuaKGoldberg/release-it-action/issues/827)
+
 ## [0.5.4](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.3...v0.5.4) (2026-09-26)
 
 ### Bug Fixes
