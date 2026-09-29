@@ -21,12 +21,12 @@
 ## Why?
 
 [`release-it`](https://github.com/release-it/release-it) is a great tool for releasing packages.
-But running it in CI takes more than `npx release-it`.
+But running it in CI takes more work than `npx release-it`.
 You need to set up Git and npm first.
 You probably don't want a new version for every push.
-Pushes that land close together can also break a release halfway through.
+Releases can also fail partway through when pushes land close together.
 
-This action takes care of all that for you.
+This action handles all of that for you.
 
 ## What It Does
 
@@ -34,19 +34,11 @@ Each time it runs, the action:
 
 1. Sets up the Git user for release commits
 2. Sets up your npm token, if you gave one
-3. Finishes any earlier release that didn't make it to npm
-4. Skips releasing if [`should-semantic-release`](https://github.com/JoshuaKGoldberg/should-semantic-release) says there's nothing to release
+3. Finishes any [earlier release that didn't make it to npm](#what-happens-when-a-release-gets-pushed-but-not-published), then stops
+4. Stops if [`should-semantic-release`](https://github.com/JoshuaKGoldberg/should-semantic-release) says there's nothing to release
 5. Runs `npx release-it --verbose`
 
-If step 3 finds a release to finish, the run ends there.
-See [What happens when a release gets pushed but not published?](#what-happens-when-a-release-gets-pushed-but-not-published)
-
-If a newer commit lands on the branch during step 5, the action exits without failing.
-See [What happens when a newer commit lands during a release?](#what-happens-when-a-newer-commit-lands-during-a-release)
-
-The action can also get around branch protections or rulesets during step 5.
-You probably don't need that.
-See [the FAQs](#why-is-there-an-option-to-bypass-branch-protections) before you use it.
+If a [newer commit lands during step 5](#what-happens-when-a-newer-commit-lands-during-a-release), the action exits without failing.
 
 ## Usage
 
@@ -86,7 +78,7 @@ You can leave out `NPM_TOKEN` if you use npm's [Trusted Publishing](https://docs
 
 ### Recommended `release-it` Config
 
-It's recommended to have `release-it` push the release commit before it publishes to npm.
+It's recommended to have `release-it` push before it publishes to npm.
 Then if a newer push wins the race, nothing gets published.
 It also lets step 3 finish any release that fails to publish.
 
@@ -104,8 +96,7 @@ It also lets step 3 finish any release that fails to publish.
 }
 ```
 
-Skip this if you set `skip-npm-publish`.
-The hook would still publish to npm.
+Skip this if you set `skip-npm-publish`, since the hook would still publish.
 
 ## Options
 
@@ -143,65 +134,51 @@ await releaseItAction({
 ```
 
 The Node API doesn't read action inputs or environment variables.
-Pass in every value you need yourself.
 
 ## FAQs
 
 ### Why does the checkout action run on the branch with full history?
 
-`release-it-action` needs to run on the latest commit of your release branch.
-It also needs a [concurrency group](https://docs.github.com/en/actions/using-jobs/using-concurrency) so only one release runs at a time.
-Otherwise a later run might miss the release commit from an earlier run.
+The action needs the latest commit of your release branch.
+The [concurrency group](https://docs.github.com/en/actions/using-jobs/using-concurrency) keeps later runs from missing earlier release commits.
 
 ### What happens when a release gets pushed but not published?
 
 Sometimes a release gets pushed to GitHub without making it to npm.
-The next run looks at the version in `package.json`.
-If that version has a Git tag and isn't on npm yet, the action publishes it.
-It doesn't make a new commit or tag.
-It also creates the GitHub release if there isn't one yet.
+The next run publishes that version without making a new commit or tag.
+It also creates the GitHub release if it's missing.
 
-Sometimes npm says the version already exists.
-That means an earlier run published it after all.
-The action treats that as a success.
-
-The version's tag has to be on the latest commit for this to work.
-Otherwise the action fails.
-You'll need to publish that version yourself before newer releases can go out.
+This only works if the version's Git tag is on the latest commit.
+Otherwise the action fails until you publish that version yourself.
 
 ### What happens when a newer commit lands during a release?
 
 Two pushes close together can start two release runs.
-The first run's push to GitHub fails if the branch already has a newer commit.
-The action spots that and exits without failing.
-The run for the newer commit will do the release instead.
+The first run's push fails because the branch has a newer commit.
+The action exits without failing so the newer run can do the release.
 
 ### Why is there an option to bypass branch protections?
 
 **The `bypass-branch-protections` option is not recommended.**
 
-Some repositories have strict older branch protections.
-Those can make it hard for automation to push to the `main` branch.
-Bypassing them lets `release-it` push its Git commits.
-
-It's recommended to instead use GitHub's newer [repository rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets).
+Some repositories have strict older branch protections that block pushes to `main`.
+This option lets `release-it` push anyway.
+Use GitHub's newer [repository rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets) instead.
 
 #### Why does the option delete and recreate branch protections?
 
 GitHub doesn't have an API to turn off a branch protection rule.
-Deleting and recreating the rule is the only way at time of writing.
-If you know of one now, please do file an issue!
+Deleting and recreating it is the only way at time of writing.
+If you know of one, please do file an issue!
 
 ### Why is there an option to bypass branch rulesets?
 
 **The `bypass-branch-rulesets` option is not recommended.**
 
-Repository [rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets) can let specific users or apps skip them.
-It's recommended to instead add the user or app behind your `github-token` to the ruleset's bypass list.
-
-If that isn't possible, `bypass-branch-rulesets` will disable each repository ruleset for the branch.
-It puts them back how they were after `release-it` finishes.
-Organization-level rulesets are left as-is.
+Rulesets can let specific users or apps bypass them.
+Add the user or app behind your `github-token` to the ruleset's bypass list instead.
+If you can't, this option disables the branch's repository rulesets while `release-it` runs.
+Organization rulesets aren't changed.
 
 ## Development
 
