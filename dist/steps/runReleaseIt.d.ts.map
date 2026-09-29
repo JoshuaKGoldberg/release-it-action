@@ -1,1 +1,1 @@
-{"version":3,"file":"runReleaseIt.d.ts","sourceRoot":"","sources":["file:///Users/josh/repos/release-it-action/src/steps/runReleaseIt.ts"],"names":[],"mappings":"AAOA,wBAAsB,YAAY,CAAC,aAAa,CAAC,EAAE,MAAM,iBAyBxD"}
+{"version":3,"file":"runReleaseIt.d.ts","sourceRoot":"","sources":["file:///Users/josh/repos/release-it-action/src/steps/runReleaseIt.ts"],"names":[],"mappings":"AAOA,wBAAsB,YAAY,CACjC,aAAa,CAAC,EAAE,MAAM,EACtB,kBAAkB,CAAC,EAAE,MAAM,OAAO,CAAC,OAAO,CAAC,iBAiC3C"}
