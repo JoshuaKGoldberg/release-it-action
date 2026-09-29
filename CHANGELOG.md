@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.7](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.6...v0.5.7) (2026-09-29)
+
+### Bug Fixes
+
+- detect npm publish conflicts when retrying an unpublished version ([#834](https://github.com/JoshuaKGoldberg/release-it-action/issues/834)) ([348deb1](https://github.com/JoshuaKGoldberg/release-it-action/commit/348deb1fb7ccffa485c98fd203d24b3422c07661)), closes [#833](https://github.com/JoshuaKGoldberg/release-it-action/issues/833)
+
 ## [0.5.6](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.5...v0.5.6) (2026-09-29)
 
 ### Bug Fixes
