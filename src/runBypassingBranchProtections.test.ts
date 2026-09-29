@@ -105,4 +105,19 @@ describe("runBypassingBranchProtections", () => {
 		`);
 		expect(run).toHaveBeenCalled();
 	});
+
+	test("recreates protections when run rejects", async () => {
+		const error = new Error("Oh no!");
+		const run = vi.fn().mockRejectedValue(error);
+
+		await expect(
+			runBypassingBranchProtections(
+				{ branch: "", owner: "", repo: "" },
+				mockOctokit,
+				run,
+			),
+		).rejects.toBe(error);
+
+		expect(mockRecreateProtections).toHaveBeenCalled();
+	});
 });

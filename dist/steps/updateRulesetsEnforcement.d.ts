@@ -8,6 +8,7 @@ export interface UpdateRulesetsEnforcementOptions {
     enforcement: (ruleset: ExistingRuleset) => RulesetEnforcement;
     existingRulesets: ExistingRuleset[] | undefined;
     octokit: Octokit;
+    setFailedOnError?: boolean;
 }
-export declare function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, }: UpdateRulesetsEnforcementOptions): Promise<void>;
+export declare function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, setFailedOnError, }: UpdateRulesetsEnforcementOptions): Promise<void>;
 //# sourceMappingURL=updateRulesetsEnforcement.d.ts.map

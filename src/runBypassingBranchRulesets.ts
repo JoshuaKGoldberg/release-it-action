@@ -27,12 +27,15 @@ export async function runBypassingBranchRulesets(
 		octokit,
 	});
 
-	await run();
-
-	await updateRulesetsEnforcement({
-		commonRequestData,
-		enforcement: (ruleset) => ruleset.enforcement,
-		existingRulesets,
-		octokit,
-	});
+	try {
+		await run();
+	} finally {
+		await updateRulesetsEnforcement({
+			commonRequestData,
+			enforcement: (ruleset) => ruleset.enforcement,
+			existingRulesets,
+			octokit,
+			setFailedOnError: true,
+		});
+	}
 }

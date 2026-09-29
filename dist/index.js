@@ -43943,6 +43943,12 @@ const $$captured = $({
 ;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
 
 async function tryCatchInfoAction(label, action) {
+    return await tryCatchAction(label, action, info);
+}
+async function tryCatchSetFailedAction(label, action) {
+    return await tryCatchAction(label, action, setFailed);
+}
+async function tryCatchAction(label, action, logError) {
     info(`Start: ${label}`);
     try {
         const result = await action();
@@ -43950,7 +43956,7 @@ async function tryCatchInfoAction(label, action) {
         return result;
     }
     catch (error) {
-        info(`Error ${label}: ${error}`);
+        logError(`Error ${label}: ${error}`);
         return undefined;
     }
 }
@@ -43979,7 +43985,7 @@ async function recreateProtections({ commonRequestData, existingProtections, oct
     if (!existingProtections) {
         return;
     }
-    await tryCatchInfoAction("re-creating branch protections", async () => await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
+    await tryCatchSetFailedAction("re-creating branch protections", async () => await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
         ...commonRequestData,
         allow_deletions: !!existingProtections.allow_deletions?.enabled,
         allow_force_pushes: !!existingProtections.allow_force_pushes?.enabled,
@@ -44060,12 +44066,16 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
         octokit,
         requestData: commonRequestData,
     });
-    await run();
-    await recreateProtections({
-        commonRequestData,
-        existingProtections,
-        octokit,
-    });
+    try {
+        await run();
+    }
+    finally {
+        await recreateProtections({
+            commonRequestData,
+            existingProtections,
+            octokit,
+        });
+    }
 }
 
 ;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
@@ -44105,14 +44115,17 @@ async function fetchRulesets({ octokit, requestData, }) {
 ;// CONCATENATED MODULE: ./src/steps/updateRulesetsEnforcement.ts
 
 
-async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, }) {
+async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, setFailedOnError, }) {
     if (!existingRulesets?.length) {
         info("No existing repository rulesets found to update.");
         return;
     }
+    const tryCatchAction = setFailedOnError
+        ? tryCatchSetFailedAction
+        : tryCatchInfoAction;
     for (const existingRuleset of existingRulesets) {
         const nextEnforcement = enforcement(existingRuleset);
-        await tryCatchInfoAction(`setting ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`, async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+        await tryCatchAction(`setting ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`, async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
             ...commonRequestData,
             enforcement: nextEnforcement,
             ruleset_id: existingRuleset.id,
@@ -44140,13 +44153,18 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
         existingRulesets,
         octokit,
     });
-    await run();
-    await updateRulesetsEnforcement({
-        commonRequestData,
-        enforcement: (ruleset) => ruleset.enforcement,
-        existingRulesets,
-        octokit,
-    });
+    try {
+        await run();
+    }
+    finally {
+        await updateRulesetsEnforcement({
+            commonRequestData,
+            enforcement: (ruleset) => ruleset.enforcement,
+            existingRulesets,
+            octokit,
+            setFailedOnError: true,
+        });
+    }
 }
 
 ;// CONCATENATED MODULE: ./src/steps/getUnpublishedVersion.ts
