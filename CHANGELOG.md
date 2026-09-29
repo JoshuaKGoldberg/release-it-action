@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.6](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.5...v0.5.6) (2026-09-29)
+
+### Bug Fixes
+
+- treat a version that appears on npm after a failed publish retry as published ([#832](https://github.com/JoshuaKGoldberg/release-it-action/issues/832)) ([2b880c9](https://github.com/JoshuaKGoldberg/release-it-action/commit/2b880c99944318fbb1b0816b760c72f32c7699d6)), closes [#831](https://github.com/JoshuaKGoldberg/release-it-action/issues/831)
+
 ## [0.5.5](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.4...v0.5.5) (2026-09-29)
 
 ### Bug Fixes
