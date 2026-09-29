@@ -44327,12 +44327,11 @@ async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, 
         }
         const hasRelease = await tryCatchInfoAction(`checking for a GitHub release for ${headTag}`, async () => await hasGitHubRelease({ octokit, owner, repo, tag: headTag }));
         info(`Version ${version} was pushed but never published to npm. Publishing it now.`);
-        await runReleaseIt([
-            "--no-increment --no-git --npm.publish",
-            hasRelease !== false && "--no-github.release",
-        ]
-            .filter(Boolean)
-            .join(" "), { allowPublishConflict: true });
+        // Creating the GitHub release first, since a publish conflict ends the run.
+        if (hasRelease === false) {
+            await runReleaseIt("--no-increment --no-git --no-npm.publish");
+        }
+        await runReleaseIt("--no-increment --no-git --npm.publish --no-github.release", { allowPublishConflict: true });
         return;
     }
     if ((await tryCatchInfoAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true }))) === false) {

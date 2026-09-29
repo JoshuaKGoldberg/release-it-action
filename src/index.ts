@@ -76,13 +76,13 @@ export async function releaseItAction({
 			`Version ${version} was pushed but never published to npm. Publishing it now.`,
 		);
 
+		// Creating the GitHub release first, since a publish conflict ends the run.
+		if (hasRelease === false) {
+			await runReleaseIt("--no-increment --no-git --no-npm.publish");
+		}
+
 		await runReleaseIt(
-			[
-				"--no-increment --no-git --npm.publish",
-				hasRelease !== false && "--no-github.release",
-			]
-				.filter(Boolean)
-				.join(" "),
+			"--no-increment --no-git --npm.publish --no-github.release",
 			{ allowPublishConflict: true },
 		);
 		return;
