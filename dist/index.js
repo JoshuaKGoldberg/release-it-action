@@ -30291,7 +30291,7 @@ module.exports = {
 
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(2627);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(3473);
 
 
 await (0,_runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__/* .runReleaseItAction */ .k)(_actions_github__WEBPACK_IMPORTED_MODULE_0__/* .context */ ._);
@@ -30301,7 +30301,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 2627:
+/***/ 3473:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -44201,34 +44201,60 @@ async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
     }
 }
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/methods/command.js
-// Convert `command` string into an array of file or arguments to pass to $`${...fileOrCommandArguments}`
-const parseCommandString = command => {
-	if (typeof command !== 'string') {
-		throw new TypeError(`The command must be a string: ${String(command)}.`);
-	}
-
-	const trimmedCommand = command.trim();
-	if (trimmedCommand === '') {
-		return [];
-	}
-
-	const tokens = [];
-	for (const token of trimmedCommand.split(SPACES_REGEXP)) {
-		// Allow spaces to be escaped by a backslash if not meant as a delimiter
-		const previousToken = tokens.at(-1);
-		if (previousToken && previousToken.endsWith('\\')) {
-			// Merge previous token with current one
-			tokens[tokens.length - 1] = `${previousToken.slice(0, -1)} ${token}`;
-		} else {
-			tokens.push(token);
-		}
-	}
-
-	return tokens;
-};
-
-const SPACES_REGEXP = / +/g;
+;// CONCATENATED MODULE: ./src/parseArgsString.ts
+function parseArgsString(input) {
+    const args = [];
+    let current = "";
+    let inArg = false;
+    let quote;
+    for (let i = 0; i < input.length; i += 1) {
+        const character = input[i];
+        if (quote) {
+            if (character === quote) {
+                quote = undefined;
+            }
+            else {
+                current += character;
+            }
+            continue;
+        }
+        switch (character) {
+            case " ":
+            case "\t":
+                if (inArg) {
+                    args.push(current);
+                    current = "";
+                    inArg = false;
+                }
+                break;
+            case '"':
+            case "'":
+                quote = character;
+                inArg = true;
+                break;
+            case "\\":
+                if (input[i + 1] === " ") {
+                    current += " ";
+                    i += 1;
+                }
+                else {
+                    current += character;
+                }
+                inArg = true;
+                break;
+            default:
+                current += character;
+                inArg = true;
+        }
+    }
+    if (quote) {
+        throw new Error(`Unterminated ${quote} quote in arguments: ${input}`);
+    }
+    if (inArg) {
+        args.push(current);
+    }
+    return args;
+}
 
 ;// CONCATENATED MODULE: ./src/steps/checkSuperseded.ts
 
@@ -44267,10 +44293,10 @@ async function getHeadSha() {
 
 const publishConflict = /cannot publish over (?:the )?previously (?:published|staged) version/i;
 async function runReleaseIt(releaseItArgs, { allowPublishConflict } = {}) {
-    const args = parseCommandString(releaseItArgs ?? "");
     await tryCatchInfoAction("running release-it", async () => {
         const startSha = await getHeadSha();
         try {
+            const args = parseArgsString(releaseItArgs ?? "");
             const { exitCode } = await $$captured `npx release-it --verbose ${args}`;
             if (exitCode) {
                 throw new Error(`Exit code ${exitCode.toString()}.`);
