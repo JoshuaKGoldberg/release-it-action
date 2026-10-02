@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.10](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.9...v0.5.10) (2026-10-02)
+
+### Bug Fixes
+
+- skip release-it npm checks when republishing an unpublished version ([#857](https://github.com/JoshuaKGoldberg/release-it-action/issues/857)) ([ab876d9](https://github.com/JoshuaKGoldberg/release-it-action/commit/ab876d9cc5e92e1511f0a7c513a0510ad5c7929f)), closes [#839](https://github.com/JoshuaKGoldberg/release-it-action/issues/839)
+
 ## [0.5.9](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.8...v0.5.9) (2026-10-02)
 
 ### Bug Fixes
