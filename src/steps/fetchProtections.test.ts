@@ -11,7 +11,7 @@ vi.mock("../tryCatchInfoAction.js", () => ({
 
 const branch = "test-branch";
 const mockProtections = { protected: true };
-const mockRequest = vi.fn().mockResolvedValue(mockProtections);
+const mockRequest = vi.fn().mockResolvedValue({ data: mockProtections });
 const mockOctokit = { request: mockRequest } as unknown as Octokit;
 const requestData = { branch, owner: "test-owner", repo: "test-repo" };
 
