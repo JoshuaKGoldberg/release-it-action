@@ -11,6 +11,16 @@ vi.mock("execa", () => ({
 			mock$quiet(strings, ...values) as unknown,
 }));
 
+vi.mock("@actions/core");
+
+const mockSetTimeout = vi.fn();
+
+vi.mock("node:timers/promises", () => ({
+	get setTimeout() {
+		return mockSetTimeout;
+	},
+}));
+
 const mockReadFile = vi.fn();
 
 vi.mock("node:fs/promises", () => ({
@@ -24,7 +34,9 @@ interface MockResult {
 	stdout?: string;
 }
 
-function mockCommands(results: Record<string, MockResult>) {
+function mockCommands(
+	results: Record<string, (() => MockResult) | MockResult>,
+) {
 	mock$quiet.mockImplementation(
 		(strings: TemplateStringsArray, ...values: unknown[]) => {
 			const command = strings
@@ -37,7 +49,13 @@ function mockCommands(results: Record<string, MockResult>) {
 				)
 				.trim();
 
-			return Promise.resolve({ exitCode: 0, stdout: "", ...results[command] });
+			const result = results[command];
+
+			return Promise.resolve({
+				exitCode: 0,
+				stdout: "",
+				...(typeof result === "function" ? result() : result),
+			});
 		},
 	);
 }
@@ -48,6 +66,7 @@ function mockPackageJson(data: object) {
 
 const packageData = { name: "test-package", version: "1.2.3" };
 const notFound = { exitCode: 1, stdout: '{"error":{"code":"E404"}}' };
+const recentTagTime = { stdout: String(Math.floor(Date.now() / 1000)) };
 
 describe("getUnpublishedVersion", () => {
 	it("returns undefined when the package is private", async () => {
@@ -169,5 +188,50 @@ describe("getUnpublishedVersion", () => {
 			headTag: "1.2.3",
 			version: "1.2.3",
 		});
+	});
+
+	it("returns undefined when a recently tagged version shows up on npm after rechecking", async () => {
+		const npmResults = [notFound, notFound, {}];
+		mockPackageJson(packageData);
+		mockCommands({
+			"git log -1 --format=%ct v1.2.3": recentTagTime,
+			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+			"npm view test-package@1.2.3 version --json": () =>
+				npmResults.shift() ?? {},
+		});
+
+		expect(await getUnpublishedVersion()).toBeUndefined();
+		expect(mockSetTimeout).toHaveBeenCalledTimes(2);
+	});
+
+	it("returns the version when a recently tagged version never shows up on npm", async () => {
+		mockPackageJson(packageData);
+		mockCommands({
+			"git log -1 --format=%ct v1.2.3": recentTagTime,
+			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+			"git tag --points-at HEAD": { stdout: "v1.2.3" },
+			"npm view test-package@1.2.3 version --json": notFound,
+		});
+
+		expect(await getUnpublishedVersion()).toEqual({
+			headTag: "v1.2.3",
+			version: "1.2.3",
+		});
+		expect(mockSetTimeout).toHaveBeenCalledTimes(12);
+	});
+
+	it("does not recheck npm when the version was tagged long ago", async () => {
+		mockPackageJson(packageData);
+		mockCommands({
+			"git log -1 --format=%ct v1.2.3": { stdout: "1000000000" },
+			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+			"npm view test-package@1.2.3 version --json": notFound,
+		});
+
+		expect(await getUnpublishedVersion()).toEqual({
+			headTag: undefined,
+			version: "1.2.3",
+		});
+		expect(mockSetTimeout).not.toHaveBeenCalled();
 	});
 });

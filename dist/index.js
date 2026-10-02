@@ -44178,7 +44178,13 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
 ;// CONCATENATED MODULE: ./src/steps/getUnpublishedVersion.ts
 
 
+
+
 const $quiet = $({ reject: false });
+// npm can take a few minutes after a publish before it shows the new version.
+const recentTagSeconds = 10 * 60;
+const recheckAttempts = 12;
+const recheckDelayMs = 15_000;
 async function getUnpublishedVersion() {
     const { name, private: isPrivate, publishConfig, version, } = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
     if (isPrivate || !name || !version) {
@@ -44191,12 +44197,18 @@ async function getUnpublishedVersion() {
         ? scopedRegistry
         : publishConfig?.registry;
     const registryArgs = registry ? ["--registry", registry] : [];
-    const view = await $quiet `npm view ${name}@${version} version --json ${registryArgs}`;
-    if (!view.exitCode) {
+    const isOnNpm = async () => {
+        const view = await $quiet `npm view ${name}@${version} version --json ${registryArgs}`;
+        if (!view.exitCode) {
+            return true;
+        }
+        if (!view.stdout.includes('"E404"')) {
+            throw new Error(`Could not check npm for ${name}@${version}.`);
+        }
+        return false;
+    };
+    if (await isOnNpm()) {
         return undefined;
-    }
-    if (!view.stdout.includes('"E404"')) {
-        throw new Error(`Could not check npm for ${name}@${version}.`);
     }
     const tagNames = [version, `v${version}`];
     const existingTags = (await $quiet `git tag --list ${tagNames}`).stdout
@@ -44205,6 +44217,16 @@ async function getUnpublishedVersion() {
     // A version that was never tagged was never released, e.g. a new package.
     if (!existingTags.length) {
         return undefined;
+    }
+    const tagSeconds = Number((await $quiet `git log -1 --format=%ct ${existingTags[0]}`).stdout);
+    if (Date.now() / 1000 - tagSeconds < recentTagSeconds) {
+        info(`Version ${version} was tagged recently but isn't on npm yet. Waiting for npm to show it.`);
+        for (let attempt = 0; attempt < recheckAttempts; attempt += 1) {
+            await (0,promises_namespaceObject.setTimeout)(recheckDelayMs);
+            if (await isOnNpm()) {
+                return undefined;
+            }
+        }
     }
     const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
     return {
