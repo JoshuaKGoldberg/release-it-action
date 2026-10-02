@@ -11,6 +11,4 @@ runs:
       with:
         cache: true
         require-lockfile: true
-    - run: which -a node npm; node --version; npm --version
-      shell: bash
   using: composite
