@@ -213,8 +213,8 @@ importers:
         specifier: 0.9.0
         version: 0.9.0
       create-typescript-app:
-        specifier: 2.66.1
-        version: 2.66.1(bingo-systems@0.7.0)(typescript@5.9.3)
+        specifier: 2.67.0
+        version: 2.67.0(bingo-systems@0.7.0)(typescript@5.9.3)
       cspell:
         specifier: 10.3.3
         version: 10.3.3
@@ -1161,6 +1161,11 @@ packages:
     resolution: {integrity: sha512-SEeaJLb3qBNF/OaXnaR1NmmBbFYk1zC0ZH/52fATcRPLFg/p791YrcyFFy44Bo9sLaGuSuLp5Q6axbb/O+v/RA==}
     engines: {node: ^14.18.0 || >=16.0.0}
 
+  '@prettier/sync@0.6.1':
+    resolution: {integrity: sha512-yF9G8vK/LYUTF3Cijd7VC9La3b20F20/J/fgoR4H0B8JGOWnZVZX6+I6+vODPosjmMcpdlUV+gUqJQZp3kLOcw==}
+    peerDependencies:
+      prettier: '*'
+
   '@release-it/conventional-changelog@12.0.2':
     resolution: {integrity: sha512-mJsfycScVqud9O+GzVLT1wQBsIR2WO3kEe6Xm7ucf9yP9KyKRTY9yqoFe/kjLCNSu0lP0PzpuOooUYyzHm1oFw==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
@@ -1811,8 +1816,8 @@ packages:
     engines: {node: '>=22'}
     hasBin: true
 
-  create-typescript-app@2.66.1:
-    resolution: {integrity: sha512-qnVdB2ra5BBwS2uKwSCNfR+iiaWxHADlK1Xtf7YCAHRcVlCpkXS4J86+2pV4uM84vB66v6Q6TbdnyK34j6QzHg==}
+  create-typescript-app@2.67.0:
+    resolution: {integrity: sha512-KXsXnltclWbrUJ8yWjlSaLCMSuqyLIAvcjd2L+85csY27bpOfdTzM9koyT92ScWU65JQtLJrtnpBBwGj8hJg9Q==}
     engines: {node: ^22.13.0 || ^24.11.0 || >=26.0.0}
     hasBin: true
 
@@ -2802,6 +2807,9 @@ packages:
 
   magicast@0.5.5:
     resolution: {integrity: sha512-UicdXN8zQ3JHlxVq+28afMXPr1z7WNY6+7EJnzTdQWkTAlMLF5fNCCKxJHBQwGaNGR11581EiQmQzx73+MvszA==}
+
+  make-synchronized@0.8.0:
+    resolution: {integrity: sha512-DZu4lwc0ffoFz581BSQa/BJl+1ZqIkoRQ+VejMlH0VrP4E86StAODnZujZ4sepumQj8rcP7wUnUBGM8Gu+zKUA==}
 
   markdown-it@14.3.2:
     resolution: {integrity: sha512-sHHjZ5fJKlgrG4qns2YwVcdNep35h5fERrfkD2YNsb9UFk0UIHarbiTaHKVMlPuWAoiilyK8Fv/jAm11slsY7Q==}
@@ -4808,6 +4816,11 @@ snapshots:
 
   '@pkgr/core@0.3.6': {}
 
+  '@prettier/sync@0.6.1(prettier@3.9.7)':
+    dependencies:
+      make-synchronized: 0.8.0
+      prettier: 3.9.7
+
   '@release-it/conventional-changelog@12.0.2(conventional-commits-filter@6.0.1)(conventional-commits-parser@7.1.2)(release-it@21.1.0(@types/node@24.19.0)(magicast@0.5.5))':
     dependencies:
       '@conventional-changelog/git-client': 3.1.2(conventional-commits-filter@6.0.1)(conventional-commits-parser@7.1.2)
@@ -5423,8 +5436,9 @@ snapshots:
       conventional-commits-filter: 6.0.1
       conventional-commits-parser: 7.1.2
 
-  create-typescript-app@2.66.1(bingo-systems@0.7.0)(typescript@5.9.3):
+  create-typescript-app@2.67.0(bingo-systems@0.7.0)(typescript@5.9.3):
     dependencies:
+      '@prettier/sync': 0.6.1(prettier@3.9.7)
       '@typescript-eslint/typescript-estree': 8.71.0(typescript@5.9.3)
       bingo: 0.13.0
       bingo-fs: 0.6.0
@@ -5448,6 +5462,7 @@ snapshots:
       object-strings-deep: 0.1.2
       parse-author: 2.0.0
       parse-package-name: 1.0.0
+      prettier: 3.9.7
       remove-dependencies: 0.1.1
       remove-undefined-objects: 9.0.0
       semver: 7.8.5
@@ -6541,6 +6556,8 @@ snapshots:
       '@babel/parser': 7.29.9
       '@babel/types': 7.29.8
       source-map-js: 1.2.1
+
+  make-synchronized@0.8.0: {}
 
   markdown-it@14.3.2:
     dependencies:
