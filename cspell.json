@@ -24,6 +24,7 @@
 		"packagejson",
 		"rulesets",
 		"shlex",
-		"tseslint"
+		"tseslint",
+		"unstub"
 	]
 }

@@ -15,9 +15,11 @@ export async function fetchProtections({
 	return await tryCatchInfoAction(
 		`fetching existing branch protections for ${requestData.branch}`,
 		async () =>
-			await octokit.request(
-				"GET /repos/{owner}/{repo}/branches/{branch}/protection",
-				requestData,
-			),
+			(
+				await octokit.request(
+					"GET /repos/{owner}/{repo}/branches/{branch}/protection",
+					requestData,
+				)
+			).data,
 	);
 }
