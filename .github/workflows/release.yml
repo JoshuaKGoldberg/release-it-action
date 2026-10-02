@@ -12,6 +12,10 @@ jobs:
           token: ${{ secrets.ACCESS_TOKEN }}
       - uses: ./.github/actions/prepare
       - env:
+          REF: ${{ inputs.ref }}
+        if: inputs.ref
+        run: git checkout "$REF"
+      - env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: node dist/index.js
 
@@ -21,6 +25,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to run the release from, such as a release tag whose npm publish failed. Defaults to main.
+        required: false
+        type: string
 
 permissions:
   contents: write
