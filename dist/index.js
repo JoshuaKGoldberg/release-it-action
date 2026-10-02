@@ -44674,7 +44674,7 @@ async function releaseItAction(options) {
 }
 async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githubToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
     // release-it reads the token from the environment, not from this process.
-    process.env.GITHUB_TOKEN ??= githubToken;
+    process.env.GITHUB_TOKEN = githubToken;
     const octokit = github/* getOctokit */.Q(githubToken);
     const unpublishedVersion = skipNpmPublish
         ? undefined

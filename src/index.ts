@@ -63,7 +63,7 @@ async function runRelease({
 	skipNpmPublish = false,
 }: ReleaseItActionOptions) {
 	// release-it reads the token from the environment, not from this process.
-	process.env.GITHUB_TOKEN ??= githubToken;
+	process.env.GITHUB_TOKEN = githubToken;
 
 	const octokit = github.getOctokit(githubToken);
 

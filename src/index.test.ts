@@ -97,13 +97,13 @@ describe("releaseItAction", () => {
 		expect(process.env.GITHUB_TOKEN).toBe("mock-githubToken");
 	});
 
-	it("does not overwrite an existing GITHUB_TOKEN environment variable", async () => {
+	it("overwrites an existing GITHUB_TOKEN environment variable with githubToken", async () => {
 		vi.stubEnv("GITHUB_TOKEN", "mock-environment-token");
 		mockShouldSemanticRelease.mockResolvedValueOnce(false);
 
 		await releaseItAction(mockOptions);
 
-		expect(process.env.GITHUB_TOKEN).toBe("mock-environment-token");
+		expect(process.env.GITHUB_TOKEN).toBe("mock-githubToken");
 	});
 
 	it("does not run release-it when shouldSemanticRelease returns false", async () => {
