@@ -238,7 +238,7 @@ describe("runReleaseIt", () => {
 		expect(mock$$).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalledWith(
 			new Error(
-				'Unterminated " quote in arguments: --github.releaseName="oops',
+				'Could not parse arguments (Got EOF while in a quoted string): --github.releaseName="oops',
 			),
 		);
 	});

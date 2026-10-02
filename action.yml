@@ -14,7 +14,7 @@ inputs:
   npm-token:
     description: npm access token with the automation role.
   release-it-args:
-    description: Any arbitrary arguments to pass to `npx release-it --verbose`.
+    description: Any arbitrary arguments to pass to `npx release-it --verbose`, split like a POSIX shell (quotes and backslash escapes, without variable expansion).
   skip-npm-publish:
     default: "false"
     description: Whether to skip publishing to npm.
