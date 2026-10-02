@@ -44612,10 +44612,7 @@ async function runReleaseIt(releaseItArgs, { allowPublishConflict, skipSupersede
         const startSha = await getHeadSha();
         try {
             const args = parseArgsString(releaseItArgs ?? "");
-            const { exitCode } = await $$captured `npx release-it --verbose ${args}`;
-            if (exitCode) {
-                throw new Error(`Exit code ${exitCode.toString()}.`);
-            }
+            await $$captured `npx release-it --verbose ${args}`;
         }
         catch (error) {
             if (!skipSupersededCheck &&
