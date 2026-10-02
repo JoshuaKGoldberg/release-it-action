@@ -23,6 +23,7 @@
 		"outro",
 		"packagejson",
 		"rulesets",
-		"tseslint"
+		"tseslint",
+		"unstub"
 	]
 }

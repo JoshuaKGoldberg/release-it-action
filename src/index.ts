@@ -47,6 +47,9 @@ export async function releaseItAction({
 		);
 	}
 
+	// release-it reads the token from the environment, not from this process.
+	process.env.GITHUB_TOKEN ??= githubToken;
+
 	const octokit = github.getOctokit(githubToken);
 
 	const unpublishedVersion = skipNpmPublish
