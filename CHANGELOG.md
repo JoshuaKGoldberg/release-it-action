@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.13](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.12...v0.5.13) (2026-10-02)
+
+### Bug Fixes
+
+- give actionable guidance when an unpublished version blocks releasing ([#864](https://github.com/JoshuaKGoldberg/release-it-action/issues/864)) ([76d6365](https://github.com/JoshuaKGoldberg/release-it-action/commit/76d63654b270afb71573d5f909765e3de349ec54)), closes [#844](https://github.com/JoshuaKGoldberg/release-it-action/issues/844)
+
 ## [0.5.12](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.11...v0.5.12) (2026-10-02)
 
 ### Bug Fixes
