@@ -8,7 +8,10 @@ import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
 import { getUnpublishedVersion } from "./steps/getUnpublishedVersion.js";
 import { hasGitHubRelease } from "./steps/hasGitHubRelease.js";
 import { runReleaseIt } from "./steps/runReleaseIt.js";
-import { tryCatchInfoAction } from "./tryCatchInfoAction.js";
+import {
+	tryCatchInfoAction,
+	tryCatchSetFailedAction,
+} from "./tryCatchInfoAction.js";
 
 export interface ReleaseItActionOptions {
 	bypassBranchProtections?: string;
@@ -118,10 +121,10 @@ async function runRelease({
 	}
 
 	if (
-		(await tryCatchInfoAction(
-			"should-semantic-release",
+		!(await tryCatchSetFailedAction(
+			"running should-semantic-release",
 			async () => await shouldSemanticRelease({ verbose: true }),
-		)) === false
+		))
 	) {
 		return;
 	}
