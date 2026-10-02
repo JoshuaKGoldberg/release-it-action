@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.19](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.18...v0.5.19) (2026-10-02)
+
+### Bug Fixes
+
+- log release-it failures once, without repeating its output ([#886](https://github.com/JoshuaKGoldberg/release-it-action/issues/886)) ([5eebe77](https://github.com/JoshuaKGoldberg/release-it-action/commit/5eebe7712f038ec64bb1512ae8c1ce8f56180ed7)), closes [#883](https://github.com/JoshuaKGoldberg/release-it-action/issues/883)
+
 ## [0.5.18](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.17...v0.5.18) (2026-10-02)
 
 ### Bug Fixes
