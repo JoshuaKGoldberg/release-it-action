@@ -48,7 +48,9 @@ export async function releaseItAction(options: ReleaseItActionOptions) {
 	} finally {
 		await tryCatchInfoAction(
 			"removing the npm token from the npmrc",
-			async () => await $$`npm config delete //registry.npmjs.org/:_authToken`,
+			async () => {
+				await $$`npm config delete //registry.npmjs.org/:_authToken`;
+			},
 		);
 	}
 }

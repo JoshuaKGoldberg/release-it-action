@@ -44669,7 +44669,9 @@ async function releaseItAction(options) {
         await runRelease(options);
     }
     finally {
-        await tryCatchInfoAction("removing the npm token from the npmrc", async () => await $$ `npm config delete //registry.npmjs.org/:_authToken`);
+        await tryCatchInfoAction("removing the npm token from the npmrc", async () => {
+            await $$ `npm config delete //registry.npmjs.org/:_authToken`;
+        });
     }
 }
 async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githubToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
