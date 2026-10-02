@@ -101,7 +101,7 @@ describe("releaseItAction", () => {
 		await releaseItAction(mockOptions);
 
 		expect(mockCore.setFailed).toHaveBeenCalledWith(
-			"Version 1.2.3 was tagged but never published to npm. Publish it before releasing a newer version.",
+			"Version 1.2.3 was tagged but never published to npm. Publish it before releasing a newer version, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.",
 		);
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
@@ -126,7 +126,7 @@ describe("releaseItAction", () => {
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).toHaveBeenCalledTimes(1);
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			"--no-increment --no-git --npm.publish --no-github.release",
+			`--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
 			{ allowPublishConflict: true },
 		);
 	});
@@ -141,12 +141,27 @@ describe("releaseItAction", () => {
 		await releaseItAction(mockOptions);
 
 		expect(mockRunReleaseIt.mock.calls).toEqual([
-			["--no-increment --no-git --no-npm.publish"],
+			[`--no-increment --no-git --no-npm.publish ${mockReleaseItArgs}`],
 			[
-				"--no-increment --no-git --npm.publish --no-github.release",
+				`--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
 				{ allowPublishConflict: true },
 			],
 		]);
+	});
+
+	it("publishes a version tagged at HEAD that was never published without extra arguments when releaseItArgs is undefined", async () => {
+		mockGetUnpublishedVersion.mockResolvedValueOnce({
+			headTag: "v1.2.3",
+			version: "1.2.3",
+		});
+		mockHasGitHubRelease.mockResolvedValueOnce(true);
+
+		await releaseItAction({ ...mockOptions, releaseItArgs: undefined });
+
+		expect(mockRunReleaseIt).toHaveBeenCalledWith(
+			"--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
+			{ allowPublishConflict: true },
+		);
 	});
 
 	it("does not check for an unpublished version when skipNpmPublish is true", async () => {

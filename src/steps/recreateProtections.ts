@@ -1,10 +1,14 @@
 import type { RequestParameters } from "@octokit/types";
 
-import { tryCatchInfoAction } from "../tryCatchInfoAction.js";
+import { tryCatchSetFailedAction } from "../tryCatchInfoAction.js";
 import { ExistingProtections, Octokit } from "../types.js";
 
 export interface RecreateProtectionsOptions {
-	commonRequestData: RequestParameters;
+	commonRequestData: RequestParameters & {
+		branch: string;
+		owner: string;
+		repo: string;
+	};
 	existingProtections: ExistingProtections | undefined;
 	octokit: Octokit;
 }
@@ -27,7 +31,7 @@ export async function recreateProtections({
 		return;
 	}
 
-	await tryCatchInfoAction(
+	await tryCatchSetFailedAction(
 		"re-creating branch protections",
 		async () =>
 			await octokit.request(
@@ -61,13 +65,14 @@ export async function recreateProtections({
 									require_code_owner_reviews:
 										existingProtections.required_pull_request_reviews
 											.require_code_owner_reviews,
+									require_last_push_approval:
+										existingProtections.required_pull_request_reviews
+											.require_last_push_approval,
 									required_approving_review_count:
 										existingProtections.required_pull_request_reviews
 											.required_approving_review_count,
 								}
 							: null,
-					required_signatures:
-						!!existingProtections.required_signatures?.enabled,
 					restrictions: existingProtections.restrictions
 						? {
 								apps: existingProtections.restrictions.apps.map(
@@ -99,6 +104,18 @@ export async function recreateProtections({
 				},
 			),
 	);
+
+	// The update protection endpoint doesn't accept required_signatures.
+	if (existingProtections.required_signatures?.enabled) {
+		await tryCatchSetFailedAction(
+			"re-enabling required signatures",
+			async () =>
+				await octokit.request(
+					`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`,
+					commonRequestData,
+				),
+		);
+	}
 }
 
 function mapReviewRestrictions(
