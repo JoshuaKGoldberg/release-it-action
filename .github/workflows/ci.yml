@@ -13,6 +13,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: ./.github/actions/prepare
       - run: pnpm build:release
+      - name: Verify dist is up to date
+        run: |
+          if [ -n "$(git status --porcelain dist)" ]; then
+            git status --porcelain dist
+            echo "dist/ is out of date. Run pnpm build:release and commit the result."
+            exit 1
+          fi
   lint:
     name: Lint
     runs-on: ubuntu-latest
