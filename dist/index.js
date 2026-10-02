@@ -33153,7 +33153,7 @@ function core_error(message, properties = {}) {
  * @param properties optional properties to add to the annotation.
  */
 function warning(message, properties = {}) {
-    issueCommand('warning', toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+    command_issueCommand('warning', utils_toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 /**
  * Adds a notice issue
@@ -44275,7 +44275,7 @@ async function checkSuperseded(startSha) {
         return true;
     }
     const isAncestor = await checkSuperseded_$quiet `git merge-base --is-ancestor ${localSha} ${remoteSha}`;
-    return isAncestor.exitCode !== 0;
+    return isAncestor.exitCode === 1;
 }
 async function getHeadSha() {
     const { exitCode, stdout } = await checkSuperseded_$quiet `git rev-parse HEAD`;
@@ -44301,7 +44301,7 @@ async function runReleaseIt(releaseItArgs, { allowPublishConflict } = {}) {
         }
         catch (error) {
             if (startSha && (await checkSuperseded(startSha))) {
-                info(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${error}`);
+                warning(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${error}`);
                 return;
             }
             if (allowPublishConflict &&
