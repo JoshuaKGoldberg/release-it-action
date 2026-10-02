@@ -163,7 +163,11 @@ The next run publishes that version without making a new commit or tag.
 It also creates the GitHub release if it's missing.
 
 This only works if the version's Git tag is on the latest commit.
-Otherwise the action fails until you publish that version yourself.
+Otherwise the action fails until you publish that version yourself, or bump the version manually if npm won't accept it again.
+
+The check assumes your package belongs on npm.
+If it doesn't, set `skip-npm-publish` or mark the package as `"private": true`.
+Otherwise every push fails as an unpublished version.
 
 ### What happens when a newer commit lands during a release?
 

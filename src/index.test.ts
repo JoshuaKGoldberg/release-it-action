@@ -101,7 +101,7 @@ describe("releaseItAction", () => {
 		await releaseItAction(mockOptions);
 
 		expect(mockCore.setFailed).toHaveBeenCalledWith(
-			"Version 1.2.3 was tagged but never published to npm. Publish it before releasing a newer version.",
+			"Version 1.2.3 was tagged but never published to npm. Publish it before releasing a newer version, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.",
 		);
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();

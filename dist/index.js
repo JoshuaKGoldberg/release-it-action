@@ -44345,7 +44345,7 @@ async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, 
     if (unpublishedVersion) {
         const { headTag, version } = unpublishedVersion;
         if (!headTag) {
-            setFailed(`Version ${version} was tagged but never published to npm. Publish it before releasing a newer version.`);
+            setFailed(`Version ${version} was tagged but never published to npm. Publish it before releasing a newer version, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.`);
             return;
         }
         const hasRelease = await tryCatchInfoAction(`checking for a GitHub release for ${headTag}`, async () => await hasGitHubRelease({ octokit, owner, repo, tag: headTag }));
