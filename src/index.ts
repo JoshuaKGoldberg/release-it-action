@@ -23,18 +23,9 @@ export interface ReleaseItActionOptions {
 	skipNpmPublish?: boolean;
 }
 
-export async function releaseItAction({
-	bypassBranchProtections,
-	bypassBranchRulesets,
-	githubToken,
-	gitUserEmail,
-	gitUserName,
-	npmToken,
-	owner,
-	releaseItArgs,
-	repo,
-	skipNpmPublish = false,
-}: ReleaseItActionOptions) {
+export async function releaseItAction(options: ReleaseItActionOptions) {
+	const { gitUserEmail, gitUserName, npmToken, skipNpmPublish } = options;
+
 	await $$`git config user.email ${gitUserEmail}`;
 	await $$`git config user.name ${gitUserName}`;
 	if (skipNpmPublish) {
@@ -47,6 +38,30 @@ export async function releaseItAction({
 		);
 	}
 
+	if (skipNpmPublish || !npmToken) {
+		await runRelease(options);
+		return;
+	}
+
+	try {
+		await runRelease(options);
+	} finally {
+		await tryCatchInfoAction(
+			"removing the npm token from the npmrc",
+			async () => await $$`npm config delete //registry.npmjs.org/:_authToken`,
+		);
+	}
+}
+
+async function runRelease({
+	bypassBranchProtections,
+	bypassBranchRulesets,
+	githubToken,
+	owner,
+	releaseItArgs,
+	repo,
+	skipNpmPublish = false,
+}: ReleaseItActionOptions) {
 	// release-it reads the token from the environment, not from this process.
 	process.env.GITHUB_TOKEN ??= githubToken;
 
