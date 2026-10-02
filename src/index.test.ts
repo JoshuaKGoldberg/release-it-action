@@ -172,6 +172,7 @@ describe("releaseItAction", () => {
 			version: "1.2.3",
 		});
 		mockHasGitHubRelease.mockResolvedValueOnce(false);
+		mockRunReleaseIt.mockResolvedValueOnce(true);
 
 		await releaseItAction(mockOptions);
 
@@ -185,6 +186,39 @@ describe("releaseItAction", () => {
 				{ allowPublishConflict: true, skipSupersededCheck: true },
 			],
 		]);
+	});
+
+	it("does not publish to npm when creating the missing GitHub release fails", async () => {
+		mockGetUnpublishedVersion.mockResolvedValueOnce({
+			headTag: "v1.2.3",
+			version: "1.2.3",
+		});
+		mockHasGitHubRelease.mockResolvedValueOnce(false);
+		mockRunReleaseIt.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		expect(mockRunReleaseIt.mock.calls).toEqual([
+			[
+				`--no-increment --no-git --no-npm.publish ${mockReleaseItArgs}`,
+				{ skipSupersededCheck: true },
+			],
+		]);
+	});
+
+	it("fails without publishing when checking for the GitHub release fails", async () => {
+		mockGetUnpublishedVersion.mockResolvedValueOnce({
+			headTag: "v1.2.3",
+			version: "1.2.3",
+		});
+		mockHasGitHubRelease.mockResolvedValueOnce(undefined);
+
+		await releaseItAction(mockOptions);
+
+		expect(mockCore.setFailed).toHaveBeenCalledWith(
+			"Could not check whether v1.2.3 has a GitHub release, so 1.2.3 was not published to npm.",
+		);
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
 	it("publishes a version tagged at HEAD that was never published without extra arguments when releaseItArgs is undefined", async () => {

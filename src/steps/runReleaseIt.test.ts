@@ -205,6 +205,29 @@ describe("runReleaseIt", () => {
 		expect(mockSetFailed).toHaveBeenCalled();
 	});
 
+	it("returns true when release-it succeeds", async () => {
+		mock$$.mockResolvedValue({ exitCode: 0 });
+
+		expect(await runReleaseIt()).toBe(true);
+	});
+
+	it("returns false when release-it fails and the run is failed", async () => {
+		mock$$.mockRejectedValue(new Error("Oh no!"));
+		mockGetHeadSha.mockResolvedValue("start-sha");
+		mockCheckSuperseded.mockResolvedValue(false);
+
+		expect(await runReleaseIt()).toBe(false);
+		expect(mockSetFailed).toHaveBeenCalled();
+	});
+
+	it("returns true when release-it fails but the branch was superseded", async () => {
+		mock$$.mockRejectedValue(new Error("Oh no!"));
+		mockGetHeadSha.mockResolvedValue("start-sha");
+		mockCheckSuperseded.mockResolvedValue(true);
+
+		expect(await runReleaseIt()).toBe(true);
+	});
+
 	it("does not log an error if running release-it runs smoothly", async () => {
 		mock$$.mockResolvedValue({ exitCode: 0 });
 

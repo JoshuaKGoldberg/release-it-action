@@ -90,21 +90,31 @@ async function runRelease({
 				await hasGitHubRelease({ octokit, owner, repo, tag: headTag }),
 		);
 
+		if (hasRelease === undefined) {
+			core.setFailed(
+				`Could not check whether ${headTag} has a GitHub release, so ${version} was not published to npm.`,
+			);
+			return;
+		}
+
 		core.info(
 			`Version ${version} was pushed but never published to npm. Publishing it now.`,
 		);
 
 		// First try to create a GitHub release, since they're mutable...
-		if (hasRelease === false) {
-			await runReleaseIt(
+		if (
+			!hasRelease &&
+			!(await runReleaseIt(
 				["--no-increment --no-git --no-npm.publish", releaseItArgs]
 					.filter(Boolean)
 					.join(" "),
 				{ skipSupersededCheck: true },
-			);
+			))
+		) {
+			return;
 		}
 
-		// ...and then if that succeeded (didn't throw), do the immutable npm publish
+		// ...and only if that succeeded, do the immutable npm publish
 		await runReleaseIt(
 			[
 				"--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",

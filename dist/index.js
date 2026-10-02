@@ -44608,7 +44608,7 @@ async function getHeadSha() {
 
 const publishConflict = /cannot publish over (?:the )?previously (?:published|staged) version/i;
 async function runReleaseIt(releaseItArgs, { allowPublishConflict, skipSupersededCheck } = {}) {
-    await tryCatchInfoAction("running release-it", async () => {
+    const succeeded = await tryCatchInfoAction("running release-it", async () => {
         const startSha = await getHeadSha();
         try {
             const args = parseArgsString(releaseItArgs ?? "");
@@ -44616,22 +44616,25 @@ async function runReleaseIt(releaseItArgs, { allowPublishConflict, skipSupersede
             if (exitCode) {
                 throw new Error(`Exit code ${exitCode.toString()}.`);
             }
+            return true;
         }
         catch (error) {
             if (!skipSupersededCheck &&
                 startSha &&
                 (await checkSuperseded(startSha))) {
                 warning(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`);
-                return;
+                return true;
             }
             if (allowPublishConflict &&
                 publishConflict.test(error.all ?? "")) {
                 info(`release-it failed because npm already has this version. A previous release run must have published it: ${describeError(error)}`);
-                return;
+                return true;
             }
             setFailed(`Error running release-it: ${describeError(error)}`);
+            return false;
         }
     });
+    return succeeded ?? false;
 }
 function describeError(error) {
     return error.shortMessage ?? String(error);
@@ -44686,14 +44689,19 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
             return;
         }
         const hasRelease = await tryCatchInfoAction(`checking for a GitHub release for ${headTag}`, async () => await hasGitHubRelease({ octokit, owner, repo, tag: headTag }));
+        if (hasRelease === undefined) {
+            setFailed(`Could not check whether ${headTag} has a GitHub release, so ${version} was not published to npm.`);
+            return;
+        }
         info(`Version ${version} was pushed but never published to npm. Publishing it now.`);
         // First try to create a GitHub release, since they're mutable...
-        if (hasRelease === false) {
-            await runReleaseIt(["--no-increment --no-git --no-npm.publish", releaseItArgs]
+        if (!hasRelease &&
+            !(await runReleaseIt(["--no-increment --no-git --no-npm.publish", releaseItArgs]
                 .filter(Boolean)
-                .join(" "), { skipSupersededCheck: true });
+                .join(" "), { skipSupersededCheck: true }))) {
+            return;
         }
-        // ...and then if that succeeded (didn't throw), do the immutable npm publish
+        // ...and only if that succeeded, do the immutable npm publish
         await runReleaseIt([
             "--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
             releaseItArgs,
