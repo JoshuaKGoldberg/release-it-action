@@ -35,7 +35,7 @@ vi.mock("../index.js", () => ({
 }));
 
 const mockContext = {
-	context: { actor: "test-actor" },
+	actor: "test-actor",
 	repo: {
 		owner: "context-owner",
 		repo: "context-repo",
@@ -60,8 +60,8 @@ describe("runReleaseItAction", () => {
 			    {
 			      "bypassBranchProtections": undefined,
 			      "bypassBranchRulesets": undefined,
-			      "gitUserEmail": "undefined@users.noreply.github.com",
-			      "gitUserName": undefined,
+			      "gitUserEmail": "test-actor@users.noreply.github.com",
+			      "gitUserName": "test-actor",
 			      "githubToken": "mock-github-token",
 			      "npmToken": undefined,
 			      "owner": "context-owner",
