@@ -44620,7 +44620,8 @@ async function runReleaseIt(releaseItArgs, { allowPublishConflict } = {}) {
 
 
 
-async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, githubToken, gitUserEmail, gitUserName, npmToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
+async function releaseItAction(options) {
+    const { gitUserEmail, gitUserName, npmToken, skipNpmPublish } = options;
     await $$ `git config user.email ${gitUserEmail}`;
     await $$ `git config user.name ${gitUserName}`;
     if (skipNpmPublish) {
@@ -44632,6 +44633,18 @@ async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, 
     else {
         info("No npm token provided. This is required unless you're using Trusted Publishing.");
     }
+    if (skipNpmPublish || !npmToken) {
+        await runRelease(options);
+        return;
+    }
+    try {
+        await runRelease(options);
+    }
+    finally {
+        await tryCatchInfoAction("removing the npm token from the npmrc", async () => await $$ `npm config delete //registry.npmjs.org/:_authToken`);
+    }
+}
+async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githubToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
     // release-it reads the token from the environment, not from this process.
     process.env.GITHUB_TOKEN ??= githubToken;
     const octokit = github/* getOctokit */.Q(githubToken);
