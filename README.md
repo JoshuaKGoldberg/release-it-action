@@ -81,10 +81,6 @@ It's strongly recommended to have `release-it` push before it publishes to npm.
 Then if a newer push wins the race, nothing gets published.
 It also lets step 3 finish any release that fails to publish.
 
-Without this config, `release-it` publishes to npm first and treats a failed push afterwards as a success.
-That leaves a version on npm whose release commit never landed, which the action can't recover from: every later run computes the same version and npm rejects it.
-The `--atomic` flag matters too: it keeps the commit and tag together, which the handling for superseded runs relies on.
-
 ```json
 {
 	"git": {
