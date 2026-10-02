@@ -141,7 +141,6 @@ The Node API doesn't read action inputs or environment variables.
 The action needs the latest commit of your release branch.
 The [concurrency group](https://docs.github.com/en/actions/using-jobs/using-concurrency) keeps later runs from missing earlier release commits.
 
-
 ### What happens when a release gets pushed but not published?
 
 Sometimes a release gets pushed to GitHub without making it to npm.
