@@ -107,7 +107,7 @@ export async function recreateProtections({
 
 	// The update protection endpoint doesn't accept required_signatures.
 	if (existingProtections.required_signatures?.enabled) {
-		await tryCatchInfoAction(
+		await tryCatchSetFailedAction(
 			"re-enabling required signatures",
 			async () =>
 				await octokit.request(
