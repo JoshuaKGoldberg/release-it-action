@@ -44333,7 +44333,7 @@ async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, 
         const hasRelease = await tryCatchInfoAction(`checking for a GitHub release for ${headTag}`, async () => await hasGitHubRelease({ octokit, owner, repo, tag: headTag }));
         info(`Version ${version} was pushed but never published to npm. Publishing it now.`);
         await runReleaseIt([
-            "--no-increment --no-git --npm.publish",
+            "--no-increment --no-git --npm.publish --npm.skipChecks",
             hasRelease !== false && "--no-github.release",
         ]
             .filter(Boolean)
