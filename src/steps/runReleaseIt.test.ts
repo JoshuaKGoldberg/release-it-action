@@ -189,6 +189,19 @@ describe("runReleaseIt", () => {
 		expect(mockSetFailed).toHaveBeenCalled();
 	});
 
+	it("logs an error if release-it fails without output when a publish conflict is allowed", async () => {
+		mock$$.mockRejectedValueOnce(new Error("Oh no!"));
+		mockGetHeadSha.mockResolvedValueOnce("start-sha");
+		mockCheckSuperseded.mockResolvedValueOnce(false);
+
+		await runReleaseIt("", { allowPublishConflict: true });
+
+		expect(mockInfo).not.toHaveBeenCalledWith(
+			expect.stringContaining("npm already has this version"),
+		);
+		expect(mockSetFailed).toHaveBeenCalled();
+	});
+
 	it("logs an error without checking for superseding if the starting sha is unknown", async () => {
 		mock$$.mockResolvedValue({ exitCode: 1 });
 		mockGetHeadSha.mockResolvedValue(undefined);
