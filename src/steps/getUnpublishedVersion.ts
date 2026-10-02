@@ -1,7 +1,14 @@
+import * as core from "@actions/core";
 import { $ } from "execa";
 import * as fs from "node:fs/promises";
+import { setTimeout } from "node:timers/promises";
 
 const $quiet = $({ reject: false });
+
+// npm can take a few minutes after a publish before it shows the new version.
+const recentTagSeconds = 10 * 60;
+const recheckAttempts = 12;
+const recheckDelayMs = 15_000;
 
 export interface UnpublishedVersion {
 	/**
@@ -40,14 +47,22 @@ export async function getUnpublishedVersion(): Promise<
 			? scopedRegistry
 			: publishConfig?.registry;
 	const registryArgs = registry ? ["--registry", registry] : [];
-	const view =
-		await $quiet`npm view ${name}@${version} version --json ${registryArgs}`;
-	if (!view.exitCode) {
-		return undefined;
-	}
+	const isOnNpm = async () => {
+		const view =
+			await $quiet`npm view ${name}@${version} version --json ${registryArgs}`;
+		if (!view.exitCode) {
+			return true;
+		}
 
-	if (!view.stdout.includes('"E404"')) {
-		throw new Error(`Could not check npm for ${name}@${version}.`);
+		if (!view.stdout.includes('"E404"')) {
+			throw new Error(`Could not check npm for ${name}@${version}.`);
+		}
+
+		return false;
+	};
+
+	if (await isOnNpm()) {
+		return undefined;
 	}
 
 	const tagNames = [version, `v${version}`];
@@ -58,6 +73,22 @@ export async function getUnpublishedVersion(): Promise<
 	// A version that was never tagged was never released, e.g. a new package.
 	if (!existingTags.length) {
 		return undefined;
+	}
+
+	const tagSeconds = Number(
+		(await $quiet`git log -1 --format=%ct ${existingTags[0]}`).stdout,
+	);
+	if (Date.now() / 1000 - tagSeconds < recentTagSeconds) {
+		core.info(
+			`Version ${version} was tagged recently but isn't on npm yet. Waiting for npm to show it.`,
+		);
+
+		for (let attempt = 0; attempt < recheckAttempts; attempt += 1) {
+			await setTimeout(recheckDelayMs);
+			if (await isOnNpm()) {
+				return undefined;
+			}
+		}
 	}
 
 	const headTags = (await $quiet`git tag --points-at HEAD`).stdout.split("\n");
