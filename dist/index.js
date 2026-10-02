@@ -30291,7 +30291,7 @@ module.exports = {
 
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(8377);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(4359);
 
 
 await (0,_runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__/* .runReleaseItAction */ .k)(_actions_github__WEBPACK_IMPORTED_MODULE_0__/* .context */ ._);
@@ -30301,7 +30301,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 8377:
+/***/ 4359:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -43940,6 +43940,34 @@ const $$captured = $({
     stdout: ["inherit", "pipe"],
 });
 
+;// CONCATENATED MODULE: ./src/getPublishRegistry.ts
+function getPublishRegistry({ name, publishConfig, }) {
+    const scopedRegistry = name?.startsWith("@")
+        ? publishConfig?.[`${name.split("/")[0]}:registry`]
+        : undefined;
+    return typeof scopedRegistry === "string" && scopedRegistry
+        ? scopedRegistry
+        : publishConfig?.registry;
+}
+
+;// CONCATENATED MODULE: ./src/getNpmAuthTokenKey.ts
+
+
+const defaultRegistry = "https://registry.npmjs.org/";
+async function getNpmAuthTokenKey() {
+    const registry = getPublishRegistry(await readPackageData()) ?? defaultRegistry;
+    const { host, pathname } = new URL(registry);
+    return `//${host}${pathname.endsWith("/") ? pathname : `${pathname}/`}:_authToken`;
+}
+async function readPackageData() {
+    try {
+        return JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    }
+    catch {
+        return {};
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
 
 async function tryCatchInfoAction(label, action) {
@@ -44182,22 +44210,19 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
 
 
 
+
 const $quiet = $({ reject: false });
 // npm can take a few minutes after a publish before it shows the new version.
 const recentTagSeconds = 10 * 60;
 const recheckAttempts = 12;
 const recheckDelayMs = 15_000;
 async function getUnpublishedVersion() {
-    const { name, private: isPrivate, publishConfig, version, } = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    const packageData = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    const { name, private: isPrivate, version } = packageData;
     if (isPrivate || !name || !version) {
         return undefined;
     }
-    const scopedRegistry = name.startsWith("@")
-        ? publishConfig?.[`${name.split("/")[0]}:registry`]
-        : undefined;
-    const registry = typeof scopedRegistry === "string" && scopedRegistry
-        ? scopedRegistry
-        : publishConfig?.registry;
+    const registry = getPublishRegistry(packageData);
     const registryArgs = registry ? ["--registry", registry] : [];
     const isOnNpm = async () => {
         const view = await $quiet `npm view ${name}@${version} version --json ${registryArgs}`;
@@ -44648,6 +44673,7 @@ function describeError(error) {
 
 
 
+
 async function releaseItAction(options) {
     const { gitUserEmail, gitUserName, npmToken, skipNpmPublish } = options;
     await $$ `git config user.email ${gitUserEmail}`;
@@ -44655,21 +44681,20 @@ async function releaseItAction(options) {
     if (skipNpmPublish) {
         info("skipNpmPublish is true. Skipping npm publish.");
     }
-    else if (npmToken) {
-        await $$ `npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
-    }
-    else {
+    else if (!npmToken) {
         info("No npm token provided. This is required unless you're using Trusted Publishing.");
     }
     if (skipNpmPublish || !npmToken) {
         await runRelease(options);
         return;
     }
+    const authTokenKey = await getNpmAuthTokenKey();
+    await $$ `npm config set ${authTokenKey} ${npmToken}`;
     try {
         await runRelease(options);
     }
     finally {
-        await tryCatchInfoAction("removing the npm token from the npmrc", async () => await $$ `npm config delete //registry.npmjs.org/:_authToken`);
+        await tryCatchInfoAction("removing the npm token from the npmrc", async () => await $$ `npm config delete ${authTokenKey}`);
     }
 }
 async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githubToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {

@@ -3,6 +3,11 @@ import { $ } from "execa";
 import * as fs from "node:fs/promises";
 import { setTimeout } from "node:timers/promises";
 
+import {
+	getPublishRegistry,
+	PublishRegistryData,
+} from "../getPublishRegistry.js";
+
 const $quiet = $({ reject: false });
 
 // npm can take a few minutes after a publish before it shows the new version.
@@ -18,34 +23,24 @@ export interface UnpublishedVersion {
 	version: string;
 }
 
-interface PackageData {
-	name?: string;
+interface PackageData extends PublishRegistryData {
 	private?: boolean;
-	publishConfig?: Record<string, unknown> & { registry?: string };
 	version?: string;
 }
 
 export async function getUnpublishedVersion(): Promise<
 	undefined | UnpublishedVersion
 > {
-	const {
-		name,
-		private: isPrivate,
-		publishConfig,
-		version,
-	} = JSON.parse(await fs.readFile("package.json", "utf8")) as PackageData;
+	const packageData = JSON.parse(
+		await fs.readFile("package.json", "utf8"),
+	) as PackageData;
+	const { name, private: isPrivate, version } = packageData;
 
 	if (isPrivate || !name || !version) {
 		return undefined;
 	}
 
-	const scopedRegistry = name.startsWith("@")
-		? publishConfig?.[`${name.split("/")[0]}:registry`]
-		: undefined;
-	const registry =
-		typeof scopedRegistry === "string" && scopedRegistry
-			? scopedRegistry
-			: publishConfig?.registry;
+	const registry = getPublishRegistry(packageData);
 	const registryArgs = registry ? ["--registry", registry] : [];
 	const isOnNpm = async () => {
 		const view =

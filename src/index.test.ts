@@ -11,6 +11,16 @@ vi.mock("./execa.js", () => ({
 	},
 }));
 
+const mockGetNpmAuthTokenKey = vi
+	.fn()
+	.mockResolvedValue("//registry.npmjs.org/:_authToken");
+
+vi.mock("./getNpmAuthTokenKey.js", () => ({
+	get getNpmAuthTokenKey() {
+		return mockGetNpmAuthTokenKey;
+	},
+}));
+
 const mockShouldSemanticRelease = vi.fn();
 
 vi.mock("should-semantic-release", () => ({
@@ -138,7 +148,26 @@ describe("releaseItAction", () => {
 		await releaseItAction(mockOptions);
 
 		expect(mock$$.mock.calls.at(-1)).toEqual([
-			["npm config delete //registry.npmjs.org/:_authToken"],
+			["npm config delete ", ""],
+			"//registry.npmjs.org/:_authToken",
+		]);
+	});
+
+	it("sets and removes the npm token for the package's publish registry", async () => {
+		mockGetNpmAuthTokenKey.mockResolvedValueOnce(
+			"//npm.pkg.github.com/:_authToken",
+		);
+		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		expect(mock$$.mock.calls.slice(2)).toEqual([
+			[
+				["npm config set ", " ", ""],
+				"//npm.pkg.github.com/:_authToken",
+				"mock-npmToken",
+			],
+			[["npm config delete ", ""], "//npm.pkg.github.com/:_authToken"],
 		]);
 	});
 
@@ -233,15 +262,19 @@ describe("releaseItAction", () => {
 			  ],
 			  [
 			    [
-			      "npm config set //registry.npmjs.org/:_authToken ",
+			      "npm config set ",
+			      " ",
 			      "",
 			    ],
+			    "//registry.npmjs.org/:_authToken",
 			    "mock-npmToken",
 			  ],
 			  [
 			    [
-			      "npm config delete //registry.npmjs.org/:_authToken",
+			      "npm config delete ",
+			      "",
 			    ],
+			    "//registry.npmjs.org/:_authToken",
 			  ],
 			]
 		`);
@@ -276,15 +309,19 @@ describe("releaseItAction", () => {
 			  ],
 			  [
 			    [
-			      "npm config set //registry.npmjs.org/:_authToken ",
+			      "npm config set ",
+			      " ",
 			      "",
 			    ],
+			    "//registry.npmjs.org/:_authToken",
 			    "mock-npmToken",
 			  ],
 			  [
 			    [
-			      "npm config delete //registry.npmjs.org/:_authToken",
+			      "npm config delete ",
+			      "",
 			    ],
+			    "//registry.npmjs.org/:_authToken",
 			  ],
 			]
 		`);
