@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.16](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.15...v0.5.16) (2026-10-02)
+
+### Bug Fixes
+
+- support quoted values in release-it-args ([#870](https://github.com/JoshuaKGoldberg/release-it-action/issues/870)) ([57a6ce1](https://github.com/JoshuaKGoldberg/release-it-action/commit/57a6ce123ef9ebc104dd258afc0145666bcb8414)), closes [#850](https://github.com/JoshuaKGoldberg/release-it-action/issues/850)
+
 ## [0.5.15](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.14...v0.5.15) (2026-10-02)
 
 ### Bug Fixes
