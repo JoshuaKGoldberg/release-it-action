@@ -141,8 +141,6 @@ The Node API doesn't read action inputs or environment variables.
 The action needs the latest commit of your release branch.
 The [concurrency group](https://docs.github.com/en/actions/using-jobs/using-concurrency) keeps later runs from missing earlier release commits.
 
-Don't add `cancel-in-progress: true` to that group.
-Cancelling a release between its push and its npm publish strands the version, and cancelling during a protections or rulesets bypass leaves them turned off.
 
 ### What happens when a release gets pushed but not published?
 
