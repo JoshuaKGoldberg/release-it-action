@@ -97,8 +97,10 @@ It also lets step 3 finish any release that fails to publish.
 ```
 
 The explicit `--tag` publishes prereleases under their own dist-tag, which newer versions of npm require.
-Releasing from a maintenance branch? Replace the tag expression with that branch's dist-tag.
 `skipChecks` lets step 3 republish a stranded version even without an npm token, such as with Trusted Publishing.
+
+> Tip: releasing from a maintenance branch?
+> Replace the tag expression with that branch's dist-tag.
 
 Skip this if you set `skip-npm-publish`, since the hook would still publish.
 
