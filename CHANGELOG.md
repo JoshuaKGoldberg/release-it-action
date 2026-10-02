@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.20](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.19...v0.5.20) (2026-10-02)
+
+### Bug Fixes
+
+- fail a republish instead of treating it as superseded ([#892](https://github.com/JoshuaKGoldberg/release-it-action/issues/892)) ([997826e](https://github.com/JoshuaKGoldberg/release-it-action/commit/997826e0704c3ac54cca6f667527f22ab044ce79)), closes [#891](https://github.com/JoshuaKGoldberg/release-it-action/issues/891)
+
 ## [0.5.19](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.18...v0.5.19) (2026-10-02)
 
 ### Bug Fixes
