@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.17](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.16...v0.5.17) (2026-10-02)
+
+### Bug Fixes
+
+- remove the npm token from the npmrc after the run ([#873](https://github.com/JoshuaKGoldberg/release-it-action/issues/873)) ([8c3f4cc](https://github.com/JoshuaKGoldberg/release-it-action/commit/8c3f4cce1dee8d883c02ea22304d9f466aea756c)), closes [#853](https://github.com/JoshuaKGoldberg/release-it-action/issues/853)
+
 ## [0.5.16](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.15...v0.5.16) (2026-10-02)
 
 ### Bug Fixes
