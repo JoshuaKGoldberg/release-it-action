@@ -175,9 +175,6 @@ importers:
       '@octokit/types':
         specifier: ^18.0.0
         version: 18.0.0
-      '@types/node':
-        specifier: ^24.10.0
-        version: 24.19.0
       execa:
         specifier: ^10.0.0
         version: 10.0.1
@@ -200,6 +197,9 @@ importers:
       '@types/eslint-plugin-markdown':
         specifier: 2.0.2
         version: 2.0.2
+      '@types/node':
+        specifier: 24.19.0
+        version: 24.19.0
       '@vercel/ncc':
         specifier: 0.45.0
         version: 0.45.0
