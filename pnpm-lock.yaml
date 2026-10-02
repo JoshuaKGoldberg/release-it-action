@@ -172,12 +172,18 @@ importers:
       '@actions/github':
         specifier: ^9.0.0
         version: 9.1.1
+      '@octokit/types':
+        specifier: ^18.0.0
+        version: 18.0.0
       '@types/node':
         specifier: ^24.10.0
         version: 24.19.0
       execa:
         specifier: ^10.0.0
         version: 10.0.1
+      should-semantic-release:
+        specifier: ^0.3.5
+        version: 0.3.5
     devDependencies:
       '@eslint-community/eslint-plugin-eslint-comments':
         specifier: 4.8.1
@@ -185,9 +191,6 @@ importers:
       '@eslint/js':
         specifier: 10.0.1
         version: 10.0.1(eslint@10.11.0(jiti@2.7.0))
-      '@octokit/types':
-        specifier: 18.0.0
-        version: 18.0.0
       '@release-it/conventional-changelog':
         specifier: 12.0.2
         version: 12.0.2(conventional-commits-filter@6.0.1)(conventional-commits-parser@7.1.2)(release-it@21.1.0(@types/node@24.19.0)(magicast@0.5.5))
@@ -272,9 +275,6 @@ importers:
       sentences-per-line:
         specifier: 0.3.0
         version: 0.3.0
-      should-semantic-release:
-        specifier: 0.3.5
-        version: 0.3.5
       typescript:
         specifier: 5.9.3
         version: 5.9.3
