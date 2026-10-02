@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.11](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.10...v0.5.11) (2026-10-02)
+
+### Bug Fixes
+
+- forward release-it-args when republishing an unpublished version ([#858](https://github.com/JoshuaKGoldberg/release-it-action/issues/858)) ([2c7af19](https://github.com/JoshuaKGoldberg/release-it-action/commit/2c7af1905700bf5c90d57c374a7d9a6f39c4f4e4)), closes [#840](https://github.com/JoshuaKGoldberg/release-it-action/issues/840)
+
 ## [0.5.10](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.9...v0.5.10) (2026-10-02)
 
 ### Bug Fixes
