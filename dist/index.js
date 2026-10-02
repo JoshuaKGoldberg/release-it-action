@@ -30291,7 +30291,7 @@ module.exports = {
 
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(8377);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(3226);
 
 
 await (0,_runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__/* .runReleaseItAction */ .k)(_actions_github__WEBPACK_IMPORTED_MODULE_0__/* .context */ ._);
@@ -30301,7 +30301,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 8377:
+/***/ 3226:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -44177,7 +44177,33 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
     }
 }
 
+;// CONCATENATED MODULE: ./src/steps/getTagNames.ts
+
+async function getTagNames(packageData) {
+    const { name, version } = packageData;
+    const tagName = (await readReleaseItConfig(packageData))?.git?.tagName;
+    if (typeof tagName === "string" && tagName) {
+        const rendered = tagName
+            .replaceAll("${version}", version)
+            .replaceAll("${npm.name}", name)
+            .replaceAll("${name}", name);
+        if (!rendered.includes("${")) {
+            return [rendered];
+        }
+    }
+    return [version, `v${version}`];
+}
+async function readReleaseItConfig(packageData) {
+    try {
+        return JSON.parse(await external_node_fs_promises_namespaceObject.readFile(".release-it.json", "utf8"));
+    }
+    catch {
+        return packageData["release-it"];
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/steps/getUnpublishedVersion.ts
+
 
 
 
@@ -44188,7 +44214,8 @@ const recentTagSeconds = 10 * 60;
 const recheckAttempts = 12;
 const recheckDelayMs = 15_000;
 async function getUnpublishedVersion() {
-    const { name, private: isPrivate, publishConfig, version, } = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    const packageData = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    const { name, private: isPrivate, publishConfig, version } = packageData;
     if (isPrivate || !name || !version) {
         return undefined;
     }
@@ -44212,7 +44239,7 @@ async function getUnpublishedVersion() {
     if (await isOnNpm()) {
         return undefined;
     }
-    const tagNames = [version, `v${version}`];
+    const tagNames = await getTagNames({ ...packageData, name, version });
     const existingTags = (await $quiet `git tag --list ${tagNames}`).stdout
         .split("\n")
         .filter(Boolean);

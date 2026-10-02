@@ -3,6 +3,8 @@ import { $ } from "execa";
 import * as fs from "node:fs/promises";
 import { setTimeout } from "node:timers/promises";
 
+import { getTagNames, TagNamesPackageData } from "./getTagNames.js";
+
 const $quiet = $({ reject: false });
 
 // npm can take a few minutes after a publish before it shows the new version.
@@ -22,18 +24,17 @@ interface PackageData {
 	name?: string;
 	private?: boolean;
 	publishConfig?: Record<string, unknown> & { registry?: string };
+	"release-it"?: TagNamesPackageData["release-it"];
 	version?: string;
 }
 
 export async function getUnpublishedVersion(): Promise<
 	undefined | UnpublishedVersion
 > {
-	const {
-		name,
-		private: isPrivate,
-		publishConfig,
-		version,
-	} = JSON.parse(await fs.readFile("package.json", "utf8")) as PackageData;
+	const packageData = JSON.parse(
+		await fs.readFile("package.json", "utf8"),
+	) as PackageData;
+	const { name, private: isPrivate, publishConfig, version } = packageData;
 
 	if (isPrivate || !name || !version) {
 		return undefined;
@@ -65,7 +66,7 @@ export async function getUnpublishedVersion(): Promise<
 		return undefined;
 	}
 
-	const tagNames = [version, `v${version}`];
+	const tagNames = await getTagNames({ ...packageData, name, version });
 	const existingTags = (await $quiet`git tag --list ${tagNames}`).stdout
 		.split("\n")
 		.filter(Boolean);

@@ -176,6 +176,23 @@ describe("getUnpublishedVersion", () => {
 		});
 	});
 
+	it("finds the version's tag using a custom git.tagName from package.json", async () => {
+		mockPackageJson({
+			...packageData,
+			"release-it": { git: { tagName: "${npm.name}@${version}" } },
+		});
+		mockCommands({
+			"git tag --list test-package@1.2.3": { stdout: "test-package@1.2.3" },
+			"git tag --points-at HEAD": { stdout: "test-package@1.2.3" },
+			"npm view test-package@1.2.3 version --json": notFound,
+		});
+
+		expect(await getUnpublishedVersion()).toEqual({
+			headTag: "test-package@1.2.3",
+			version: "1.2.3",
+		});
+	});
+
 	it("returns the version with its headTag when it was tagged at HEAD", async () => {
 		mockPackageJson(packageData);
 		mockCommands({
