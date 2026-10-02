@@ -1,6 +1,6 @@
 import type { RequestParameters } from "@octokit/types";
 
-import { tryCatchInfoAction } from "../tryCatchInfoAction.js";
+import { tryCatchSetFailedAction } from "../tryCatchInfoAction.js";
 import { ExistingProtections, Octokit } from "../types.js";
 
 export interface RecreateProtectionsOptions {
@@ -31,7 +31,7 @@ export async function recreateProtections({
 		return;
 	}
 
-	await tryCatchInfoAction(
+	await tryCatchSetFailedAction(
 		"re-creating branch protections",
 		async () =>
 			await octokit.request(
@@ -107,7 +107,7 @@ export async function recreateProtections({
 
 	// The update protection endpoint doesn't accept required_signatures.
 	if (existingProtections.required_signatures?.enabled) {
-		await tryCatchInfoAction(
+		await tryCatchSetFailedAction(
 			"re-enabling required signatures",
 			async () =>
 				await octokit.request(

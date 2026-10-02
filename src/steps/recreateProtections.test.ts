@@ -4,7 +4,7 @@ import { Octokit } from "../types.js";
 import { recreateProtections } from "./recreateProtections.js";
 
 vi.mock("../tryCatchInfoAction.js", () => ({
-	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
+	async tryCatchSetFailedAction(_: string, action: () => Promise<unknown>) {
 		return await action();
 	},
 }));

@@ -32,11 +32,13 @@ export async function runBypassingBranchProtections(
 		requestData: commonRequestData,
 	});
 
-	await run();
-
-	await recreateProtections({
-		commonRequestData,
-		existingProtections,
-		octokit,
-	});
+	try {
+		await run();
+	} finally {
+		await recreateProtections({
+			commonRequestData,
+			existingProtections,
+			octokit,
+		});
+	}
 }

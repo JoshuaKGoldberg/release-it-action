@@ -117,6 +117,7 @@ describe("runBypassingBranchRulesets", () => {
 			      "octokit": {
 			        "request": [MockFunction],
 			      },
+			      "setFailedOnError": true,
 			    },
 			  ],
 			]
@@ -150,5 +151,22 @@ describe("runBypassingBranchRulesets", () => {
 		);
 
 		expect(order).toEqual(["update:disabled", "run", "update:active"]);
+	});
+
+	test("restores rulesets when run rejects", async () => {
+		const error = new Error("Oh no!");
+
+		await expect(
+			runBypassingBranchRulesets(
+				{ branch: "", owner: "", repo: "" },
+				mockOctokit,
+				vi.fn().mockRejectedValue(error),
+			),
+		).rejects.toBe(error);
+
+		expect(mockUpdateRulesetsEnforcement).toHaveBeenCalledTimes(2);
+		expect(mockUpdateRulesetsEnforcement).toHaveBeenLastCalledWith(
+			expect.objectContaining({ setFailedOnError: true }),
+		);
 	});
 });
