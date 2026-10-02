@@ -44035,7 +44035,7 @@ async function recreateProtections({ commonRequestData, existingProtections, oct
     }));
     // The update protection endpoint doesn't accept required_signatures.
     if (existingProtections.required_signatures?.enabled) {
-        await tryCatchInfoAction("re-enabling required signatures", async () => await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, commonRequestData));
+        await tryCatchSetFailedAction("re-enabling required signatures", async () => await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, commonRequestData));
     }
 }
 function mapReviewRestrictions(restrictions) {
