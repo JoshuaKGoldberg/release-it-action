@@ -1,5 +1,63 @@
 # Changelog
 
+## [0.5.16](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.15...v0.5.16) (2026-10-02)
+
+### Bug Fixes
+
+- support quoted values in release-it-args ([#870](https://github.com/JoshuaKGoldberg/release-it-action/issues/870)) ([57a6ce1](https://github.com/JoshuaKGoldberg/release-it-action/commit/57a6ce123ef9ebc104dd258afc0145666bcb8414)), closes [#850](https://github.com/JoshuaKGoldberg/release-it-action/issues/850)
+
+## [0.5.15](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.14...v0.5.15) (2026-10-02)
+
+### Bug Fixes
+
+- honor scoped publishConfig registries when checking for unpublished versions ([#871](https://github.com/JoshuaKGoldberg/release-it-action/issues/871)) ([6ee2f62](https://github.com/JoshuaKGoldberg/release-it-action/commit/6ee2f62ee5d8c4fddeb3f212c45f0d4d82378a63)), closes [#851](https://github.com/JoshuaKGoldberg/release-it-action/issues/851)
+- provide the github-token input to release-it as GITHUB_TOKEN ([#867](https://github.com/JoshuaKGoldberg/release-it-action/issues/867)) ([8978be6](https://github.com/JoshuaKGoldberg/release-it-action/commit/8978be678d248280b0b6adb85d85dd95e0bb6848)), closes [#847](https://github.com/JoshuaKGoldberg/release-it-action/issues/847)
+
+## [0.5.14](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.13...v0.5.14) (2026-10-02)
+
+### Bug Fixes
+
+- create a missing GitHub release before retrying the npm publish ([#866](https://github.com/JoshuaKGoldberg/release-it-action/issues/866)) ([9a30536](https://github.com/JoshuaKGoldberg/release-it-action/commit/9a30536c32884857074103c643b8077fb1adedd9)), closes [#846](https://github.com/JoshuaKGoldberg/release-it-action/issues/846)
+- paginate branch rules when bypassing rulesets ([#872](https://github.com/JoshuaKGoldberg/release-it-action/issues/872)) ([7fefabe](https://github.com/JoshuaKGoldberg/release-it-action/commit/7fefabe2e995b7b45a96ef964a91e80882119626)), closes [#852](https://github.com/JoshuaKGoldberg/release-it-action/issues/852)
+- run the action on Node 24 ([#869](https://github.com/JoshuaKGoldberg/release-it-action/issues/869)) ([aa65c73](https://github.com/JoshuaKGoldberg/release-it-action/commit/aa65c735a4688eb1008fb696db0f008fc73c99d2)), closes [#849](https://github.com/JoshuaKGoldberg/release-it-action/issues/849)
+- warn on superseded releases and treat merge-base errors as not superseded ([#868](https://github.com/JoshuaKGoldberg/release-it-action/issues/868)) ([7e7e6ca](https://github.com/JoshuaKGoldberg/release-it-action/commit/7e7e6cad0d2aad515a5485aef9ba78d997f972c1)), closes [#848](https://github.com/JoshuaKGoldberg/release-it-action/issues/848)
+
+## [0.5.13](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.12...v0.5.13) (2026-10-02)
+
+### Bug Fixes
+
+- give actionable guidance when an unpublished version blocks releasing ([#864](https://github.com/JoshuaKGoldberg/release-it-action/issues/864)) ([76d6365](https://github.com/JoshuaKGoldberg/release-it-action/commit/76d63654b270afb71573d5f909765e3de349ec54)), closes [#844](https://github.com/JoshuaKGoldberg/release-it-action/issues/844)
+
+## [0.5.12](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.11...v0.5.12) (2026-10-02)
+
+### Bug Fixes
+
+- always restore branch protections and rulesets, and fail the run when restoring fails ([#862](https://github.com/JoshuaKGoldberg/release-it-action/issues/862)) ([9805870](https://github.com/JoshuaKGoldberg/release-it-action/commit/980587026a1679f38854d73b3185caef8e45c251)), closes [#842](https://github.com/JoshuaKGoldberg/release-it-action/issues/842)
+
+## [0.5.11](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.10...v0.5.11) (2026-10-02)
+
+### Bug Fixes
+
+- forward release-it-args when republishing an unpublished version ([#858](https://github.com/JoshuaKGoldberg/release-it-action/issues/858)) ([2c7af19](https://github.com/JoshuaKGoldberg/release-it-action/commit/2c7af1905700bf5c90d57c374a7d9a6f39c4f4e4)), closes [#840](https://github.com/JoshuaKGoldberg/release-it-action/issues/840)
+
+## [0.5.10](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.9...v0.5.10) (2026-10-02)
+
+### Bug Fixes
+
+- skip release-it npm checks when republishing an unpublished version ([#857](https://github.com/JoshuaKGoldberg/release-it-action/issues/857)) ([ab876d9](https://github.com/JoshuaKGoldberg/release-it-action/commit/ab876d9cc5e92e1511f0a7c513a0510ad5c7929f)), closes [#839](https://github.com/JoshuaKGoldberg/release-it-action/issues/839)
+
+## [0.5.9](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.8...v0.5.9) (2026-10-02)
+
+### Bug Fixes
+
+- emit lib/ so the published Node API exists ([#856](https://github.com/JoshuaKGoldberg/release-it-action/issues/856)) ([104e45c](https://github.com/JoshuaKGoldberg/release-it-action/commit/104e45cfc244e06be48a6a537b0542b3e603bea7)), closes [#838](https://github.com/JoshuaKGoldberg/release-it-action/issues/838)
+
+## [0.5.8](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.7...v0.5.8) (2026-10-02)
+
+### Bug Fixes
+
+- recreate branch protections from the fetched response data ([#855](https://github.com/JoshuaKGoldberg/release-it-action/issues/855)) ([7c4d26b](https://github.com/JoshuaKGoldberg/release-it-action/commit/7c4d26be4074a7aeab0fcf18bed28ba01b780e57)), closes [#837](https://github.com/JoshuaKGoldberg/release-it-action/issues/837)
+
 ## [0.5.7](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.6...v0.5.7) (2026-09-29)
 
 ### Bug Fixes

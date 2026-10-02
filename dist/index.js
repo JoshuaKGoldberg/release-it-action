@@ -30291,7 +30291,7 @@ module.exports = {
 
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(2627);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(8377);
 
 
 await (0,_runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__/* .runReleaseItAction */ .k)(_actions_github__WEBPACK_IMPORTED_MODULE_0__/* .context */ ._);
@@ -30301,7 +30301,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 2627:
+/***/ 8377:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -33153,7 +33153,7 @@ function core_error(message, properties = {}) {
  * @param properties optional properties to add to the annotation.
  */
 function warning(message, properties = {}) {
-    issueCommand('warning', toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+    command_issueCommand('warning', utils_toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 /**
  * Adds a notice issue
@@ -43943,6 +43943,12 @@ const $$captured = $({
 ;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
 
 async function tryCatchInfoAction(label, action) {
+    return await tryCatchAction(label, action, info);
+}
+async function tryCatchSetFailedAction(label, action) {
+    return await tryCatchAction(label, action, setFailed);
+}
+async function tryCatchAction(label, action, logError) {
     info(`Start: ${label}`);
     try {
         const result = await action();
@@ -43950,7 +43956,7 @@ async function tryCatchInfoAction(label, action) {
         return result;
     }
     catch (error) {
-        info(`Error ${label}: ${error}`);
+        logError(`Error ${label}: ${error}`);
         return undefined;
     }
 }
@@ -43970,7 +43976,7 @@ async function deleteProtections({ existingProtections, octokit, requestData, })
 ;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
 
 async function fetchProtections({ octokit, requestData, }) {
-    return await tryCatchInfoAction(`fetching existing branch protections for ${requestData.branch}`, async () => await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData));
+    return await tryCatchInfoAction(`fetching existing branch protections for ${requestData.branch}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData)).data);
 }
 
 ;// CONCATENATED MODULE: ./src/steps/recreateProtections.ts
@@ -43979,7 +43985,7 @@ async function recreateProtections({ commonRequestData, existingProtections, oct
     if (!existingProtections) {
         return;
     }
-    await tryCatchInfoAction("re-creating branch protections", async () => await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
+    await tryCatchSetFailedAction("re-creating branch protections", async () => await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
         ...commonRequestData,
         allow_deletions: !!existingProtections.allow_deletions?.enabled,
         allow_force_pushes: !!existingProtections.allow_force_pushes?.enabled,
@@ -43999,11 +44005,12 @@ async function recreateProtections({ commonRequestData, existingProtections, oct
                     .dismissal_restrictions),
                 require_code_owner_reviews: existingProtections.required_pull_request_reviews
                     .require_code_owner_reviews,
+                require_last_push_approval: existingProtections.required_pull_request_reviews
+                    .require_last_push_approval,
                 required_approving_review_count: existingProtections.required_pull_request_reviews
                     .required_approving_review_count,
             }
             : null,
-        required_signatures: !!existingProtections.required_signatures?.enabled,
         restrictions: existingProtections.restrictions
             ? {
                 apps: existingProtections.restrictions.apps.map(
@@ -44026,6 +44033,10 @@ async function recreateProtections({ commonRequestData, existingProtections, oct
             }
             : null,
     }));
+    // The update protection endpoint doesn't accept required_signatures.
+    if (existingProtections.required_signatures?.enabled) {
+        await tryCatchSetFailedAction("re-enabling required signatures", async () => await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, commonRequestData));
+    }
 }
 function mapReviewRestrictions(restrictions) {
     if (!restrictions) {
@@ -44060,19 +44071,26 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
         octokit,
         requestData: commonRequestData,
     });
-    await run();
-    await recreateProtections({
-        commonRequestData,
-        existingProtections,
-        octokit,
-    });
+    try {
+        await run();
+    }
+    finally {
+        await recreateProtections({
+            commonRequestData,
+            existingProtections,
+            octokit,
+        });
+    }
 }
 
 ;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
 
 
 async function fetchRulesets({ octokit, requestData, }) {
-    const rules = await tryCatchInfoAction(`fetching existing branch rules for ${requestData.branch}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rules/branches/{branch}", requestData)).data);
+    const rules = await tryCatchInfoAction(`fetching existing branch rules for ${requestData.branch}`, async () => await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
+        ...requestData,
+        per_page: 100,
+    }));
     if (!rules) {
         return undefined;
     }
@@ -44105,14 +44123,17 @@ async function fetchRulesets({ octokit, requestData, }) {
 ;// CONCATENATED MODULE: ./src/steps/updateRulesetsEnforcement.ts
 
 
-async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, }) {
+async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, setFailedOnError, }) {
     if (!existingRulesets?.length) {
         info("No existing repository rulesets found to update.");
         return;
     }
+    const tryCatchAction = setFailedOnError
+        ? tryCatchSetFailedAction
+        : tryCatchInfoAction;
     for (const existingRuleset of existingRulesets) {
         const nextEnforcement = enforcement(existingRuleset);
-        await tryCatchInfoAction(`setting ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`, async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+        await tryCatchAction(`setting ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`, async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
             ...commonRequestData,
             enforcement: nextEnforcement,
             ruleset_id: existingRuleset.id,
@@ -44140,13 +44161,18 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
         existingRulesets,
         octokit,
     });
-    await run();
-    await updateRulesetsEnforcement({
-        commonRequestData,
-        enforcement: (ruleset) => ruleset.enforcement,
-        existingRulesets,
-        octokit,
-    });
+    try {
+        await run();
+    }
+    finally {
+        await updateRulesetsEnforcement({
+            commonRequestData,
+            enforcement: (ruleset) => ruleset.enforcement,
+            existingRulesets,
+            octokit,
+            setFailedOnError: true,
+        });
+    }
 }
 
 ;// CONCATENATED MODULE: ./src/steps/getUnpublishedVersion.ts
@@ -44158,9 +44184,13 @@ async function getUnpublishedVersion() {
     if (isPrivate || !name || !version) {
         return undefined;
     }
-    const registryArgs = publishConfig?.registry
-        ? ["--registry", publishConfig.registry]
-        : [];
+    const scopedRegistry = name.startsWith("@")
+        ? publishConfig?.[`${name.split("/")[0]}:registry`]
+        : undefined;
+    const registry = typeof scopedRegistry === "string" && scopedRegistry
+        ? scopedRegistry
+        : publishConfig?.registry;
+    const registryArgs = registry ? ["--registry", registry] : [];
     const view = await $quiet `npm view ${name}@${version} version --json ${registryArgs}`;
     if (!view.exitCode) {
         return undefined;
@@ -44201,34 +44231,321 @@ async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
     }
 }
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/methods/command.js
-// Convert `command` string into an array of file or arguments to pass to $`${...fileOrCommandArguments}`
-const parseCommandString = command => {
-	if (typeof command !== 'string') {
-		throw new TypeError(`The command must be a string: ${String(command)}.`);
-	}
+;// CONCATENATED MODULE: ./node_modules/.pnpm/shlex@3.0.0/node_modules/shlex/shlex.js
 
-	const trimmedCommand = command.trim();
-	if (trimmedCommand === '') {
-		return [];
-	}
 
-	const tokens = [];
-	for (const token of trimmedCommand.split(SPACES_REGEXP)) {
-		// Allow spaces to be escaped by a backslash if not meant as a delimiter
-		const previousToken = tokens.at(-1);
-		if (previousToken && previousToken.endsWith('\\')) {
-			// Merge previous token with current one
-			tokens[tokens.length - 1] = `${previousToken.slice(0, -1)} ${token}`;
-		} else {
-			tokens.push(token);
-		}
-	}
+/*
+  Port of a subset of the features of CPython's shlex module, which provides a
+  shell-like lexer. Original code by Eric S. Raymond and other contributors.
+*/
 
-	return tokens;
-};
+class Shlexer {
+  constructor (string) {
+    this.i = 0
+    this.string = string
 
-const SPACES_REGEXP = / +/g;
+    /**
+     * Characters that will be considered whitespace and skipped. Whitespace
+     * bounds tokens. By default, includes space, tab, linefeed and carriage
+     * return.
+     */
+    this.whitespace = ' \t\r\n'
+
+    /**
+     * Characters that will be considered string quotes. The token accumulates
+     * until the same quote is encountered again (thus, different quote types
+     * protect each other as in the shell.) By default, includes ASCII single
+     * and double quotes.
+     */
+    this.quotes = `'"`
+
+    /**
+     * Characters that will be considered as escape. Just `\` by default.
+     */
+    this.escapes = '\\'
+
+    /**
+     * The subset of quote types that allow escaped characters. Just `"` by default.
+     */
+    this.escapedQuotes = '"'
+
+    /**
+     * Whether to support ANSI C-style $'' quotes
+     * https://www.gnu.org/software/bash/manual/html_node/ANSI_002dC-Quoting.html
+     */
+    this.ansiCQuotes = true
+
+    /**
+     * Whether to support localized $"" quotes
+     * https://www.gnu.org/software/bash/manual/html_node/Locale-Translation.html
+     *
+     * The behavior is as if the current locale is set to C or POSIX, i.e., the
+     * contents are not translated.
+     */
+    this.localeQuotes = true
+
+    this.debug = false
+  }
+
+  readChar () {
+    return this.string.charAt(this.i++)
+  }
+
+  processEscapes (string, quote, isAnsiCQuote) {
+    if (!isAnsiCQuote && !this.escapedQuotes.includes(quote)) {
+      // This quote type doesn't support escape sequences
+      return string
+    }
+
+    // We need to form a regex that matches any of the escape characters,
+    // without interpreting any of the characters as a regex special character.
+    const anyEscape = '[' + this.escapes.replace(/(.)/g, '\\$1') + ']'
+
+    // In regular quoted strings, we can only escape an escape character, and
+    // the quote character itself.
+    if (!isAnsiCQuote && this.escapedQuotes.includes(quote)) {
+      const re = new RegExp(
+        anyEscape + '(' + anyEscape + '|\\' + quote + ')', 'g')
+      return string.replace(re, '$1')
+    }
+
+    // ANSI C quoted strings support a wide variety of escape sequences
+    if (isAnsiCQuote) {
+      const patterns = {
+        // Literal characters
+        '([\\\\\'"?])': (x) => x,
+
+        // Non-printable ASCII characters
+        'a': () => '\x07',
+        'b': () => '\x08',
+        'e|E': () => '\x1b',
+        'f': () => '\x0c',
+        'n': () => '\x0a',
+        'r': () => '\x0d',
+        't': () => '\x09',
+        'v': () => '\x0b',
+
+        // Octal bytes
+        '([0-7]{1,3})': (x) => String.fromCharCode(parseInt(x, 8)),
+
+        // Hexadecimal bytes
+        'x([0-9a-fA-F]{1,2})': (x) => String.fromCharCode(parseInt(x, 16)),
+
+        // Unicode code units
+        'u([0-9a-fA-F]{1,4})': (x) => String.fromCharCode(parseInt(x, 16)),
+        'U([0-9a-fA-F]{1,8})': (x) => String.fromCharCode(parseInt(x, 16)),
+
+        // Control characters
+        // https://en.wikipedia.org/wiki/Control_character#How_control_characters_map_to_keyboards
+        'c(.)': (x) => {
+          if (x === '?') {
+            return '\x7f'
+          } else if (x === '@') {
+            return '\x00'
+          } else {
+            return String.fromCharCode(x.charCodeAt(0) & 31)
+          }
+        }
+      }
+
+      // Construct an uber-RegEx that catches all of the above pattern
+      const re = new RegExp(
+        anyEscape + '(' + Object.keys(patterns).join('|') + ')', 'g')
+
+      // For each match, figure out which subpattern matched, and apply the
+      // corresponding function
+      return string.replace(re, function (m, p1) {
+        for (const matched in patterns) {
+          const mm = new RegExp('^' + matched + '$').exec(p1)
+          if (mm === null) {
+            continue
+          }
+
+          return patterns[matched].apply(null, mm.slice(1))
+        }
+      })
+    }
+
+    // Should not get here
+    return undefined
+  }
+
+  * [Symbol.iterator] () {
+    let inQuote = false
+    let inDollarQuote = false
+    let escaped = false
+    let lastDollar = -2 // position of last dollar sign we saw
+    let token
+
+    if (this.debug) {
+      console.log('full input:', '>' + this.string + '<')
+    }
+
+    while (true) {
+      const pos = this.i
+      const char = this.readChar()
+
+      if (this.debug) {
+        console.log(
+          'position:', pos,
+          'input:', '>' + char + '<',
+          'accumulated:', token,
+          'inQuote:', inQuote,
+          'inDollarQuote:', inDollarQuote,
+          'lastDollar:', lastDollar,
+          'escaped:', escaped
+        )
+      }
+
+      // Ran out of characters, we're done
+      if (char === '') {
+        if (inQuote) { throw new Error('Got EOF while in a quoted string') }
+        if (escaped) { throw new Error('Got EOF while in an escape sequence') }
+        if (token !== undefined) { yield token }
+        return
+      }
+
+      // We were in an escape sequence, complete it
+      if (escaped) {
+        if (char === '\n') {
+          // An escaped newline just means to continue the command on the next
+          // line. We just need to ignore it.
+        } else if (inQuote) {
+          // If we are in a quote, just accumulate the whole escape sequence,
+          // as we will interpret escape sequences later.
+          token = (token || '') + escaped + char
+        } else {
+          // Just use the literal character
+          token = (token || '') + char
+        }
+
+        escaped = false
+        continue
+      }
+
+      if (this.escapes.includes(char)) {
+        if (!inQuote || inDollarQuote !== false || this.escapedQuotes.includes(inQuote)) {
+          // We encountered an escape character, which is going to affect how
+          // we treat the next character.
+          escaped = char
+          continue
+        } else {
+          // This string type doesn't use escape characters. Ignore for now.
+        }
+      }
+
+      // We were in a string
+      if (inQuote !== false) {
+        // String is finished. Don't grab the quote character.
+        if (char === inQuote) {
+          token = this.processEscapes(token, inQuote, inDollarQuote === '\'')
+          inQuote = false
+          inDollarQuote = false
+          continue
+        }
+
+        // String isn't finished yet, accumulate the character
+        token = (token || '') + char
+        continue
+      }
+
+      // This is the start of a new string, don't accumulate the quotation mark
+      if (this.quotes.includes(char)) {
+        inQuote = char
+        if (lastDollar === pos - 1) {
+          if (char === '\'' && !this.ansiCQuotes) {
+            // Feature not enabled
+          } else if (char === '"' && !this.localeQuotes) {
+            // Feature not enabled
+          } else {
+            inDollarQuote = char
+          }
+        }
+
+        token = (token || '') // fixes blank string
+
+        if (inDollarQuote !== false) {
+          // Drop the opening $ we captured before
+          token = token.slice(0, -1)
+        }
+
+        continue
+      }
+
+      // This is a dollar sign, record that we saw it in case it's the start of
+      // an ANSI C or localized string
+      if (inQuote === false && char === '$') {
+        lastDollar = pos
+      }
+
+      // This is whitespace, so yield the token if we have one
+      if (this.whitespace.includes(char)) {
+        if (token !== undefined) { yield token }
+        token = undefined
+        continue
+      }
+
+      // Otherwise, accumulate the character
+      token = (token || '') + char
+    }
+  }
+}
+
+
+/**
+ * Splits a given string using shell-like syntax. This function is the inverse
+ * of shlex.join().
+ *
+ * @param {String} s String to split.
+ * @returns {String[]}
+ */
+function split (s) {
+  return Array.from(new Shlexer(s))
+}
+
+/**
+ * Escapes a potentially shell-unsafe string using quotes.
+ *
+ * @param {String} s String to quote
+ * @returns {String}
+ */
+function quote (s) {
+  if (s === '') { return '\'\'' }
+
+  const unsafeRe = /[^\w@%\-+=:,./]/
+  if (!unsafeRe.test(s)) { return s }
+
+  return ('\'' + s.replace(/('+)/g, '\'"$1"\'') + '\'').replace(/^''|''$/g, '')
+}
+
+
+/**
+ * Concatenate the tokens of the list args and return a string. This function
+ * is the inverse of shlex.split().
+ *
+ * The returned value is shell-escaped to protect against injection
+ * vulnerabilities (see shlex.quote()).
+ *
+ * @param {String[]} args List of args to join
+ * @returns {String}
+ */
+function join (args) {
+  if (!Array.isArray(args)) {
+    throw new TypeError("args should be an array")
+  }
+  return args.map(quote).join(" ")
+}
+
+;// CONCATENATED MODULE: ./src/parseArgsString.ts
+
+function parseArgsString(input) {
+    try {
+        return split(input);
+    }
+    catch (error) {
+        throw new Error(`Could not parse arguments (${error.message}): ${input}`, { cause: error });
+    }
+}
 
 ;// CONCATENATED MODULE: ./src/steps/checkSuperseded.ts
 
@@ -44252,7 +44569,7 @@ async function checkSuperseded(startSha) {
         return true;
     }
     const isAncestor = await checkSuperseded_$quiet `git merge-base --is-ancestor ${localSha} ${remoteSha}`;
-    return isAncestor.exitCode !== 0;
+    return isAncestor.exitCode === 1;
 }
 async function getHeadSha() {
     const { exitCode, stdout } = await checkSuperseded_$quiet `git rev-parse HEAD`;
@@ -44267,10 +44584,10 @@ async function getHeadSha() {
 
 const publishConflict = /cannot publish over (?:the )?previously (?:published|staged) version/i;
 async function runReleaseIt(releaseItArgs, { allowPublishConflict } = {}) {
-    const args = parseCommandString(releaseItArgs ?? "");
     await tryCatchInfoAction("running release-it", async () => {
         const startSha = await getHeadSha();
         try {
+            const args = parseArgsString(releaseItArgs ?? "");
             const { exitCode } = await $$captured `npx release-it --verbose ${args}`;
             if (exitCode) {
                 throw new Error(`Exit code ${exitCode.toString()}.`);
@@ -44278,7 +44595,7 @@ async function runReleaseIt(releaseItArgs, { allowPublishConflict } = {}) {
         }
         catch (error) {
             if (startSha && (await checkSuperseded(startSha))) {
-                info(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${error}`);
+                warning(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${error}`);
                 return;
             }
             if (allowPublishConflict &&
@@ -44303,8 +44620,7 @@ async function runReleaseIt(releaseItArgs, { allowPublishConflict } = {}) {
 
 
 
-async function releaseItAction(options) {
-    const { gitUserEmail, gitUserName, npmToken, skipNpmPublish } = options;
+async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, githubToken, gitUserEmail, gitUserName, npmToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
     await $$ `git config user.email ${gitUserEmail}`;
     await $$ `git config user.name ${gitUserName}`;
     if (skipNpmPublish) {
@@ -44316,18 +44632,8 @@ async function releaseItAction(options) {
     else {
         info("No npm token provided. This is required unless you're using Trusted Publishing.");
     }
-    if (skipNpmPublish || !npmToken) {
-        await runRelease(options);
-        return;
-    }
-    try {
-        await runRelease(options);
-    }
-    finally {
-        await tryCatchInfoAction("removing the npm token from the npmrc", async () => await $$ `npm config delete //registry.npmjs.org/:_authToken`);
-    }
-}
-async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githubToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
+    // release-it reads the token from the environment, not from this process.
+    process.env.GITHUB_TOKEN ??= githubToken;
     const octokit = github/* getOctokit */.Q(githubToken);
     const unpublishedVersion = skipNpmPublish
         ? undefined
@@ -44335,14 +44641,21 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
     if (unpublishedVersion) {
         const { headTag, version } = unpublishedVersion;
         if (!headTag) {
-            setFailed(`Version ${version} was tagged but never published to npm. Publish it before releasing a newer version.`);
+            setFailed(`Version ${version} was tagged but never published to npm. Publish it before releasing a newer version, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.`);
             return;
         }
         const hasRelease = await tryCatchInfoAction(`checking for a GitHub release for ${headTag}`, async () => await hasGitHubRelease({ octokit, owner, repo, tag: headTag }));
         info(`Version ${version} was pushed but never published to npm. Publishing it now.`);
+        // First try to create a GitHub release, since they're mutable...
+        if (hasRelease === false) {
+            await runReleaseIt(["--no-increment --no-git --no-npm.publish", releaseItArgs]
+                .filter(Boolean)
+                .join(" "));
+        }
+        // ...and then if that succeeded (didn't throw), do the immutable npm publish
         await runReleaseIt([
-            "--no-increment --no-git --npm.publish",
-            hasRelease !== false && "--no-github.release",
+            "--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
+            releaseItArgs,
         ]
             .filter(Boolean)
             .join(" "), { allowPublishConflict: true });

@@ -2,7 +2,10 @@ import type { RequestParameters } from "@octokit/types";
 
 import * as core from "@actions/core";
 
-import { tryCatchInfoAction } from "../tryCatchInfoAction.js";
+import {
+	tryCatchInfoAction,
+	tryCatchSetFailedAction,
+} from "../tryCatchInfoAction.js";
 import { ExistingRuleset, Octokit, RulesetEnforcement } from "../types.js";
 
 export interface UpdateRulesetsEnforcementOptions {
@@ -10,6 +13,7 @@ export interface UpdateRulesetsEnforcementOptions {
 	enforcement: (ruleset: ExistingRuleset) => RulesetEnforcement;
 	existingRulesets: ExistingRuleset[] | undefined;
 	octokit: Octokit;
+	setFailedOnError?: boolean;
 }
 
 export async function updateRulesetsEnforcement({
@@ -17,16 +21,21 @@ export async function updateRulesetsEnforcement({
 	enforcement,
 	existingRulesets,
 	octokit,
+	setFailedOnError,
 }: UpdateRulesetsEnforcementOptions) {
 	if (!existingRulesets?.length) {
 		core.info("No existing repository rulesets found to update.");
 		return;
 	}
 
+	const tryCatchAction = setFailedOnError
+		? tryCatchSetFailedAction
+		: tryCatchInfoAction;
+
 	for (const existingRuleset of existingRulesets) {
 		const nextEnforcement = enforcement(existingRuleset);
 
-		await tryCatchInfoAction(
+		await tryCatchAction(
 			`setting ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`,
 			async () =>
 				await octokit.request(

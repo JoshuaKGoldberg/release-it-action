@@ -81,6 +81,45 @@ describe("getUnpublishedVersion", () => {
 		);
 	});
 
+	it("checks the scoped publishConfig registry for a scoped package", async () => {
+		mockPackageJson({
+			name: "@scope/test-package",
+			publishConfig: {
+				"@scope:registry": "https://npm.pkg.github.com",
+				registry: "https://example.com",
+			},
+			version: "1.2.3",
+		});
+		mockCommands({});
+
+		await getUnpublishedVersion();
+
+		expect(mock$quiet).toHaveBeenCalledWith(
+			expect.anything(),
+			"@scope/test-package",
+			"1.2.3",
+			["--registry", "https://npm.pkg.github.com"],
+		);
+	});
+
+	it("falls back to the plain publishConfig registry for a scoped package without a scoped registry", async () => {
+		mockPackageJson({
+			name: "@scope/test-package",
+			publishConfig: { registry: "https://example.com" },
+			version: "1.2.3",
+		});
+		mockCommands({});
+
+		await getUnpublishedVersion();
+
+		expect(mock$quiet).toHaveBeenCalledWith(
+			expect.anything(),
+			"@scope/test-package",
+			"1.2.3",
+			["--registry", "https://example.com"],
+		);
+	});
+
 	it("throws when npm fails for a reason other than a missing version", async () => {
 		mockPackageJson(packageData);
 		mockCommands({

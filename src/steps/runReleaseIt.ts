@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
-import { parseCommandString } from "execa";
 
 import { $$captured } from "../execa.js";
+import { parseArgsString } from "../parseArgsString.js";
 import { tryCatchInfoAction } from "../tryCatchInfoAction.js";
 import { checkSuperseded, getHeadSha } from "./checkSuperseded.js";
 
@@ -16,19 +16,18 @@ export async function runReleaseIt(
 	releaseItArgs?: string,
 	{ allowPublishConflict }: RunReleaseItOptions = {},
 ) {
-	const args = parseCommandString(releaseItArgs ?? "");
-
 	await tryCatchInfoAction("running release-it", async () => {
 		const startSha = await getHeadSha();
 
 		try {
+			const args = parseArgsString(releaseItArgs ?? "");
 			const { exitCode } = await $$captured`npx release-it --verbose ${args}`;
 			if (exitCode) {
 				throw new Error(`Exit code ${exitCode.toString()}.`);
 			}
 		} catch (error) {
 			if (startSha && (await checkSuperseded(startSha))) {
-				core.info(
+				core.warning(
 					`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${error as string}`,
 				);
 				return;

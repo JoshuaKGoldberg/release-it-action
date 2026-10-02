@@ -11,9 +11,19 @@ vi.mock("@actions/core", () => ({
 	},
 }));
 
+const mockTryCatchInfoAction = vi.fn(
+	async (_: string, action: () => Promise<unknown>) => await action(),
+);
+const mockTryCatchSetFailedAction = vi.fn(
+	async (_: string, action: () => Promise<unknown>) => await action(),
+);
+
 vi.mock("../tryCatchInfoAction.js", () => ({
-	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
-		return await action();
+	get tryCatchInfoAction() {
+		return mockTryCatchInfoAction;
+	},
+	get tryCatchSetFailedAction() {
+		return mockTryCatchSetFailedAction;
 	},
 }));
 
@@ -67,6 +77,20 @@ describe("updateRulesetsEnforcement", () => {
 		expect(mockRequest).not.toHaveBeenCalled();
 	});
 
+	it("updates each ruleset through tryCatchSetFailedAction when setFailedOnError is true", async () => {
+		await updateRulesetsEnforcement({
+			commonRequestData,
+			enforcement: (ruleset) => ruleset.enforcement,
+			existingRulesets,
+			octokit: mockOctokit,
+			setFailedOnError: true,
+		});
+
+		expect(mockTryCatchInfoAction).not.toHaveBeenCalled();
+		expect(mockTryCatchSetFailedAction).toHaveBeenCalledTimes(2);
+		expect(mockRequest).toHaveBeenCalledTimes(2);
+	});
+
 	it("updates each ruleset with the computed enforcement", async () => {
 		await updateRulesetsEnforcement({
 			commonRequestData,
@@ -76,6 +100,7 @@ describe("updateRulesetsEnforcement", () => {
 		});
 
 		expect(mockInfo).not.toHaveBeenCalled();
+		expect(mockTryCatchSetFailedAction).not.toHaveBeenCalled();
 		expect(mockRequest.mock.calls).toMatchInlineSnapshot(`
 			[
 			  [

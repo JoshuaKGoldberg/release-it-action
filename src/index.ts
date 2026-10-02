@@ -62,6 +62,9 @@ async function runRelease({
 	repo,
 	skipNpmPublish = false,
 }: ReleaseItActionOptions) {
+	// release-it reads the token from the environment, not from this process.
+	process.env.GITHUB_TOKEN ??= githubToken;
+
 	const octokit = github.getOctokit(githubToken);
 
 	const unpublishedVersion = skipNpmPublish
@@ -76,7 +79,7 @@ async function runRelease({
 
 		if (!headTag) {
 			core.setFailed(
-				`Version ${version} was tagged but never published to npm. Publish it before releasing a newer version.`,
+				`Version ${version} was tagged but never published to npm. Publish it before releasing a newer version, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.`,
 			);
 			return;
 		}
@@ -91,10 +94,20 @@ async function runRelease({
 			`Version ${version} was pushed but never published to npm. Publishing it now.`,
 		);
 
+		// First try to create a GitHub release, since they're mutable...
+		if (hasRelease === false) {
+			await runReleaseIt(
+				["--no-increment --no-git --no-npm.publish", releaseItArgs]
+					.filter(Boolean)
+					.join(" "),
+			);
+		}
+
+		// ...and then if that succeeded (didn't throw), do the immutable npm publish
 		await runReleaseIt(
 			[
-				"--no-increment --no-git --npm.publish",
-				hasRelease !== false && "--no-github.release",
+				"--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
+				releaseItArgs,
 			]
 				.filter(Boolean)
 				.join(" "),
