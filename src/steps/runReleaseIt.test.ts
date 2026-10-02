@@ -122,6 +122,20 @@ describe("runReleaseIt", () => {
 		expect(mockSetFailed).not.toHaveBeenCalled();
 	});
 
+	it("logs an error without checking for superseding when skipSupersededCheck is true", async () => {
+		mock$$.mockResolvedValue({ exitCode: 1 });
+		mockGetHeadSha.mockResolvedValue("start-sha");
+		mockCheckSuperseded.mockResolvedValue(true);
+
+		await runReleaseIt("", { skipSupersededCheck: true });
+
+		expect(mockCheckSuperseded).not.toHaveBeenCalled();
+		expect(mockWarning).not.toHaveBeenCalled();
+		expect(mockSetFailed).toHaveBeenCalledWith(
+			"Error running release-it: Error: Exit code 1.",
+		);
+	});
+
 	it("logs an error if release-it fails and the branch was not superseded", async () => {
 		mock$$.mockResolvedValue({ exitCode: 1 });
 		mockGetHeadSha.mockResolvedValue("start-sha");
