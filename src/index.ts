@@ -76,10 +76,19 @@ export async function releaseItAction({
 			`Version ${version} was pushed but never published to npm. Publishing it now.`,
 		);
 
+		// First try to create a GitHub release, since they're mutable...
+		if (hasRelease === false) {
+			await runReleaseIt(
+				["--no-increment --no-git --no-npm.publish", releaseItArgs]
+					.filter(Boolean)
+					.join(" "),
+			);
+		}
+
+		// ...and then if that succeeded (didn't throw), do the immutable npm publish
 		await runReleaseIt(
 			[
-				"--no-increment --no-git --npm.publish --npm.skipChecks",
-				hasRelease !== false && "--no-github.release",
+				"--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
 				releaseItArgs,
 			]
 				.filter(Boolean)
