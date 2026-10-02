@@ -44,7 +44,11 @@ vi.mock("./checkSuperseded.js", () => ({
 
 vi.mock("../tryCatchInfoAction.js", () => ({
 	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
-		return await action();
+		try {
+			return await action();
+		} catch {
+			return undefined;
+		}
 	},
 }));
 
@@ -193,6 +197,27 @@ describe("runReleaseIt", () => {
 
 		expect(mockError).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalled();
+	});
+
+	it("logs an error if release-it fails without output when a publish conflict is allowed", async () => {
+		mock$$.mockRejectedValueOnce(new Error("Oh no!"));
+		mockGetHeadSha.mockResolvedValueOnce("start-sha");
+		mockCheckSuperseded.mockResolvedValueOnce(false);
+
+		await runReleaseIt("", { allowPublishConflict: true });
+
+		expect(mockInfo).not.toHaveBeenCalledWith(
+			expect.stringContaining("npm already has this version"),
+		);
+		expect(mockSetFailed).toHaveBeenCalled();
+	});
+
+	it("returns false when running release-it throws unexpectedly", async () => {
+		mock$$.mockRejectedValueOnce(new Error("Command failed"));
+		mockGetHeadSha.mockResolvedValueOnce("start-sha");
+		mockCheckSuperseded.mockRejectedValueOnce(new Error("Oh no!"));
+
+		expect(await runReleaseIt()).toBe(false);
 	});
 
 	it("logs an error without checking for superseding if the starting sha is unknown", async () => {
