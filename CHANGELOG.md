@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.15](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.14...v0.5.15) (2026-10-02)
+
+### Bug Fixes
+
+- honor scoped publishConfig registries when checking for unpublished versions ([#871](https://github.com/JoshuaKGoldberg/release-it-action/issues/871)) ([6ee2f62](https://github.com/JoshuaKGoldberg/release-it-action/commit/6ee2f62ee5d8c4fddeb3f212c45f0d4d82378a63)), closes [#851](https://github.com/JoshuaKGoldberg/release-it-action/issues/851)
+- provide the github-token input to release-it as GITHUB_TOKEN ([#867](https://github.com/JoshuaKGoldberg/release-it-action/issues/867)) ([8978be6](https://github.com/JoshuaKGoldberg/release-it-action/commit/8978be678d248280b0b6adb85d85dd95e0bb6848)), closes [#847](https://github.com/JoshuaKGoldberg/release-it-action/issues/847)
+
 ## [0.5.14](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.13...v0.5.14) (2026-10-02)
 
 ### Bug Fixes
