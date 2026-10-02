@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.12](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.11...v0.5.12) (2026-10-02)
+
+### Bug Fixes
+
+- always restore branch protections and rulesets, and fail the run when restoring fails ([#862](https://github.com/JoshuaKGoldberg/release-it-action/issues/862)) ([9805870](https://github.com/JoshuaKGoldberg/release-it-action/commit/980587026a1679f38854d73b3185caef8e45c251)), closes [#842](https://github.com/JoshuaKGoldberg/release-it-action/issues/842)
+
 ## [0.5.11](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.10...v0.5.11) (2026-10-02)
 
 ### Bug Fixes
