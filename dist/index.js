@@ -44609,9 +44609,16 @@ async function getHeadSha() {
 const publishConflict = /cannot publish over (?:the )?previously (?:published|staged) version/i;
 async function runReleaseIt(releaseItArgs, { allowPublishConflict, skipSupersededCheck } = {}) {
     await tryCatchInfoAction("running release-it", async () => {
+        let args;
+        try {
+            args = parseArgsString(releaseItArgs ?? "");
+        }
+        catch (error) {
+            setFailed(`Error running release-it: ${describeError(error)}`);
+            return;
+        }
         const startSha = await getHeadSha();
         try {
-            const args = parseArgsString(releaseItArgs ?? "");
             const { exitCode } = await $$captured `npx release-it --verbose ${args}`;
             if (exitCode) {
                 throw new Error(`Exit code ${exitCode.toString()}.`);

@@ -250,13 +250,15 @@ describe("runReleaseIt", () => {
 		expect(mockSetFailed).not.toHaveBeenCalled();
 	});
 
-	it("logs an error without running release-it when releaseItArgs has an unterminated quote", async () => {
+	it("logs an error without running release-it when releaseItArgs has an unterminated quote, even if the branch was superseded", async () => {
 		mockGetHeadSha.mockResolvedValue("start-sha");
-		mockCheckSuperseded.mockResolvedValue(false);
+		mockCheckSuperseded.mockResolvedValue(true);
 
 		await runReleaseIt('--github.releaseName="oops');
 
 		expect(mock$$).not.toHaveBeenCalled();
+		expect(mockCheckSuperseded).not.toHaveBeenCalled();
+		expect(mockWarning).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalledWith(
 			'Error running release-it: Error: Could not parse arguments (Got EOF while in a quoted string): --github.releaseName="oops',
 		);
