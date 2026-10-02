@@ -24,6 +24,7 @@
 But running it in CI takes more work than `npx release-it`.
 You need to set up Git and npm first.
 You probably want safe handling for consecutive branch pushes during your release flow.
+And if things go wrong, you want informative error reporting to explain what happened.
 
 This action handles all of that for you.
 
