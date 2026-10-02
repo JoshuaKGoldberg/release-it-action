@@ -1,7 +1,2 @@
-import { Octokit } from "./types.js";
-export interface CommonData {
-    branch: string;
-    owner: string;
-    repo: string;
-}
+import { CommonData, Octokit } from "./types.js";
 export declare function runBypassingBranchProtections(commonData: CommonData, octokit: Octokit, run: () => Promise<void>): Promise<void>;
