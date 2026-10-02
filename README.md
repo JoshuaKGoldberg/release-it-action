@@ -55,6 +55,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: main
+          token: ${{ secrets.ACCESS_TOKEN }}
       - run: npm run build
       - env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -147,6 +148,13 @@ The Node API doesn't read action inputs or environment variables.
 
 The action needs the latest commit of your release branch.
 The [concurrency group](https://docs.github.com/en/actions/using-jobs/using-concurrency) keeps later runs from missing earlier release commits.
+
+### Why does the checkout action need a token?
+
+`release-it` pushes with the credentials saved by `actions/checkout`, which default to the workflow's `GITHUB_TOKEN`.
+Pushes made with `GITHUB_TOKEN` don't trigger workflows.
+Checking out with your PAT lets the release commit start its own run, which is how the next section's recovery gets to happen on its own.
+It also makes the push come from your PAT's user, which matters for ruleset bypass lists.
 
 ### What happens when a release gets pushed but not published?
 
