@@ -125,7 +125,7 @@ describe("releaseItAction", () => {
 		);
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			"--no-increment --no-git --npm.publish --no-github.release",
+			`--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
 			{ allowPublishConflict: true },
 		);
 	});
@@ -140,7 +140,22 @@ describe("releaseItAction", () => {
 		await releaseItAction(mockOptions);
 
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			"--no-increment --no-git --npm.publish",
+			`--no-increment --no-git --npm.publish --npm.skipChecks ${mockReleaseItArgs}`,
+			{ allowPublishConflict: true },
+		);
+	});
+
+	it("publishes a version tagged at HEAD that was never published without extra arguments when releaseItArgs is undefined", async () => {
+		mockGetUnpublishedVersion.mockResolvedValueOnce({
+			headTag: "v1.2.3",
+			version: "1.2.3",
+		});
+		mockHasGitHubRelease.mockResolvedValueOnce(true);
+
+		await releaseItAction({ ...mockOptions, releaseItArgs: undefined });
+
+		expect(mockRunReleaseIt).toHaveBeenCalledWith(
+			"--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
 			{ allowPublishConflict: true },
 		);
 	});

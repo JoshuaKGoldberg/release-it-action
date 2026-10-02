@@ -97,7 +97,6 @@ describe("recreateProtections", () => {
 			      "required_conversation_resolution": false,
 			      "required_linear_history": false,
 			      "required_pull_request_reviews": null,
-			      "required_signatures": false,
 			      "required_status_checks": null,
 			      "restrictions": null,
 			    },
@@ -164,6 +163,7 @@ describe("recreateProtections", () => {
 						users_url: "dismissal-users-url",
 					},
 					require_code_owner_reviews: true,
+					require_last_push_approval: true,
 					required_approving_review_count: 1,
 				},
 				required_signatures: { enabled: true, url: "required-signatures-url" },
@@ -235,9 +235,9 @@ describe("recreateProtections", () => {
 			          ],
 			        },
 			        "require_code_owner_reviews": true,
+			        "require_last_push_approval": true,
 			        "required_approving_review_count": 1,
 			      },
-			      "required_signatures": true,
 			      "required_status_checks": {
 			        "checks": [
 			          {
@@ -262,6 +262,14 @@ describe("recreateProtections", () => {
 			          "user-login",
 			        ],
 			      },
+			    },
+			  ],
+			  [
+			    "POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures",
+			    {
+			      "branch": "test-branch",
+			      "owner": "test-owner",
+			      "repo": "test-repo",
 			    },
 			  ],
 			]

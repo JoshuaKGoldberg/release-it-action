@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.5.10](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.9...v0.5.10) (2026-10-02)
+
+### Bug Fixes
+
+- skip release-it npm checks when republishing an unpublished version ([#857](https://github.com/JoshuaKGoldberg/release-it-action/issues/857)) ([ab876d9](https://github.com/JoshuaKGoldberg/release-it-action/commit/ab876d9cc5e92e1511f0a7c513a0510ad5c7929f)), closes [#839](https://github.com/JoshuaKGoldberg/release-it-action/issues/839)
+
+## [0.5.9](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.8...v0.5.9) (2026-10-02)
+
+### Bug Fixes
+
+- emit lib/ so the published Node API exists ([#856](https://github.com/JoshuaKGoldberg/release-it-action/issues/856)) ([104e45c](https://github.com/JoshuaKGoldberg/release-it-action/commit/104e45cfc244e06be48a6a537b0542b3e603bea7)), closes [#838](https://github.com/JoshuaKGoldberg/release-it-action/issues/838)
+
+## [0.5.8](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.7...v0.5.8) (2026-10-02)
+
+### Bug Fixes
+
+- recreate branch protections from the fetched response data ([#855](https://github.com/JoshuaKGoldberg/release-it-action/issues/855)) ([7c4d26b](https://github.com/JoshuaKGoldberg/release-it-action/commit/7c4d26be4074a7aeab0fcf18bed28ba01b780e57)), closes [#837](https://github.com/JoshuaKGoldberg/release-it-action/issues/837)
+
 ## [0.5.7](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.6...v0.5.7) (2026-09-29)
 
 ### Bug Fixes

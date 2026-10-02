@@ -55,6 +55,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: main
+          token: ${{ secrets.ACCESS_TOKEN }}
       - run: npm run build
       - env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -77,7 +78,7 @@ You can leave out `NPM_TOKEN` if you use npm's [Trusted Publishing](https://docs
 
 ### Recommended `release-it` Config
 
-It's recommended to have `release-it` push before it publishes to npm.
+It's strongly recommended to have `release-it` push before it publishes to npm.
 Then if a newer push wins the race, nothing gets published.
 It also lets step 3 finish any release that fails to publish.
 
@@ -87,13 +88,20 @@ It also lets step 3 finish any release that fails to publish.
 		"pushArgs": ["--follow-tags", "--atomic"]
 	},
 	"hooks": {
-		"after:git:release": "npm publish"
+		"after:git:release": "npm publish --tag ${preReleaseId || 'latest'}"
 	},
 	"npm": {
-		"publish": false
+		"publish": false,
+		"skipChecks": true
 	}
 }
 ```
+
+The explicit `--tag` publishes prereleases under their own dist-tag, which newer versions of npm require.
+`skipChecks` lets step 3 republish a stranded version even without an npm token, such as with Trusted Publishing.
+
+> Tip: releasing from a maintenance branch?
+> Replace the tag expression with that branch's dist-tag.
 
 Skip this if you set `skip-npm-publish`, since the hook would still publish.
 
@@ -141,6 +149,13 @@ The Node API doesn't read action inputs or environment variables.
 The action needs the latest commit of your release branch.
 The [concurrency group](https://docs.github.com/en/actions/using-jobs/using-concurrency) keeps later runs from missing earlier release commits.
 
+### Why does the checkout action need a token?
+
+`release-it` pushes with the credentials saved by `actions/checkout`, which default to the workflow's `GITHUB_TOKEN`.
+Pushes made with `GITHUB_TOKEN` don't trigger workflows.
+Checking out with your PAT lets the release commit start its own run, which is how the next section's recovery gets to happen on its own.
+It also makes the push come from your PAT's user, which matters for ruleset bypass lists.
+
 ### What happens when a release gets pushed but not published?
 
 Sometimes a release gets pushed to GitHub without making it to npm.
@@ -155,6 +170,8 @@ Otherwise the action fails until you publish that version yourself.
 Two pushes close together can start two release runs.
 The first run's push fails because the branch has a newer commit.
 The action exits without failing so the newer run can do the release.
+
+This relies on the [recommended config](#recommended-release-it-config) pushing before publishing.
 
 ### Why is there an option to bypass branch protections?
 
