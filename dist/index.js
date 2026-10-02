@@ -43970,7 +43970,7 @@ async function deleteProtections({ existingProtections, octokit, requestData, })
 ;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
 
 async function fetchProtections({ octokit, requestData, }) {
-    return await tryCatchInfoAction(`fetching existing branch protections for ${requestData.branch}`, async () => await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData));
+    return await tryCatchInfoAction(`fetching existing branch protections for ${requestData.branch}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData)).data);
 }
 
 ;// CONCATENATED MODULE: ./src/steps/recreateProtections.ts
@@ -43999,11 +43999,12 @@ async function recreateProtections({ commonRequestData, existingProtections, oct
                     .dismissal_restrictions),
                 require_code_owner_reviews: existingProtections.required_pull_request_reviews
                     .require_code_owner_reviews,
+                require_last_push_approval: existingProtections.required_pull_request_reviews
+                    .require_last_push_approval,
                 required_approving_review_count: existingProtections.required_pull_request_reviews
                     .required_approving_review_count,
             }
             : null,
-        required_signatures: !!existingProtections.required_signatures?.enabled,
         restrictions: existingProtections.restrictions
             ? {
                 apps: existingProtections.restrictions.apps.map(
@@ -44026,6 +44027,10 @@ async function recreateProtections({ commonRequestData, existingProtections, oct
             }
             : null,
     }));
+    // The update protection endpoint doesn't accept required_signatures.
+    if (existingProtections.required_signatures?.enabled) {
+        await tryCatchInfoAction("re-enabling required signatures", async () => await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, commonRequestData));
+    }
 }
 function mapReviewRestrictions(restrictions) {
     if (!restrictions) {
@@ -44328,7 +44333,7 @@ async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, 
         const hasRelease = await tryCatchInfoAction(`checking for a GitHub release for ${headTag}`, async () => await hasGitHubRelease({ octokit, owner, repo, tag: headTag }));
         info(`Version ${version} was pushed but never published to npm. Publishing it now.`);
         await runReleaseIt([
-            "--no-increment --no-git --npm.publish",
+            "--no-increment --no-git --npm.publish --npm.skipChecks",
             hasRelease !== false && "--no-github.release",
             releaseItArgs,
         ]
