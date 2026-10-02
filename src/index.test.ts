@@ -162,7 +162,7 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt).toHaveBeenCalledTimes(1);
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
 			`--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
-			{ allowPublishConflict: true },
+			{ allowPublishConflict: true, skipSupersededCheck: true },
 		);
 	});
 
@@ -176,10 +176,13 @@ describe("releaseItAction", () => {
 		await releaseItAction(mockOptions);
 
 		expect(mockRunReleaseIt.mock.calls).toEqual([
-			[`--no-increment --no-git --no-npm.publish ${mockReleaseItArgs}`],
+			[
+				`--no-increment --no-git --no-npm.publish ${mockReleaseItArgs}`,
+				{ skipSupersededCheck: true },
+			],
 			[
 				`--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
-				{ allowPublishConflict: true },
+				{ allowPublishConflict: true, skipSupersededCheck: true },
 			],
 		]);
 	});
@@ -195,7 +198,7 @@ describe("releaseItAction", () => {
 
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
 			"--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
-			{ allowPublishConflict: true },
+			{ allowPublishConflict: true, skipSupersededCheck: true },
 		);
 	});
 

@@ -100,6 +100,7 @@ async function runRelease({
 				["--no-increment --no-git --no-npm.publish", releaseItArgs]
 					.filter(Boolean)
 					.join(" "),
+				{ skipSupersededCheck: true },
 			);
 		}
 
@@ -111,7 +112,7 @@ async function runRelease({
 			]
 				.filter(Boolean)
 				.join(" "),
-			{ allowPublishConflict: true },
+			{ allowPublishConflict: true, skipSupersededCheck: true },
 		);
 		return;
 	}

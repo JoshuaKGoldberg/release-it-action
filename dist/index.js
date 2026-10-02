@@ -44607,7 +44607,7 @@ async function getHeadSha() {
 
 
 const publishConflict = /cannot publish over (?:the )?previously (?:published|staged) version/i;
-async function runReleaseIt(releaseItArgs, { allowPublishConflict } = {}) {
+async function runReleaseIt(releaseItArgs, { allowPublishConflict, skipSupersededCheck } = {}) {
     await tryCatchInfoAction("running release-it", async () => {
         const startSha = await getHeadSha();
         try {
@@ -44618,7 +44618,9 @@ async function runReleaseIt(releaseItArgs, { allowPublishConflict } = {}) {
             }
         }
         catch (error) {
-            if (startSha && (await checkSuperseded(startSha))) {
+            if (!skipSupersededCheck &&
+                startSha &&
+                (await checkSuperseded(startSha))) {
                 warning(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`);
                 return;
             }
@@ -44689,7 +44691,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
         if (hasRelease === false) {
             await runReleaseIt(["--no-increment --no-git --no-npm.publish", releaseItArgs]
                 .filter(Boolean)
-                .join(" "));
+                .join(" "), { skipSupersededCheck: true });
         }
         // ...and then if that succeeded (didn't throw), do the immutable npm publish
         await runReleaseIt([
@@ -44697,7 +44699,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
             releaseItArgs,
         ]
             .filter(Boolean)
-            .join(" "), { allowPublishConflict: true });
+            .join(" "), { allowPublishConflict: true, skipSupersededCheck: true });
         return;
     }
     if ((await tryCatchInfoAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true }))) === false) {

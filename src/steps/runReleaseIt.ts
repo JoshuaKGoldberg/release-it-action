@@ -7,6 +7,7 @@ import { checkSuperseded, getHeadSha } from "./checkSuperseded.js";
 
 export interface RunReleaseItOptions {
 	allowPublishConflict?: boolean;
+	skipSupersededCheck?: boolean;
 }
 
 const publishConflict =
@@ -14,7 +15,7 @@ const publishConflict =
 
 export async function runReleaseIt(
 	releaseItArgs?: string,
-	{ allowPublishConflict }: RunReleaseItOptions = {},
+	{ allowPublishConflict, skipSupersededCheck }: RunReleaseItOptions = {},
 ) {
 	await tryCatchInfoAction("running release-it", async () => {
 		const startSha = await getHeadSha();
@@ -26,7 +27,11 @@ export async function runReleaseIt(
 				throw new Error(`Exit code ${exitCode.toString()}.`);
 			}
 		} catch (error) {
-			if (startSha && (await checkSuperseded(startSha))) {
+			if (
+				!skipSupersededCheck &&
+				startSha &&
+				(await checkSuperseded(startSha))
+			) {
 				core.warning(
 					`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`,
 				);
