@@ -28,7 +28,7 @@ export async function runReleaseIt(
 		} catch (error) {
 			if (startSha && (await checkSuperseded(startSha))) {
 				core.warning(
-					`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${error as string}`,
+					`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`,
 				);
 				return;
 			}
@@ -38,13 +38,16 @@ export async function runReleaseIt(
 				publishConflict.test((error as { all?: string }).all ?? "")
 			) {
 				core.info(
-					`release-it failed because npm already has this version. A previous release run must have published it: ${error as string}`,
+					`release-it failed because npm already has this version. A previous release run must have published it: ${describeError(error)}`,
 				);
 				return;
 			}
 
-			core.error(`Error running release-it: ${error as string}`);
-			core.setFailed(error as string);
+			core.setFailed(`Error running release-it: ${describeError(error)}`);
 		}
 	});
+}
+
+function describeError(error: unknown) {
+	return (error as { shortMessage?: string }).shortMessage ?? String(error);
 }

@@ -54,17 +54,11 @@ describe("runReleaseIt", () => {
 
 		await runReleaseIt();
 
-		expect(mockError.mock.calls).toMatchInlineSnapshot(`
-			[
-			  [
-			    "Error running release-it: Error: Exit code 1.",
-			  ],
-			]
-		`);
+		expect(mockError).not.toHaveBeenCalled();
 		expect(mockSetFailed.mock.calls).toMatchInlineSnapshot(`
 			[
 			  [
-			    [Error: Exit code 1.],
+			    "Error running release-it: Error: Exit code 1.",
 			  ],
 			]
 		`);
@@ -84,20 +78,29 @@ describe("runReleaseIt", () => {
 
 		await runReleaseIt();
 
-		expect(mockError.mock.calls).toMatchInlineSnapshot(`
+		expect(mockError).not.toHaveBeenCalled();
+		expect(mockSetFailed.mock.calls).toMatchInlineSnapshot(`
 			[
 			  [
 			    "Error running release-it: Error: Oh no!",
 			  ],
 			]
 		`);
-		expect(mockSetFailed.mock.calls).toMatchInlineSnapshot(`
-			[
-			  [
-			    [Error: Oh no!],
-			  ],
-			]
-		`);
+	});
+
+	it("logs only the short message of a release-it command failure", async () => {
+		mock$$.mockRejectedValue(
+			Object.assign(new Error("Command failed...\n\nrelease-it output"), {
+				shortMessage:
+					"Command failed with exit code 1: npx release-it --verbose",
+			}),
+		);
+
+		await runReleaseIt();
+
+		expect(mockSetFailed).toHaveBeenCalledWith(
+			"Error running release-it: Command failed with exit code 1: npx release-it --verbose",
+		);
 	});
 
 	it("logs a warning instead of an error if release-it fails and the branch was superseded", async () => {
@@ -126,7 +129,7 @@ describe("runReleaseIt", () => {
 
 		await runReleaseIt();
 
-		expect(mockError).toHaveBeenCalled();
+		expect(mockError).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalled();
 	});
 
@@ -161,7 +164,7 @@ describe("runReleaseIt", () => {
 
 		await runReleaseIt("");
 
-		expect(mockError).toHaveBeenCalled();
+		expect(mockError).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalled();
 	});
 
@@ -174,7 +177,7 @@ describe("runReleaseIt", () => {
 
 		await runReleaseIt("", { allowPublishConflict: true });
 
-		expect(mockError).toHaveBeenCalled();
+		expect(mockError).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalled();
 	});
 
@@ -241,9 +244,7 @@ describe("runReleaseIt", () => {
 
 		expect(mock$$).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalledWith(
-			new Error(
-				'Could not parse arguments (Got EOF while in a quoted string): --github.releaseName="oops',
-			),
+			'Error running release-it: Error: Could not parse arguments (Got EOF while in a quoted string): --github.releaseName="oops',
 		);
 	});
 });
