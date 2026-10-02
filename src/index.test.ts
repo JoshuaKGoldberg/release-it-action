@@ -117,13 +117,14 @@ describe("releaseItAction", () => {
 	it("fails without releasing when an older tagged version was never published", async () => {
 		mockGetUnpublishedVersion.mockResolvedValueOnce({
 			headTag: undefined,
+			tag: "v1.2.3",
 			version: "1.2.3",
 		});
 
 		await releaseItAction(mockOptions);
 
 		expect(mockCore.setFailed).toHaveBeenCalledWith(
-			"Version 1.2.3 was tagged but never published to npm. Publish it before releasing a newer version, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.",
+			"Version 1.2.3 was tagged as v1.2.3 but never published to npm, and newer commits have landed since. Publish it by re-running your release workflow from v1.2.3, such as with a workflow_dispatch that checks out that tag, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.",
 		);
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
@@ -132,6 +133,7 @@ describe("releaseItAction", () => {
 	it("removes the npm token even when the run fails early", async () => {
 		mockGetUnpublishedVersion.mockResolvedValueOnce({
 			headTag: undefined,
+			tag: "v1.2.3",
 			version: "1.2.3",
 		});
 
@@ -145,6 +147,7 @@ describe("releaseItAction", () => {
 	it("publishes a version tagged at HEAD that was never published, without recreating its GitHub release", async () => {
 		mockGetUnpublishedVersion.mockResolvedValueOnce({
 			headTag: "v1.2.3",
+			tag: "v1.2.3",
 			version: "1.2.3",
 		});
 		mockHasGitHubRelease.mockResolvedValueOnce(true);
@@ -169,6 +172,7 @@ describe("releaseItAction", () => {
 	it("publishes a version tagged at HEAD that was never published and creates its missing GitHub release first", async () => {
 		mockGetUnpublishedVersion.mockResolvedValueOnce({
 			headTag: "v1.2.3",
+			tag: "v1.2.3",
 			version: "1.2.3",
 		});
 		mockHasGitHubRelease.mockResolvedValueOnce(false);
@@ -190,6 +194,7 @@ describe("releaseItAction", () => {
 	it("publishes a version tagged at HEAD that was never published without extra arguments when releaseItArgs is undefined", async () => {
 		mockGetUnpublishedVersion.mockResolvedValueOnce({
 			headTag: "v1.2.3",
+			tag: "v1.2.3",
 			version: "1.2.3",
 		});
 		mockHasGitHubRelease.mockResolvedValueOnce(true);

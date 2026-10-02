@@ -15,6 +15,7 @@ export interface UnpublishedVersion {
 	 * The version's Git tag if it points at HEAD, meaning HEAD is its release commit.
 	 */
 	headTag: string | undefined;
+	tag: string;
 	version: string;
 }
 
@@ -95,6 +96,7 @@ export async function getUnpublishedVersion(): Promise<
 
 	return {
 		headTag: existingTags.find((tag) => headTags.includes(tag)),
+		tag: existingTags[0],
 		version,
 	};
 }

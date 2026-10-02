@@ -172,6 +172,7 @@ describe("getUnpublishedVersion", () => {
 
 		expect(await getUnpublishedVersion()).toEqual({
 			headTag: undefined,
+			tag: "v1.2.3",
 			version: "1.2.3",
 		});
 	});
@@ -186,6 +187,7 @@ describe("getUnpublishedVersion", () => {
 
 		expect(await getUnpublishedVersion()).toEqual({
 			headTag: "1.2.3",
+			tag: "1.2.3",
 			version: "1.2.3",
 		});
 	});
@@ -215,6 +217,7 @@ describe("getUnpublishedVersion", () => {
 
 		expect(await getUnpublishedVersion()).toEqual({
 			headTag: "v1.2.3",
+			tag: "v1.2.3",
 			version: "1.2.3",
 		});
 		expect(mockSetTimeout).toHaveBeenCalledTimes(12);
@@ -230,6 +233,7 @@ describe("getUnpublishedVersion", () => {
 
 		expect(await getUnpublishedVersion()).toEqual({
 			headTag: undefined,
+			tag: "v1.2.3",
 			version: "1.2.3",
 		});
 		expect(mockSetTimeout).not.toHaveBeenCalled();

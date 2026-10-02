@@ -75,11 +75,11 @@ async function runRelease({
 			);
 
 	if (unpublishedVersion) {
-		const { headTag, version } = unpublishedVersion;
+		const { headTag, tag, version } = unpublishedVersion;
 
 		if (!headTag) {
 			core.setFailed(
-				`Version ${version} was tagged but never published to npm. Publish it before releasing a newer version, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.`,
+				`Version ${version} was tagged as ${tag} but never published to npm, and newer commits have landed since. Publish it by re-running your release workflow from ${tag}, such as with a workflow_dispatch that checks out that tag, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.`,
 			);
 			return;
 		}

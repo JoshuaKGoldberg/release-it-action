@@ -44233,6 +44233,7 @@ async function getUnpublishedVersion() {
     const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
     return {
         headTag: existingTags.find((tag) => headTags.includes(tag)),
+        tag: existingTags[0],
         version,
     };
 }
@@ -44680,9 +44681,9 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
         ? undefined
         : await tryCatchInfoAction("checking for a version that was pushed but not published", getUnpublishedVersion);
     if (unpublishedVersion) {
-        const { headTag, version } = unpublishedVersion;
+        const { headTag, tag, version } = unpublishedVersion;
         if (!headTag) {
-            setFailed(`Version ${version} was tagged but never published to npm. Publish it before releasing a newer version, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.`);
+            setFailed(`Version ${version} was tagged as ${tag} but never published to npm, and newer commits have landed since. Publish it by re-running your release workflow from ${tag}, such as with a workflow_dispatch that checks out that tag, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.`);
             return;
         }
         const hasRelease = await tryCatchInfoAction(`checking for a GitHub release for ${headTag}`, async () => await hasGitHubRelease({ octokit, owner, repo, tag: headTag }));
