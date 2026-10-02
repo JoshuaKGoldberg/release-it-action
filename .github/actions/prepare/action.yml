@@ -4,11 +4,13 @@ name: Prepare
 
 runs:
   steps:
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+      with:
+        node-version: 24.21.0
     - uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3
       with:
         cache: true
         require-lockfile: true
-        runtime: node@24.21.0
-    - run: which -a node npm npx; node --version; npm --version; ls -la "$(dirname "$(which node)")" | head
+    - run: which -a node npm; node --version; npm --version
       shell: bash
   using: composite
