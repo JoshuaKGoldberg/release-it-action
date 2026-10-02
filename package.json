@@ -39,6 +39,7 @@
 		"@octokit/types": "^18.0.0",
 		"@types/node": "^24.10.0",
 		"execa": "^10.0.0",
+		"shlex": "^3.0.0",
 		"should-semantic-release": "^0.3.5"
 	},
 	"devDependencies": {

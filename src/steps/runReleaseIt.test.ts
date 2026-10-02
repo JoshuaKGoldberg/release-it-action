@@ -219,4 +219,31 @@ describe("runReleaseIt", () => {
 		expect(mockError).not.toHaveBeenCalled();
 		expect(mockSetFailed).not.toHaveBeenCalled();
 	});
+
+	it("keeps a quoted releaseItArgs value with spaces as a single argument", async () => {
+		mock$$.mockResolvedValue({ exitCode: 0 });
+
+		await runReleaseIt('--github.releaseName="Release v1"');
+
+		expect(mock$$).toHaveBeenCalledWith(
+			["npx release-it --verbose ", ""],
+			["--github.releaseName=Release v1"],
+		);
+		expect(mockError).not.toHaveBeenCalled();
+		expect(mockSetFailed).not.toHaveBeenCalled();
+	});
+
+	it("logs an error without running release-it when releaseItArgs has an unterminated quote", async () => {
+		mockGetHeadSha.mockResolvedValue("start-sha");
+		mockCheckSuperseded.mockResolvedValue(false);
+
+		await runReleaseIt('--github.releaseName="oops');
+
+		expect(mock$$).not.toHaveBeenCalled();
+		expect(mockSetFailed).toHaveBeenCalledWith(
+			new Error(
+				'Could not parse arguments (Got EOF while in a quoted string): --github.releaseName="oops',
+			),
+		);
+	});
 });
