@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.8](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.7...v0.5.8) (2026-10-02)
+
+### Bug Fixes
+
+- recreate branch protections from the fetched response data ([#855](https://github.com/JoshuaKGoldberg/release-it-action/issues/855)) ([7c4d26b](https://github.com/JoshuaKGoldberg/release-it-action/commit/7c4d26be4074a7aeab0fcf18bed28ba01b780e57)), closes [#837](https://github.com/JoshuaKGoldberg/release-it-action/issues/837)
+
 ## [0.5.7](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.6...v0.5.7) (2026-09-29)
 
 ### Bug Fixes
