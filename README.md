@@ -130,8 +130,13 @@ npm i release-it-action
 ```ts
 import { releaseItAction } from "release-it-action";
 
+const githubToken = process.env.GITHUB_TOKEN;
+if (!githubToken) {
+	throw new Error("Missing GITHUB_TOKEN.");
+}
+
 await releaseItAction({
-	githubToken: process.env.GITHUB_TOKEN,
+	githubToken,
 	gitUserEmail: "your@email.com",
 	gitUserName: "YourUsername",
 	npmToken: process.env.NPM_TOKEN,
