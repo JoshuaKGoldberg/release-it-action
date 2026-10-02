@@ -44605,33 +44605,29 @@ async function getHeadSha() {
 
 
 
-
 const publishConflict = /cannot publish over (?:the )?previously (?:published|staged) version/i;
 async function runReleaseIt(releaseItArgs, { allowPublishConflict, skipSupersededCheck } = {}) {
-    await tryCatchInfoAction("running release-it", async () => {
-        const startSha = await getHeadSha();
-        try {
-            const args = parseArgsString(releaseItArgs ?? "");
-            const { exitCode } = await $$captured `npx release-it --verbose ${args}`;
-            if (exitCode) {
-                throw new Error(`Exit code ${exitCode.toString()}.`);
-            }
+    info("Start: running release-it");
+    const startSha = await getHeadSha();
+    try {
+        const args = parseArgsString(releaseItArgs ?? "");
+        const { exitCode } = await $$captured `npx release-it --verbose ${args}`;
+        if (exitCode) {
+            throw new Error(`Exit code ${exitCode.toString()}.`);
         }
-        catch (error) {
-            if (!skipSupersededCheck &&
-                startSha &&
-                (await checkSuperseded(startSha))) {
-                warning(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`);
-                return;
-            }
-            if (allowPublishConflict &&
-                publishConflict.test(error.all ?? "")) {
-                info(`release-it failed because npm already has this version. A previous release run must have published it: ${describeError(error)}`);
-                return;
-            }
-            setFailed(`Error running release-it: ${describeError(error)}`);
+    }
+    catch (error) {
+        if (!skipSupersededCheck && startSha && (await checkSuperseded(startSha))) {
+            warning(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`);
+            return;
         }
-    });
+        if (allowPublishConflict &&
+            publishConflict.test(error.all ?? "")) {
+            info(`release-it failed because npm already has this version. A previous release run must have published it: ${describeError(error)}`);
+            return;
+        }
+        setFailed(`Error running release-it: ${describeError(error)}`);
+    }
 }
 function describeError(error) {
     return error.shortMessage ?? String(error);

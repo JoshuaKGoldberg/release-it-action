@@ -42,12 +42,6 @@ vi.mock("./checkSuperseded.js", () => ({
 	},
 }));
 
-vi.mock("../tryCatchInfoAction.js", () => ({
-	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
-		return await action();
-	},
-}));
-
 describe("runReleaseIt", () => {
 	it("logs an error if running release-it has a non-zero exit code", async () => {
 		mock$$.mockResolvedValue({ exitCode: 1 });
@@ -203,6 +197,15 @@ describe("runReleaseIt", () => {
 
 		expect(mockCheckSuperseded).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalled();
+	});
+
+	it("rejects instead of passing when checking for superseding throws unexpectedly", async () => {
+		const error = new Error("Oh no!");
+		mock$$.mockRejectedValue(new Error("Command failed"));
+		mockGetHeadSha.mockResolvedValue("start-sha");
+		mockCheckSuperseded.mockRejectedValue(error);
+
+		await expect(runReleaseIt()).rejects.toBe(error);
 	});
 
 	it("does not log an error if running release-it runs smoothly", async () => {
