@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.14](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.13...v0.5.14) (2026-10-02)
+
+### Bug Fixes
+
+- create a missing GitHub release before retrying the npm publish ([#866](https://github.com/JoshuaKGoldberg/release-it-action/issues/866)) ([9a30536](https://github.com/JoshuaKGoldberg/release-it-action/commit/9a30536c32884857074103c643b8077fb1adedd9)), closes [#846](https://github.com/JoshuaKGoldberg/release-it-action/issues/846)
+- paginate branch rules when bypassing rulesets ([#872](https://github.com/JoshuaKGoldberg/release-it-action/issues/872)) ([7fefabe](https://github.com/JoshuaKGoldberg/release-it-action/commit/7fefabe2e995b7b45a96ef964a91e80882119626)), closes [#852](https://github.com/JoshuaKGoldberg/release-it-action/issues/852)
+- run the action on Node 24 ([#869](https://github.com/JoshuaKGoldberg/release-it-action/issues/869)) ([aa65c73](https://github.com/JoshuaKGoldberg/release-it-action/commit/aa65c735a4688eb1008fb696db0f008fc73c99d2)), closes [#849](https://github.com/JoshuaKGoldberg/release-it-action/issues/849)
+- warn on superseded releases and treat merge-base errors as not superseded ([#868](https://github.com/JoshuaKGoldberg/release-it-action/issues/868)) ([7e7e6ca](https://github.com/JoshuaKGoldberg/release-it-action/commit/7e7e6cad0d2aad515a5485aef9ba78d997f972c1)), closes [#848](https://github.com/JoshuaKGoldberg/release-it-action/issues/848)
+
 ## [0.5.13](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.12...v0.5.13) (2026-10-02)
 
 ### Bug Fixes
