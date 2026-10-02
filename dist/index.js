@@ -33153,7 +33153,7 @@ function core_error(message, properties = {}) {
  * @param properties optional properties to add to the annotation.
  */
 function warning(message, properties = {}) {
-    issueCommand('warning', toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+    command_issueCommand('warning', utils_toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 /**
  * Adds a notice issue
@@ -43943,6 +43943,12 @@ const $$captured = $({
 ;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
 
 async function tryCatchInfoAction(label, action) {
+    return await tryCatchAction(label, action, info);
+}
+async function tryCatchSetFailedAction(label, action) {
+    return await tryCatchAction(label, action, setFailed);
+}
+async function tryCatchAction(label, action, logError) {
     info(`Start: ${label}`);
     try {
         const result = await action();
@@ -43950,7 +43956,7 @@ async function tryCatchInfoAction(label, action) {
         return result;
     }
     catch (error) {
-        info(`Error ${label}: ${error}`);
+        logError(`Error ${label}: ${error}`);
         return undefined;
     }
 }
@@ -43970,7 +43976,7 @@ async function deleteProtections({ existingProtections, octokit, requestData, })
 ;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
 
 async function fetchProtections({ octokit, requestData, }) {
-    return await tryCatchInfoAction(`fetching existing branch protections for ${requestData.branch}`, async () => await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData));
+    return await tryCatchInfoAction(`fetching existing branch protections for ${requestData.branch}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData)).data);
 }
 
 ;// CONCATENATED MODULE: ./src/steps/recreateProtections.ts
@@ -43979,7 +43985,7 @@ async function recreateProtections({ commonRequestData, existingProtections, oct
     if (!existingProtections) {
         return;
     }
-    await tryCatchInfoAction("re-creating branch protections", async () => await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
+    await tryCatchSetFailedAction("re-creating branch protections", async () => await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
         ...commonRequestData,
         allow_deletions: !!existingProtections.allow_deletions?.enabled,
         allow_force_pushes: !!existingProtections.allow_force_pushes?.enabled,
@@ -43999,11 +44005,12 @@ async function recreateProtections({ commonRequestData, existingProtections, oct
                     .dismissal_restrictions),
                 require_code_owner_reviews: existingProtections.required_pull_request_reviews
                     .require_code_owner_reviews,
+                require_last_push_approval: existingProtections.required_pull_request_reviews
+                    .require_last_push_approval,
                 required_approving_review_count: existingProtections.required_pull_request_reviews
                     .required_approving_review_count,
             }
             : null,
-        required_signatures: !!existingProtections.required_signatures?.enabled,
         restrictions: existingProtections.restrictions
             ? {
                 apps: existingProtections.restrictions.apps.map(
@@ -44026,6 +44033,10 @@ async function recreateProtections({ commonRequestData, existingProtections, oct
             }
             : null,
     }));
+    // The update protection endpoint doesn't accept required_signatures.
+    if (existingProtections.required_signatures?.enabled) {
+        await tryCatchSetFailedAction("re-enabling required signatures", async () => await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, commonRequestData));
+    }
 }
 function mapReviewRestrictions(restrictions) {
     if (!restrictions) {
@@ -44060,19 +44071,26 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
         octokit,
         requestData: commonRequestData,
     });
-    await run();
-    await recreateProtections({
-        commonRequestData,
-        existingProtections,
-        octokit,
-    });
+    try {
+        await run();
+    }
+    finally {
+        await recreateProtections({
+            commonRequestData,
+            existingProtections,
+            octokit,
+        });
+    }
 }
 
 ;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
 
 
 async function fetchRulesets({ octokit, requestData, }) {
-    const rules = await tryCatchInfoAction(`fetching existing branch rules for ${requestData.branch}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rules/branches/{branch}", requestData)).data);
+    const rules = await tryCatchInfoAction(`fetching existing branch rules for ${requestData.branch}`, async () => await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
+        ...requestData,
+        per_page: 100,
+    }));
     if (!rules) {
         return undefined;
     }
@@ -44105,14 +44123,17 @@ async function fetchRulesets({ octokit, requestData, }) {
 ;// CONCATENATED MODULE: ./src/steps/updateRulesetsEnforcement.ts
 
 
-async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, }) {
+async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, setFailedOnError, }) {
     if (!existingRulesets?.length) {
         info("No existing repository rulesets found to update.");
         return;
     }
+    const tryCatchAction = setFailedOnError
+        ? tryCatchSetFailedAction
+        : tryCatchInfoAction;
     for (const existingRuleset of existingRulesets) {
         const nextEnforcement = enforcement(existingRuleset);
-        await tryCatchInfoAction(`setting ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`, async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+        await tryCatchAction(`setting ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`, async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
             ...commonRequestData,
             enforcement: nextEnforcement,
             ruleset_id: existingRuleset.id,
@@ -44140,13 +44161,18 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
         existingRulesets,
         octokit,
     });
-    await run();
-    await updateRulesetsEnforcement({
-        commonRequestData,
-        enforcement: (ruleset) => ruleset.enforcement,
-        existingRulesets,
-        octokit,
-    });
+    try {
+        await run();
+    }
+    finally {
+        await updateRulesetsEnforcement({
+            commonRequestData,
+            enforcement: (ruleset) => ruleset.enforcement,
+            existingRulesets,
+            octokit,
+            setFailedOnError: true,
+        });
+    }
 }
 
 ;// CONCATENATED MODULE: ./src/steps/getUnpublishedVersion.ts
@@ -44252,7 +44278,7 @@ async function checkSuperseded(startSha) {
         return true;
     }
     const isAncestor = await checkSuperseded_$quiet `git merge-base --is-ancestor ${localSha} ${remoteSha}`;
-    return isAncestor.exitCode !== 0;
+    return isAncestor.exitCode === 1;
 }
 async function getHeadSha() {
     const { exitCode, stdout } = await checkSuperseded_$quiet `git rev-parse HEAD`;
@@ -44278,7 +44304,7 @@ async function runReleaseIt(releaseItArgs, { allowPublishConflict } = {}) {
         }
         catch (error) {
             if (startSha && (await checkSuperseded(startSha))) {
-                info(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${error}`);
+                warning(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${error}`);
                 return;
             }
             if (allowPublishConflict &&
@@ -44324,14 +44350,21 @@ async function releaseItAction({ bypassBranchProtections, bypassBranchRulesets, 
     if (unpublishedVersion) {
         const { headTag, version } = unpublishedVersion;
         if (!headTag) {
-            setFailed(`Version ${version} was tagged but never published to npm. Publish it before releasing a newer version.`);
+            setFailed(`Version ${version} was tagged but never published to npm. Publish it before releasing a newer version, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.`);
             return;
         }
         const hasRelease = await tryCatchInfoAction(`checking for a GitHub release for ${headTag}`, async () => await hasGitHubRelease({ octokit, owner, repo, tag: headTag }));
         info(`Version ${version} was pushed but never published to npm. Publishing it now.`);
+        // First try to create a GitHub release, since they're mutable...
+        if (hasRelease === false) {
+            await runReleaseIt(["--no-increment --no-git --no-npm.publish", releaseItArgs]
+                .filter(Boolean)
+                .join(" "));
+        }
+        // ...and then if that succeeded (didn't throw), do the immutable npm publish
         await runReleaseIt([
-            "--no-increment --no-git --npm.publish",
-            hasRelease !== false && "--no-github.release",
+            "--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
+            releaseItArgs,
         ]
             .filter(Boolean)
             .join(" "), { allowPublishConflict: true });

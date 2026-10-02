@@ -28,7 +28,7 @@ export async function runReleaseIt(
 			}
 		} catch (error) {
 			if (startSha && (await checkSuperseded(startSha))) {
-				core.info(
+				core.warning(
 					`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${error as string}`,
 				);
 				return;
