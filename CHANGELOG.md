@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.18](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.17...v0.5.18) (2026-10-02)
+
+### Bug Fixes
+
+- wait for npm to show a recently tagged version before treating it as unpublished ([#885](https://github.com/JoshuaKGoldberg/release-it-action/issues/885)) ([20764c0](https://github.com/JoshuaKGoldberg/release-it-action/commit/20764c010054d52f9d56355614c84a2b7e697b31)), closes [#882](https://github.com/JoshuaKGoldberg/release-it-action/issues/882) [#876](https://github.com/JoshuaKGoldberg/release-it-action/issues/876)
+
 ## [0.5.17](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.16...v0.5.17) (2026-10-02)
 
 ### Bug Fixes
