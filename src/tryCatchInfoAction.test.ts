@@ -37,6 +37,12 @@ describe("tryCatchInfoAction", () => {
 		`);
 	});
 
+	it("does not log a result when the action resolves with undefined", async () => {
+		await tryCatchInfoAction("abc", vi.fn().mockResolvedValue(undefined));
+
+		expect(mockInfo.mock.calls).toEqual([["Start: abc"]]);
+	});
+
 	it("logs the rejection when the action rejects", async () => {
 		const actual = await tryCatchInfoAction(
 			"running",

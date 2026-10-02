@@ -33121,7 +33121,7 @@ function setCommandEcho(enabled) {
  */
 function setFailed(message) {
     process.exitCode = ExitCode.Failure;
-    core_error(message);
+    error(message);
 }
 //-----------------------------------------------------------------------
 // Logging Commands
@@ -33144,7 +33144,7 @@ function core_debug(message) {
  * @param message error issue message. Errors will be converted to string via toString()
  * @param properties optional properties to add to the annotation.
  */
-function core_error(message, properties = {}) {
+function error(message, properties = {}) {
     command_issueCommand('error', utils_toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 /**
@@ -43952,7 +43952,9 @@ async function tryCatchAction(label, action, logError) {
     info(`Start: ${label}`);
     try {
         const result = await action();
-        info(`Result from ${label}: ${JSON.stringify(result, null, 4)}`);
+        if (result !== undefined) {
+            info(`Result from ${label}: ${JSON.stringify(result, null, 4)}`);
+        }
         return result;
     }
     catch (error) {
@@ -44617,18 +44619,20 @@ async function runReleaseIt(releaseItArgs, { allowPublishConflict } = {}) {
         }
         catch (error) {
             if (startSha && (await checkSuperseded(startSha))) {
-                warning(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${error}`);
+                warning(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`);
                 return;
             }
             if (allowPublishConflict &&
                 publishConflict.test(error.all ?? "")) {
-                info(`release-it failed because npm already has this version. A previous release run must have published it: ${error}`);
+                info(`release-it failed because npm already has this version. A previous release run must have published it: ${describeError(error)}`);
                 return;
             }
-            core_error(`Error running release-it: ${error}`);
-            setFailed(error);
+            setFailed(`Error running release-it: ${describeError(error)}`);
         }
     });
+}
+function describeError(error) {
+    return error.shortMessage ?? String(error);
 }
 
 ;// CONCATENATED MODULE: ./src/index.ts

@@ -22,7 +22,9 @@ async function tryCatchAction<T>(
 	core.info(`Start: ${label}`);
 	try {
 		const result = await action();
-		core.info(`Result from ${label}: ${JSON.stringify(result, null, 4)}`);
+		if ((result as unknown) !== undefined) {
+			core.info(`Result from ${label}: ${JSON.stringify(result, null, 4)}`);
+		}
 		return result;
 	} catch (error) {
 		logError(`Error ${label}: ${error as string}`);
