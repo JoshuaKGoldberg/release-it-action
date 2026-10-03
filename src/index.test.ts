@@ -163,6 +163,22 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
+	it("deletes the npm token from the npmrc when the npm user config could not be snapshotted", async () => {
+		mockSnapshotNpmUserConfig.mockResolvedValueOnce(undefined);
+		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		expect(mock$$.mock.calls.slice(2)).toEqual([
+			[
+				["npm config set //registry.npmjs.org/:_authToken ", ""],
+				"mock-npmToken",
+			],
+			[["npm config delete //registry.npmjs.org/:_authToken"]],
+		]);
+		expect(mockRestoreNpmUserConfig).not.toHaveBeenCalled();
+	});
+
 	it("snapshots the npm user config before setting the npm token", async () => {
 		mockShouldSemanticRelease.mockResolvedValueOnce(false);
 
