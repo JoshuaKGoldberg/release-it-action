@@ -1,4 +1,5 @@
 import * as core from "@actions/core";
+import { inspect } from "node:util";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { releaseItAction, ReleaseItActionOptions } from "./index.js";
@@ -43,6 +44,14 @@ const mockSnapshotNpmUserConfig = vi
 vi.mock("./snapshotNpmUserConfig.js", () => ({
 	get snapshotNpmUserConfig() {
 		return mockSnapshotNpmUserConfig;
+	},
+}));
+
+const mockGetHeadTagMissingGitHubRelease = vi.fn();
+
+vi.mock("./steps/getHeadTagMissingGitHubRelease.js", () => ({
+	get getHeadTagMissingGitHubRelease() {
+		return mockGetHeadTagMissingGitHubRelease;
 	},
 }));
 
@@ -189,6 +198,27 @@ describe("releaseItAction", () => {
 		);
 	});
 
+	it("does not expose the npm token when setting it fails", async () => {
+		mock$$
+			.mockResolvedValueOnce(undefined)
+			.mockResolvedValueOnce(undefined)
+			.mockRejectedValueOnce(
+				new Error(
+					`Command failed with exit code 1: npm config set //registry.npmjs.org/:_authToken ${mockOptions.npmToken}`,
+				),
+			);
+
+		const error = await releaseItAction(mockOptions).catch(
+			(caught: unknown) => caught,
+		);
+
+		expect(error).toEqual(
+			new Error("Could not set the npm token in the npmrc."),
+		);
+		expect(inspect(error)).not.toContain(mockOptions.npmToken);
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
+	});
+
 	it("publishes a version tagged at HEAD that was never published, without recreating its GitHub release", async () => {
 		mockGetUnpublishedVersion.mockResolvedValueOnce({
 			headTag: "v1.2.3",
@@ -247,6 +277,63 @@ describe("releaseItAction", () => {
 			"--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
 			{ allowPublishConflict: true, skipSupersededCheck: true },
 		);
+	});
+
+	it("does not check for a missing GitHub release when the version was never published", async () => {
+		mockGetUnpublishedVersion.mockResolvedValueOnce({
+			headTag: "v1.2.3",
+			version: "1.2.3",
+		});
+		mockHasGitHubRelease.mockResolvedValueOnce(true);
+
+		await releaseItAction(mockOptions);
+
+		expect(mockGetHeadTagMissingGitHubRelease).not.toHaveBeenCalled();
+	});
+
+	it("creates a missing GitHub release for a version tagged at HEAD that was already published", async () => {
+		mockGetHeadTagMissingGitHubRelease.mockResolvedValueOnce("v1.2.3");
+
+		await releaseItAction(mockOptions);
+
+		expect(mockGetHeadTagMissingGitHubRelease).toHaveBeenCalledWith(
+			expect.objectContaining({
+				owner: "mock-owner",
+				releaseItArgs: mockReleaseItArgs,
+				repo: "mock-repo",
+			}),
+		);
+		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
+		expect(mockRunReleaseIt.mock.calls).toEqual([
+			[
+				`--no-increment --no-git --no-npm.publish ${mockReleaseItArgs}`,
+				{ allowPublishConflict: true, skipSupersededCheck: true },
+			],
+		]);
+	});
+
+	it("creates a missing GitHub release for a version tagged at HEAD when skipNpmPublish is true", async () => {
+		mockGetHeadTagMissingGitHubRelease.mockResolvedValueOnce("v1.2.3");
+
+		await releaseItAction({ ...mockOptions, skipNpmPublish: true });
+
+		expect(mockGetUnpublishedVersion).not.toHaveBeenCalled();
+		expect(mockRunReleaseIt.mock.calls).toEqual([
+			[
+				`--no-increment --no-git --no-npm.publish ${mockReleaseItArgs}`,
+				{ allowPublishConflict: true, skipSupersededCheck: true },
+			],
+		]);
+	});
+
+	it("checks should-semantic-release when no GitHub release is missing", async () => {
+		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		expect(mockGetHeadTagMissingGitHubRelease).toHaveBeenCalled();
+		expect(mockShouldSemanticRelease).toHaveBeenCalled();
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
 	it("does not check for an unpublished version when skipNpmPublish is true", async () => {

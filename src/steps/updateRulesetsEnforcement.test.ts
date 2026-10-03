@@ -11,17 +11,11 @@ vi.mock("@actions/core", () => ({
 	},
 }));
 
-const mockTryCatchInfoAction = vi.fn(
-	async (_: string, action: () => Promise<unknown>) => await action(),
-);
 const mockTryCatchSetFailedAction = vi.fn(
 	async (_: string, action: () => Promise<unknown>) => await action(),
 );
 
 vi.mock("../tryCatchInfoAction.js", () => ({
-	get tryCatchInfoAction() {
-		return mockTryCatchInfoAction;
-	},
 	get tryCatchSetFailedAction() {
 		return mockTryCatchSetFailedAction;
 	},
@@ -43,24 +37,6 @@ const existingRulesets = [
 describe("updateRulesetsEnforcement", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-	});
-
-	it("logs and does not request when existingRulesets is undefined", async () => {
-		await updateRulesetsEnforcement({
-			commonRequestData,
-			enforcement: () => "disabled",
-			existingRulesets: undefined,
-			octokit: mockOctokit,
-		});
-
-		expect(mockInfo.mock.calls).toMatchInlineSnapshot(`
-			[
-			  [
-			    "No existing repository rulesets found to update.",
-			  ],
-			]
-		`);
-		expect(mockRequest).not.toHaveBeenCalled();
 	});
 
 	it("logs and does not request when existingRulesets is empty", async () => {
@@ -86,7 +62,7 @@ describe("updateRulesetsEnforcement", () => {
 			setFailedOnError: true,
 		});
 
-		expect(mockTryCatchInfoAction).not.toHaveBeenCalled();
+		expect(mockInfo).not.toHaveBeenCalled();
 		expect(mockTryCatchSetFailedAction).toHaveBeenCalledTimes(2);
 		expect(mockRequest).toHaveBeenCalledTimes(2);
 	});
@@ -99,7 +75,16 @@ describe("updateRulesetsEnforcement", () => {
 			octokit: mockOctokit,
 		});
 
-		expect(mockInfo).not.toHaveBeenCalled();
+		expect(mockInfo.mock.calls).toMatchInlineSnapshot(`
+			[
+			  [
+			    "Start: setting ruleset 1 (A) enforcement to active",
+			  ],
+			  [
+			    "Start: setting ruleset 2 (B) enforcement to evaluate",
+			  ],
+			]
+		`);
 		expect(mockTryCatchSetFailedAction).not.toHaveBeenCalled();
 		expect(mockRequest.mock.calls).toMatchInlineSnapshot(`
 			[
@@ -125,5 +110,21 @@ describe("updateRulesetsEnforcement", () => {
 			  ],
 			]
 		`);
+	});
+
+	it("throws without updating later rulesets when an update fails", async () => {
+		mockRequest.mockRejectedValueOnce(new Error("Oh no!"));
+
+		await expect(
+			updateRulesetsEnforcement({
+				commonRequestData,
+				enforcement: () => "disabled",
+				existingRulesets,
+				octokit: mockOctokit,
+			}),
+		).rejects.toThrowErrorMatchingInlineSnapshot(
+			`[Error: Could not set ruleset 1 (A) enforcement to disabled: Error: Oh no!]`,
+		);
+		expect(mockRequest).toHaveBeenCalledTimes(1);
 	});
 });
