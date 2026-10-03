@@ -144,6 +144,7 @@ await releaseItAction({
 The Node API doesn't read action inputs or change `process.env`.
 It passes `githubToken` to `release-it` as the `GITHUB_TOKEN` environment variable.
 Other environment variables still apply, such as `GITHUB_API_URL` for its GitHub API requests.
+Most failures are reported with `@actions/core`'s `setFailed`, which logs an error and sets `process.exitCode` to `1` instead of rejecting, so check `process.exitCode` after `releaseItAction` resolves.
 
 ## FAQs
 
