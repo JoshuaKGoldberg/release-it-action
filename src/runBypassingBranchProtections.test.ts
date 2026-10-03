@@ -121,6 +121,27 @@ describe("runBypassingBranchProtections", () => {
 		expect(mockRecreateProtections).toHaveBeenCalled();
 	});
 
+	test("recreates protections without running when deleting them rejects", async () => {
+		const error = new Error("Oh no!");
+		const existingProtections = {};
+		const run = vi.fn();
+		mockFetchProtections.mockResolvedValueOnce(existingProtections);
+		mockDeleteProtections.mockRejectedValueOnce(error);
+
+		await expect(
+			runBypassingBranchProtections(
+				{ branch: "", owner: "", repo: "" },
+				mockOctokit,
+				run,
+			),
+		).rejects.toBe(error);
+
+		expect(run).not.toHaveBeenCalled();
+		expect(mockRecreateProtections).toHaveBeenCalledWith(
+			expect.objectContaining({ existingProtections }),
+		);
+	});
+
 	test("does not delete, run, or recreate protections when fetching them rejects", async () => {
 		const error = new Error("Oh no!");
 		const run = vi.fn();

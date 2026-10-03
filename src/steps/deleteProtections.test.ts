@@ -11,12 +11,6 @@ vi.mock("@actions/core", () => ({
 	},
 }));
 
-vi.mock("../tryCatchInfoAction.js", () => ({
-	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
-		return await action();
-	},
-}));
-
 const branch = "test-branch";
 const mockRequest = vi.fn();
 const mockOctokit = { request: mockRequest } as unknown as Octokit;
@@ -30,7 +24,13 @@ describe("deleteProtections", () => {
 			requestData,
 		});
 
-		expect(mockInfo).not.toHaveBeenCalled();
+		expect(mockInfo.mock.calls).toMatchInlineSnapshot(`
+			[
+			  [
+			    "Start: deleting existing protections for test-branch",
+			  ],
+			]
+		`);
 		expect(mockRequest.mock.calls).toMatchInlineSnapshot(`
 			[
 			  [
@@ -60,5 +60,24 @@ describe("deleteProtections", () => {
 			]
 		`);
 		expect(mockRequest).not.toHaveBeenCalled();
+	});
+
+	it("throws when deleting protections fails", async () => {
+		mockRequest.mockRejectedValueOnce(
+			Object.assign(new Error("Resource not accessible by integration"), {
+				name: "HttpError",
+				status: 403,
+			}),
+		);
+
+		await expect(
+			deleteProtections({
+				existingProtections: {},
+				octokit: mockOctokit,
+				requestData,
+			}),
+		).rejects.toThrowErrorMatchingInlineSnapshot(
+			`[Error: Could not delete existing branch protections for test-branch: HttpError: Resource not accessible by integration]`,
+		);
 	});
 });

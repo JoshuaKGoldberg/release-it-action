@@ -2,7 +2,6 @@ import type { Endpoints } from "@octokit/types";
 
 import * as core from "@actions/core";
 
-import { tryCatchInfoAction } from "../tryCatchInfoAction.js";
 import { Octokit } from "../types.js";
 
 export interface DeleteProtectionsOptions {
@@ -17,14 +16,19 @@ export async function deleteProtections({
 	requestData,
 }: DeleteProtectionsOptions) {
 	if (existingProtections) {
-		await tryCatchInfoAction(
-			`deleting existing protections for ${requestData.branch}`,
-			async () =>
-				await octokit.request(
-					`DELETE /repos/{owner}/{repo}/branches/{branch}/protection`,
-					requestData,
-				),
-		);
+		core.info(`Start: deleting existing protections for ${requestData.branch}`);
+
+		try {
+			await octokit.request(
+				`DELETE /repos/{owner}/{repo}/branches/{branch}/protection`,
+				requestData,
+			);
+		} catch (error) {
+			throw new Error(
+				`Could not delete existing branch protections for ${requestData.branch}: ${String(error)}`,
+				{ cause: error },
+			);
+		}
 	} else {
 		core.info(
 			`No existing branch protections found for ${requestData.branch}.`,
