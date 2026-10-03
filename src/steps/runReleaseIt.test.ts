@@ -43,12 +43,6 @@ vi.mock("./checkSuperseded.js", () => ({
 	},
 }));
 
-vi.mock("../tryCatchInfoAction.js", () => ({
-	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
-		return await action();
-	},
-}));
-
 const mockOptions = { githubToken: "mock-github-token" };
 
 const commandFailure = Object.assign(
@@ -188,6 +182,19 @@ describe("runReleaseIt", () => {
 		expect(mockSetFailed).toHaveBeenCalled();
 	});
 
+	it("logs an error if release-it fails without output when a publish conflict is allowed", async () => {
+		mock$$.mockRejectedValueOnce(new Error("Oh no!"));
+		mockGetHeadSha.mockResolvedValueOnce("start-sha");
+		mockCheckSuperseded.mockResolvedValueOnce(false);
+
+		await runReleaseIt("", { ...mockOptions, allowPublishConflict: true });
+
+		expect(mockInfo).not.toHaveBeenCalledWith(
+			expect.stringContaining("npm already has this version"),
+		);
+		expect(mockSetFailed).toHaveBeenCalled();
+	});
+
 	it("logs an error without checking for superseding if the starting sha is unknown", async () => {
 		mock$$.mockRejectedValue(commandFailure);
 		mockGetHeadSha.mockResolvedValue(undefined);
@@ -196,6 +203,15 @@ describe("runReleaseIt", () => {
 
 		expect(mockCheckSuperseded).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalled();
+	});
+
+	it("rejects instead of passing when checking for superseding throws unexpectedly", async () => {
+		const error = new Error("Oh no!");
+		mock$$.mockRejectedValueOnce(new Error("Command failed"));
+		mockGetHeadSha.mockResolvedValueOnce("start-sha");
+		mockCheckSuperseded.mockRejectedValueOnce(error);
+
+		await expect(runReleaseIt("", mockOptions)).rejects.toBe(error);
 	});
 
 	it("does not log an error if running release-it runs smoothly", async () => {

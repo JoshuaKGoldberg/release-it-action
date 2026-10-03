@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.5.29](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.28...v0.5.29) (2026-10-03)
+
+### Bug Fixes
+
+- replace the redundant runReleaseIt wrapper with a top-level failure handler ([#942](https://github.com/JoshuaKGoldberg/release-it-action/issues/942)) ([23bbb72](https://github.com/JoshuaKGoldberg/release-it-action/commit/23bbb726293d8705b64a06ba4ad6f97062bb6c7c)), closes [#904](https://github.com/JoshuaKGoldberg/release-it-action/issues/904)
+
+## [0.5.28](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.27...v0.5.28) (2026-10-03)
+
+### Bug Fixes
+
+- stop publishing compiled tests to npm ([#952](https://github.com/JoshuaKGoldberg/release-it-action/issues/952)) ([44d2885](https://github.com/JoshuaKGoldberg/release-it-action/commit/44d2885425c064d17893ab89b53cfc59cbc9d35b)), closes [#901](https://github.com/JoshuaKGoldberg/release-it-action/issues/901)
+
+## [0.5.27](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.26...v0.5.27) (2026-10-03)
+
+### Bug Fixes
+
+- always fail on unparseable release-it-args ([#945](https://github.com/JoshuaKGoldberg/release-it-action/issues/945)) ([23f9790](https://github.com/JoshuaKGoldberg/release-it-action/commit/23f9790978b62ea0e7906adf9576cde6748210f3)), closes [#896](https://github.com/JoshuaKGoldberg/release-it-action/issues/896)
+- stop logging the npm token cleanup's command result ([#941](https://github.com/JoshuaKGoldberg/release-it-action/issues/941)) ([e4111e1](https://github.com/JoshuaKGoldberg/release-it-action/commit/e4111e11d59a81d1c04198422194796534c13664)), closes [#903](https://github.com/JoshuaKGoldberg/release-it-action/issues/903)
+
 ## [0.5.26](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.25...v0.5.26) (2026-10-03)
 
 ### Bug Fixes
