@@ -131,6 +131,36 @@ describe("recreateProtections", () => {
 		);
 	});
 
+	it("allows any app to provide required checks that were not limited to an app", async () => {
+		await recreateProtections({
+			commonRequestData,
+			existingProtections: {
+				required_status_checks: {
+					checks: [
+						{ app_id: null, context: "any-app-check" },
+						{ app_id: 15368, context: "github-actions-check" },
+					],
+					contexts: ["any-app-check", "github-actions-check"],
+					strict: false,
+				},
+			},
+			octokit: mockOctokit,
+		});
+
+		expect(mockRequest).toHaveBeenCalledWith(
+			"PUT /repos/{owner}/{repo}/branches/{branch}/protection",
+			expect.objectContaining({
+				required_status_checks: {
+					checks: [
+						{ app_id: -1, context: "any-app-check" },
+						{ app_id: 15368, context: "github-actions-check" },
+					],
+					strict: false,
+				},
+			}),
+		);
+	});
+
 	it("recreates protections when existingProtections is a full set of protections", async () => {
 		await recreateProtections({
 			commonRequestData,
@@ -241,7 +271,7 @@ describe("recreateProtections", () => {
 			      "required_status_checks": {
 			        "checks": [
 			          {
-			            "app_id": undefined,
+			            "app_id": -1,
 			            "context": "check-context-null",
 			          },
 			          {

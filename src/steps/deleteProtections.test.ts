@@ -45,7 +45,7 @@ describe("deleteProtections", () => {
 		`);
 	});
 
-	it("does not delete protections when existingProjections does not exist", async () => {
+	it("does not delete protections when existingProtections does not exist", async () => {
 		await deleteProtections({
 			existingProtections: undefined,
 			octokit: mockOctokit,
