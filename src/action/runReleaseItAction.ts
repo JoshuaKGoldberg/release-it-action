@@ -1,24 +1,27 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
+import * as process from "node:process";
 
-import {
-	getOptionalTokenInput,
-	getRequiredTokenInput,
-} from "../getTokenInput.js";
+import { getTokenInput } from "../getTokenInput.js";
 import { releaseItAction } from "../index.js";
 
 export async function runReleaseItAction(context: typeof github.context) {
 	const gitUserName = core.getInput("git-user-name") || context.actor;
 
+	if (process.env.NPM_TOKEN) {
+		core.warning(
+			"release-it-action no longer uses NPM_TOKEN. Publish to npm with Trusted Publishing instead: https://docs.npmjs.com/trusted-publishers",
+		);
+	}
+
 	await releaseItAction({
 		bypassBranchProtections: core.getInput("bypass-branch-protections"),
 		bypassBranchRulesets: core.getInput("bypass-branch-rulesets"),
-		githubToken: getRequiredTokenInput("github-token", "GITHUB_TOKEN"),
+		githubToken: getTokenInput("github-token", "GITHUB_TOKEN"),
 		gitUserEmail:
 			core.getInput("git-user-email") ||
 			`${gitUserName}@users.noreply.github.com`,
 		gitUserName,
-		npmToken: getOptionalTokenInput("npm-token", "NPM_TOKEN"),
 		owner: context.repo.owner,
 		releaseItArgs: core.getInput("release-it-args"),
 		repo: context.repo.repo,

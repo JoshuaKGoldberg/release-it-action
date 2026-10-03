@@ -1,13 +1,13 @@
 import * as github from "@actions/github";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getOptionalTokenInput } from "../getTokenInput.js";
 import { runReleaseItAction } from "./runReleaseItAction.js";
 
 process.env.GITHUB_REPOSITORY = "mock-github-repository";
 
 const mockGetBooleanInput = vi.fn();
 const mockGetInput = vi.fn();
+const mockWarning = vi.fn();
 
 vi.mock("@actions/core", () => ({
 	get getBooleanInput() {
@@ -16,15 +16,16 @@ vi.mock("@actions/core", () => ({
 	get getInput() {
 		return mockGetInput;
 	},
+	get warning() {
+		return mockWarning;
+	},
 }));
 
 vi.mock("../getTokenInput.js", () => ({
-	getOptionalTokenInput: vi.fn(),
-	getRequiredTokenInput(tokenName: string) {
+	getTokenInput(tokenName: string) {
 		return `mock-${tokenName}`;
 	},
 }));
-const mockGetOptionalTokenInput = vi.mocked(getOptionalTokenInput);
 
 const mockReleaseItAction = vi.fn();
 
@@ -45,12 +46,15 @@ const mockContext = {
 describe("runReleaseItAction", () => {
 	beforeEach(() => {
 		mockGetBooleanInput.mockReturnValue(false);
-		mockGetOptionalTokenInput.mockReturnValue("mock-npm-token");
+		vi.stubEnv("NPM_TOKEN", undefined);
+	});
+
+	afterEach(() => {
+		vi.unstubAllEnvs();
 	});
 
 	it("runs when no optional core inputs are required", async () => {
 		mockGetInput.mockReturnValue(undefined);
-		mockGetOptionalTokenInput.mockReturnValue(undefined);
 
 		await runReleaseItAction(mockContext);
 
@@ -63,7 +67,6 @@ describe("runReleaseItAction", () => {
 			      "gitUserEmail": "test-actor@users.noreply.github.com",
 			      "gitUserName": "test-actor",
 			      "githubToken": "mock-github-token",
-			      "npmToken": undefined,
 			      "owner": "context-owner",
 			      "releaseItArgs": undefined,
 			      "repo": "context-repo",
@@ -116,7 +119,6 @@ describe("runReleaseItAction", () => {
 			      "gitUserEmail": "mock-git-user-email",
 			      "gitUserName": "mock-git-user-name",
 			      "githubToken": "mock-github-token",
-			      "npmToken": "mock-npm-token",
 			      "owner": "context-owner",
 			      "releaseItArgs": "mock-release-it-args",
 			      "repo": "context-repo",
@@ -125,5 +127,21 @@ describe("runReleaseItAction", () => {
 			  ],
 			]
 		`);
+	});
+
+	it("does not warn when NPM_TOKEN is not set", async () => {
+		await runReleaseItAction(mockContext);
+
+		expect(mockWarning).not.toHaveBeenCalled();
+	});
+
+	it("warns that NPM_TOKEN is no longer used when it is set", async () => {
+		vi.stubEnv("NPM_TOKEN", "mock-npm-token");
+
+		await runReleaseItAction(mockContext);
+
+		expect(mockWarning).toHaveBeenCalledWith(
+			"release-it-action no longer uses NPM_TOKEN. Publish to npm with Trusted Publishing instead: https://docs.npmjs.com/trusted-publishers",
+		);
 	});
 });
