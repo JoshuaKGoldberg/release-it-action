@@ -1,6 +1,6 @@
 {
 	"name": "release-it-action",
-	"version": "0.5.20",
+	"version": "0.5.26",
 	"description": "Runs release-it as a GitHub Action, with handling for semantic releases and protected branches. 📤",
 	"repository": {
 		"type": "git",
@@ -15,11 +15,12 @@
 	"main": "lib/index.js",
 	"files": [
 		"lib/",
-		"!lib/**/*.test.*"
+		"!lib/**/*.test.*",
+		"!lib/tests/"
 	],
 	"scripts": {
 		"build": "tsc",
-		"build:release": "ncc build src/action/index.ts -o dist",
+		"build:release": "rm -rf dist && ncc build src/action/index.ts -o dist",
 		"format": "prettier .",
 		"lint": "eslint . --max-warnings 0",
 		"lint:knip": "knip",
@@ -38,7 +39,6 @@
 		"@actions/core": "^3.0.0",
 		"@actions/github": "^9.0.0",
 		"@octokit/types": "^18.0.0",
-		"@types/node": "^24.10.0",
 		"execa": "^10.0.0",
 		"shlex": "^3.0.0",
 		"should-semantic-release": "^0.3.5"
@@ -65,7 +65,7 @@
 		"eslint-plugin-regexp": "3.3.0",
 		"eslint-plugin-yml": "3.8.1",
 		"husky": "9.1.7",
-		"knip": "5.78.0",
+		"knip": "5.88.1",
 		"lint-staged": "17.6.0",
 		"markdownlint": "0.41.1",
 		"markdownlint-cli": "0.49.1",
