@@ -44708,10 +44708,10 @@ async function releaseItAction(options) {
         await tryCatchInfoAction("removing the npm token from the npmrc", async () => await $$ `npm config delete //registry.npmjs.org/:_authToken`);
     }
 }
-async function createGitHubRelease(releaseItArgs) {
+async function createGitHubRelease(releaseItArgs, options = {}) {
     await runReleaseIt(["--no-increment --no-git --no-npm.publish", releaseItArgs]
         .filter(Boolean)
-        .join(" "), { skipSupersededCheck: true });
+        .join(" "), { ...options, skipSupersededCheck: true });
 }
 async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githubToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
     // release-it reads the token from the environment, not from this process.
@@ -44749,7 +44749,8 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
     }));
     if (tagMissingRelease) {
         info(`Tag ${tagMissingRelease} was pushed but its GitHub release was never created. Creating it now.`);
-        await createGitHubRelease(releaseItArgs);
+        // Hooks such as after:release can try to publish the version npm already has.
+        await createGitHubRelease(releaseItArgs, { allowPublishConflict: true });
         return;
     }
     if ((await tryCatchInfoAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true }))) === false) {
