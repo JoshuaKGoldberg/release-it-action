@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { mockCommands } from "../tests/mockCommands.js";
 import { getUnpublishedVersion } from "./getUnpublishedVersion.js";
 
 const mock$quiet = vi.fn();
@@ -29,37 +30,6 @@ vi.mock("node:fs/promises", () => ({
 	},
 }));
 
-interface MockResult {
-	exitCode?: number;
-	stdout?: string;
-}
-
-function mockCommands(
-	results: Record<string, (() => MockResult) | MockResult>,
-) {
-	mock$quiet.mockImplementation(
-		(strings: TemplateStringsArray, ...values: unknown[]) => {
-			const command = strings
-				.reduce(
-					(soFar, string, i) =>
-						soFar +
-						string +
-						(i < values.length ? [values[i]].flat().join(" ") : ""),
-					"",
-				)
-				.trim();
-
-			const result = results[command];
-
-			return Promise.resolve({
-				exitCode: 0,
-				stdout: "",
-				...(typeof result === "function" ? result() : result),
-			});
-		},
-	);
-}
-
 function mockPackageJson(data: object) {
 	mockReadFile.mockResolvedValueOnce(JSON.stringify(data));
 }
@@ -78,7 +48,7 @@ describe("getUnpublishedVersion", () => {
 
 	it("returns undefined when the version is on npm", async () => {
 		mockPackageJson(packageData);
-		mockCommands({});
+		mockCommands(mock$quiet, {});
 
 		expect(await getUnpublishedVersion()).toBeUndefined();
 	});
@@ -88,7 +58,7 @@ describe("getUnpublishedVersion", () => {
 			...packageData,
 			publishConfig: { registry: "https://npm.pkg.github.com" },
 		});
-		mockCommands({});
+		mockCommands(mock$quiet, {});
 
 		await getUnpublishedVersion();
 
@@ -109,7 +79,7 @@ describe("getUnpublishedVersion", () => {
 			},
 			version: "1.2.3",
 		});
-		mockCommands({});
+		mockCommands(mock$quiet, {});
 
 		await getUnpublishedVersion();
 
@@ -127,7 +97,7 @@ describe("getUnpublishedVersion", () => {
 			publishConfig: { registry: "https://example.com" },
 			version: "1.2.3",
 		});
-		mockCommands({});
+		mockCommands(mock$quiet, {});
 
 		await getUnpublishedVersion();
 
@@ -141,7 +111,7 @@ describe("getUnpublishedVersion", () => {
 
 	it("throws when npm fails for a reason other than a missing version", async () => {
 		mockPackageJson(packageData);
-		mockCommands({
+		mockCommands(mock$quiet, {
 			"npm view test-package@1.2.3 version --json": {
 				exitCode: 1,
 				stdout: '{"error":{"code":"ECONNRESET"}}',
@@ -155,7 +125,7 @@ describe("getUnpublishedVersion", () => {
 
 	it("returns undefined when the version is not on npm and was never tagged", async () => {
 		mockPackageJson(packageData);
-		mockCommands({
+		mockCommands(mock$quiet, {
 			"npm view test-package@1.2.3 version --json": notFound,
 		});
 
@@ -164,7 +134,7 @@ describe("getUnpublishedVersion", () => {
 
 	it("returns the version without a headTag when it was tagged on an older commit", async () => {
 		mockPackageJson(packageData);
-		mockCommands({
+		mockCommands(mock$quiet, {
 			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
 			"git tag --points-at HEAD": { stdout: "" },
 			"npm view test-package@1.2.3 version --json": notFound,
@@ -178,7 +148,7 @@ describe("getUnpublishedVersion", () => {
 
 	it("returns the version with its headTag when it was tagged at HEAD", async () => {
 		mockPackageJson(packageData);
-		mockCommands({
+		mockCommands(mock$quiet, {
 			"git tag --list 1.2.3 v1.2.3": { stdout: "1.2.3" },
 			"git tag --points-at HEAD": { stdout: "other\n1.2.3" },
 			"npm view test-package@1.2.3 version --json": notFound,
@@ -193,7 +163,7 @@ describe("getUnpublishedVersion", () => {
 	it("returns undefined when a recently tagged version shows up on npm after rechecking", async () => {
 		const npmResults = [notFound, notFound, {}];
 		mockPackageJson(packageData);
-		mockCommands({
+		mockCommands(mock$quiet, {
 			"git log -1 --format=%ct v1.2.3": recentTagTime,
 			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
 			"npm view test-package@1.2.3 version --json": () =>
@@ -206,7 +176,7 @@ describe("getUnpublishedVersion", () => {
 
 	it("returns the version when a recently tagged version never shows up on npm", async () => {
 		mockPackageJson(packageData);
-		mockCommands({
+		mockCommands(mock$quiet, {
 			"git log -1 --format=%ct v1.2.3": recentTagTime,
 			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
 			"git tag --points-at HEAD": { stdout: "v1.2.3" },
@@ -222,7 +192,7 @@ describe("getUnpublishedVersion", () => {
 
 	it("does not recheck npm when the version was tagged long ago", async () => {
 		mockPackageJson(packageData);
-		mockCommands({
+		mockCommands(mock$quiet, {
 			"git log -1 --format=%ct v1.2.3": { stdout: "1000000000" },
 			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
 			"npm view test-package@1.2.3 version --json": notFound,

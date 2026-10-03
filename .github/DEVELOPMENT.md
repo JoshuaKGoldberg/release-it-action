@@ -19,7 +19,7 @@ Run [TypeScript](https://typescriptlang.org) locally to type check and build sou
 pnpm build
 ```
 
-Add `--watch` to run the builder in a watch mode that continuously cleans and recreates `lib/` as you save files:
+Add `--watch` to run the builder in a watch mode that rebuilds changed files into `lib/` as you save them:
 
 ```shell
 pnpm build --watch
@@ -32,6 +32,9 @@ Run [`@vercel/ncc`](https://github.com/vercel/ncc) to create an output `dist/` t
 ```shell
 pnpm build:release
 ```
+
+CI fails if the committed `dist/` doesn't match what `pnpm build:release` produces.
+On Renovate branches, the [Rebuild Dist workflow](./workflows/rebuild-dist.yml) runs `pnpm build:release` and pushes any `dist/` changes as a `chore: rebuild dist` commit so dependency updates can still automerge.
 
 ## Formatting
 
@@ -52,7 +55,7 @@ Each should be shown in VS Code, and can be run manually on the command-line:
 - `pnpm lint` ([ESLint](https://eslint.org) with [typescript-eslint](https://typescript-eslint.io)): Lints JavaScript and TypeScript source files
 - `pnpm lint:knip` ([knip](https://github.com/webpro/knip)): Detects unused files, dependencies, and code exports
 - `pnpm lint:md` ([Markdownlint](https://github.com/DavidAnson/markdownlint)): Checks Markdown source files
-- `pnpm lint:packages` ([pnpm dedupe --check](https://pnpm.io/cli/dedupe)): Checks for unnecessarily duplicated packages in the `pnpm-lock.yml` file
+- `pnpm lint:packages` ([pnpm dedupe --check](https://pnpm.io/cli/dedupe)): Checks for unnecessarily duplicated packages in the `pnpm-lock.yaml` file
 - `pnpm lint:spelling` ([cspell](https://cspell.org)): Spell checks across all source files
 
 Read the individual documentation for each linter to understand how it can be configured and used best.
