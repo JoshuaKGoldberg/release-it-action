@@ -27,12 +27,9 @@ export async function runReleaseIt(
 
 		try {
 			const args = parseArgsString(releaseItArgs);
-			const { exitCode } = await $$captured({
+			await $$captured({
 				env: { GITHUB_TOKEN: githubToken },
 			})`npx release-it --verbose ${args}`;
-			if (exitCode) {
-				throw new Error(`Exit code ${exitCode.toString()}.`);
-			}
 		} catch (error) {
 			if (
 				!skipSupersededCheck &&

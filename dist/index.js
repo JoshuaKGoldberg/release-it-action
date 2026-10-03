@@ -43943,310 +43943,6 @@ const $$captured = $({
     stdout: ["inherit", "pipe"],
 });
 
-;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
-
-async function tryCatchInfoAction(label, action) {
-    return await tryCatchAction(label, action, info);
-}
-async function tryCatchSetFailedAction(label, action) {
-    return await tryCatchAction(label, action, setFailed);
-}
-async function tryCatchAction(label, action, logError) {
-    info(`Start: ${label}`);
-    try {
-        const result = await action();
-        if (result !== undefined) {
-            info(`Result from ${label}: ${JSON.stringify(result, null, 4)}`);
-        }
-        return result;
-    }
-    catch (error) {
-        logError(`Error ${label}: ${error}`);
-        return undefined;
-    }
-}
-
-;// CONCATENATED MODULE: ./src/steps/deleteProtections.ts
-
-
-async function deleteProtections({ existingProtections, octokit, requestData, }) {
-    if (existingProtections) {
-        await tryCatchInfoAction(`deleting existing protections for ${requestData.branch}`, async () => await octokit.request(`DELETE /repos/{owner}/{repo}/branches/{branch}/protection`, requestData));
-    }
-    else {
-        info(`No existing branch protections found for ${requestData.branch}.`);
-    }
-}
-
-;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
-
-async function fetchProtections({ octokit, requestData, }) {
-    return await tryCatchInfoAction(`fetching existing branch protections for ${requestData.branch}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData)).data);
-}
-
-;// CONCATENATED MODULE: ./src/steps/recreateProtections.ts
-
-async function recreateProtections({ commonRequestData, existingProtections, octokit, }) {
-    if (!existingProtections) {
-        return;
-    }
-    await tryCatchSetFailedAction("re-creating branch protections", async () => await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
-        ...commonRequestData,
-        allow_deletions: !!existingProtections.allow_deletions?.enabled,
-        allow_force_pushes: !!existingProtections.allow_force_pushes?.enabled,
-        allow_fork_syncing: !!existingProtections.allow_fork_syncing?.enabled,
-        block_creations: !!existingProtections.block_creations?.enabled,
-        enforce_admins: !!existingProtections.enforce_admins?.enabled,
-        lock_branch: !!existingProtections.lock_branch?.enabled,
-        required_conversation_resolution: !!existingProtections.required_conversation_resolution?.enabled,
-        required_linear_history: !!existingProtections.required_linear_history?.enabled,
-        required_pull_request_reviews: existingProtections.required_pull_request_reviews
-            ? {
-                bypass_pull_request_allowances: mapReviewRestrictions(existingProtections.required_pull_request_reviews
-                    .bypass_pull_request_allowances),
-                dismiss_stale_reviews: existingProtections.required_pull_request_reviews
-                    .dismiss_stale_reviews,
-                dismissal_restrictions: mapReviewRestrictions(existingProtections.required_pull_request_reviews
-                    .dismissal_restrictions),
-                require_code_owner_reviews: existingProtections.required_pull_request_reviews
-                    .require_code_owner_reviews,
-                require_last_push_approval: existingProtections.required_pull_request_reviews
-                    .require_last_push_approval,
-                required_approving_review_count: existingProtections.required_pull_request_reviews
-                    .required_approving_review_count,
-            }
-            : null,
-        restrictions: existingProtections.restrictions
-            ? {
-                apps: existingProtections.restrictions.apps.map(
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                (app) => app.slug),
-                teams: existingProtections.restrictions.teams.map((team) => team.slug),
-                users: existingProtections.restrictions.users.map(
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                (user) => user.login),
-            }
-            : null,
-        // @ts-expect-error -- The left types use 'null', while the right are 'undefined'...
-        required_status_checks: existingProtections.required_status_checks
-            ? {
-                checks: existingProtections.required_status_checks.checks.map((check) => ({
-                    app_id: check.app_id ?? -1,
-                    context: check.context,
-                })),
-                strict: existingProtections.required_status_checks.strict,
-            }
-            : null,
-    }));
-    // The update protection endpoint doesn't accept required_signatures.
-    if (existingProtections.required_signatures?.enabled) {
-        await tryCatchSetFailedAction("re-enabling required signatures", async () => await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, commonRequestData));
-    }
-}
-function mapReviewRestrictions(restrictions) {
-    if (!restrictions) {
-        return undefined;
-    }
-    return {
-        apps: restrictions.apps
-            ?.map((app) => app?.slug)
-            .filter((slug) => slug !== undefined),
-        teams: restrictions.teams?.map((team) => team.slug),
-        users: restrictions.users?.map((user) => user.login),
-    };
-}
-
-;// CONCATENATED MODULE: ./src/runBypassingBranchProtections.ts
-
-
-
-async function runBypassingBranchProtections(commonData, octokit, run) {
-    const commonRequestData = {
-        ...commonData,
-        headers: {
-            "X-GitHub-Api-Version": "2022-11-28",
-        },
-    };
-    const existingProtections = await fetchProtections({
-        octokit,
-        requestData: commonRequestData,
-    });
-    await deleteProtections({
-        existingProtections,
-        octokit,
-        requestData: commonRequestData,
-    });
-    try {
-        await run();
-    }
-    finally {
-        await recreateProtections({
-            commonRequestData,
-            existingProtections,
-            octokit,
-        });
-    }
-}
-
-;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
-
-const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
-async function fetchRulesets({ octokit, requestData, }) {
-    const rules = await fetchLogged(`existing branch rules for ${requestData.branch}`, async () => {
-        try {
-            return await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
-                ...requestData,
-                per_page: 100,
-            });
-        }
-        catch (error) {
-            const { response, status } = error;
-            if (status === 403 &&
-                planUpgradeRequired.test(response?.data?.message ?? "")) {
-                warning(`Repository rulesets aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
-                return [];
-            }
-            throw error;
-        }
-    });
-    const rulesetIds = new Set();
-    for (const rule of rules) {
-        if (rule.ruleset_id === undefined) {
-            continue;
-        }
-        // Only repository rulesets can be updated with a repository-scoped token.
-        if (rule.ruleset_source_type === "Repository") {
-            rulesetIds.add(rule.ruleset_id);
-        }
-        else {
-            info(`Skipping ${rule.ruleset_source_type ?? "unknown"} ruleset ${rule.ruleset_id.toString()} (${rule.ruleset_source ?? "unknown source"}): only repository rulesets can be bypassed.`);
-        }
-    }
-    const rulesets = [];
-    for (const rulesetId of rulesetIds) {
-        const ruleset = await fetchLogged(`existing ruleset ${rulesetId.toString()}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
-            ...requestData,
-            ruleset_id: rulesetId,
-        })).data);
-        rulesets.push(ruleset);
-    }
-    return rulesets;
-}
-async function fetchLogged(description, fetch) {
-    info(`Start: fetching ${description}`);
-    let result;
-    try {
-        result = await fetch();
-    }
-    catch (error) {
-        throw new Error(`Could not fetch ${description}: ${String(error)}`, {
-            cause: error,
-        });
-    }
-    info(`Result from fetching ${description}: ${JSON.stringify(result, null, 4)}`);
-    return result;
-}
-
-;// CONCATENATED MODULE: ./src/steps/updateRulesetsEnforcement.ts
-
-
-async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, setFailedOnError, }) {
-    if (!existingRulesets.length) {
-        info("No existing repository rulesets found to update.");
-        return;
-    }
-    for (const existingRuleset of existingRulesets) {
-        const nextEnforcement = enforcement(existingRuleset);
-        const description = `ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`;
-        const update = async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
-            ...commonRequestData,
-            enforcement: nextEnforcement,
-            ruleset_id: existingRuleset.id,
-        });
-        if (setFailedOnError) {
-            await tryCatchSetFailedAction(`setting ${description}`, update);
-            continue;
-        }
-        info(`Start: setting ${description}`);
-        try {
-            await update();
-        }
-        catch (error) {
-            throw new Error(`Could not set ${description}: ${String(error)}`, {
-                cause: error,
-            });
-        }
-    }
-}
-
-;// CONCATENATED MODULE: ./src/runBypassingBranchRulesets.ts
-
-
-async function runBypassingBranchRulesets(commonData, octokit, run) {
-    const commonRequestData = {
-        ...commonData,
-        headers: {
-            "X-GitHub-Api-Version": "2022-11-28",
-        },
-    };
-    const existingRulesets = await fetchRulesets({
-        octokit,
-        requestData: commonRequestData,
-    });
-    try {
-        await updateRulesetsEnforcement({
-            commonRequestData,
-            enforcement: () => "disabled",
-            existingRulesets,
-            octokit,
-        });
-        await run();
-    }
-    finally {
-        await updateRulesetsEnforcement({
-            commonRequestData,
-            enforcement: (ruleset) => ruleset.enforcement,
-            existingRulesets,
-            octokit,
-            setFailedOnError: true,
-        });
-    }
-}
-
-;// CONCATENATED MODULE: ./src/snapshotNpmUserConfig.ts
-
-
-
-async function snapshotNpmUserConfig() {
-    try {
-        const { stdout: userConfig } = await $ `npm config get userconfig`;
-        const contents = await readFileIfExists(userConfig);
-        return async () => {
-            if (contents) {
-                await external_node_fs_promises_namespaceObject.writeFile(userConfig, contents);
-            }
-            else {
-                await external_node_fs_promises_namespaceObject.rm(userConfig, { force: true });
-            }
-        };
-    }
-    catch (error) {
-        warning(`Could not snapshot the npmrc, so the npm token will be deleted from it after the run instead: ${error}`);
-        return undefined;
-    }
-}
-async function readFileIfExists(filePath) {
-    try {
-        return await external_node_fs_promises_namespaceObject.readFile(filePath);
-    }
-    catch (error) {
-        if (error.code === "ENOENT") {
-            return undefined;
-        }
-        throw error;
-    }
-}
-
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/shlex@3.0.0/node_modules/shlex/shlex.js
 
 
@@ -44563,6 +44259,310 @@ function parseArgsString(input) {
     }
 }
 
+;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
+
+async function tryCatchInfoAction(label, action) {
+    return await tryCatchAction(label, action, info);
+}
+async function tryCatchSetFailedAction(label, action) {
+    return await tryCatchAction(label, action, setFailed);
+}
+async function tryCatchAction(label, action, logError) {
+    info(`Start: ${label}`);
+    try {
+        const result = await action();
+        if (result !== undefined) {
+            info(`Result from ${label}: ${JSON.stringify(result, null, 4)}`);
+        }
+        return result;
+    }
+    catch (error) {
+        logError(`Error ${label}: ${error}`);
+        return undefined;
+    }
+}
+
+;// CONCATENATED MODULE: ./src/steps/deleteProtections.ts
+
+
+async function deleteProtections({ existingProtections, octokit, requestData, }) {
+    if (existingProtections) {
+        await tryCatchInfoAction(`deleting existing protections for ${requestData.branch}`, async () => await octokit.request(`DELETE /repos/{owner}/{repo}/branches/{branch}/protection`, requestData));
+    }
+    else {
+        info(`No existing branch protections found for ${requestData.branch}.`);
+    }
+}
+
+;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
+
+async function fetchProtections({ octokit, requestData, }) {
+    return await tryCatchInfoAction(`fetching existing branch protections for ${requestData.branch}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData)).data);
+}
+
+;// CONCATENATED MODULE: ./src/steps/recreateProtections.ts
+
+async function recreateProtections({ commonRequestData, existingProtections, octokit, }) {
+    if (!existingProtections) {
+        return;
+    }
+    await tryCatchSetFailedAction("re-creating branch protections", async () => await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
+        ...commonRequestData,
+        allow_deletions: !!existingProtections.allow_deletions?.enabled,
+        allow_force_pushes: !!existingProtections.allow_force_pushes?.enabled,
+        allow_fork_syncing: !!existingProtections.allow_fork_syncing?.enabled,
+        block_creations: !!existingProtections.block_creations?.enabled,
+        enforce_admins: !!existingProtections.enforce_admins?.enabled,
+        lock_branch: !!existingProtections.lock_branch?.enabled,
+        required_conversation_resolution: !!existingProtections.required_conversation_resolution?.enabled,
+        required_linear_history: !!existingProtections.required_linear_history?.enabled,
+        required_pull_request_reviews: existingProtections.required_pull_request_reviews
+            ? {
+                bypass_pull_request_allowances: mapReviewRestrictions(existingProtections.required_pull_request_reviews
+                    .bypass_pull_request_allowances),
+                dismiss_stale_reviews: existingProtections.required_pull_request_reviews
+                    .dismiss_stale_reviews,
+                dismissal_restrictions: mapReviewRestrictions(existingProtections.required_pull_request_reviews
+                    .dismissal_restrictions),
+                require_code_owner_reviews: existingProtections.required_pull_request_reviews
+                    .require_code_owner_reviews,
+                require_last_push_approval: existingProtections.required_pull_request_reviews
+                    .require_last_push_approval,
+                required_approving_review_count: existingProtections.required_pull_request_reviews
+                    .required_approving_review_count,
+            }
+            : null,
+        restrictions: existingProtections.restrictions
+            ? {
+                apps: existingProtections.restrictions.apps.map(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                (app) => app.slug),
+                teams: existingProtections.restrictions.teams.map((team) => team.slug),
+                users: existingProtections.restrictions.users.map(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                (user) => user.login),
+            }
+            : null,
+        // @ts-expect-error -- The left types use 'null', while the right are 'undefined'...
+        required_status_checks: existingProtections.required_status_checks
+            ? {
+                checks: existingProtections.required_status_checks.checks.map((check) => ({
+                    app_id: check.app_id ?? -1,
+                    context: check.context,
+                })),
+                strict: existingProtections.required_status_checks.strict,
+            }
+            : null,
+    }));
+    // The update protection endpoint doesn't accept required_signatures.
+    if (existingProtections.required_signatures?.enabled) {
+        await tryCatchSetFailedAction("re-enabling required signatures", async () => await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, commonRequestData));
+    }
+}
+function mapReviewRestrictions(restrictions) {
+    if (!restrictions) {
+        return undefined;
+    }
+    return {
+        apps: restrictions.apps
+            ?.map((app) => app?.slug)
+            .filter((slug) => slug !== undefined),
+        teams: restrictions.teams?.map((team) => team.slug),
+        users: restrictions.users?.map((user) => user.login),
+    };
+}
+
+;// CONCATENATED MODULE: ./src/runBypassingBranchProtections.ts
+
+
+
+async function runBypassingBranchProtections(commonData, octokit, run) {
+    const commonRequestData = {
+        ...commonData,
+        headers: {
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    };
+    const existingProtections = await fetchProtections({
+        octokit,
+        requestData: commonRequestData,
+    });
+    await deleteProtections({
+        existingProtections,
+        octokit,
+        requestData: commonRequestData,
+    });
+    try {
+        await run();
+    }
+    finally {
+        await recreateProtections({
+            commonRequestData,
+            existingProtections,
+            octokit,
+        });
+    }
+}
+
+;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
+
+const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
+async function fetchRulesets({ octokit, requestData, }) {
+    const rules = await fetchLogged(`existing branch rules for ${requestData.branch}`, async () => {
+        try {
+            return await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
+                ...requestData,
+                per_page: 100,
+            });
+        }
+        catch (error) {
+            const { response, status } = error;
+            if (status === 403 &&
+                planUpgradeRequired.test(response?.data?.message ?? "")) {
+                warning(`Repository rulesets aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
+                return [];
+            }
+            throw error;
+        }
+    });
+    const rulesetIds = new Set();
+    for (const rule of rules) {
+        if (rule.ruleset_id === undefined) {
+            continue;
+        }
+        // Only repository rulesets can be updated with a repository-scoped token.
+        if (rule.ruleset_source_type === "Repository") {
+            rulesetIds.add(rule.ruleset_id);
+        }
+        else {
+            info(`Skipping ${rule.ruleset_source_type ?? "unknown"} ruleset ${rule.ruleset_id.toString()} (${rule.ruleset_source ?? "unknown source"}): only repository rulesets can be bypassed.`);
+        }
+    }
+    const rulesets = [];
+    for (const rulesetId of rulesetIds) {
+        const ruleset = await fetchLogged(`existing ruleset ${rulesetId.toString()}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+            ...requestData,
+            ruleset_id: rulesetId,
+        })).data);
+        rulesets.push(ruleset);
+    }
+    return rulesets;
+}
+async function fetchLogged(description, fetch) {
+    info(`Start: fetching ${description}`);
+    let result;
+    try {
+        result = await fetch();
+    }
+    catch (error) {
+        throw new Error(`Could not fetch ${description}: ${String(error)}`, {
+            cause: error,
+        });
+    }
+    info(`Result from fetching ${description}: ${JSON.stringify(result, null, 4)}`);
+    return result;
+}
+
+;// CONCATENATED MODULE: ./src/steps/updateRulesetsEnforcement.ts
+
+
+async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, setFailedOnError, }) {
+    if (!existingRulesets.length) {
+        info("No existing repository rulesets found to update.");
+        return;
+    }
+    for (const existingRuleset of existingRulesets) {
+        const nextEnforcement = enforcement(existingRuleset);
+        const description = `ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`;
+        const update = async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+            ...commonRequestData,
+            enforcement: nextEnforcement,
+            ruleset_id: existingRuleset.id,
+        });
+        if (setFailedOnError) {
+            await tryCatchSetFailedAction(`setting ${description}`, update);
+            continue;
+        }
+        info(`Start: setting ${description}`);
+        try {
+            await update();
+        }
+        catch (error) {
+            throw new Error(`Could not set ${description}: ${String(error)}`, {
+                cause: error,
+            });
+        }
+    }
+}
+
+;// CONCATENATED MODULE: ./src/runBypassingBranchRulesets.ts
+
+
+async function runBypassingBranchRulesets(commonData, octokit, run) {
+    const commonRequestData = {
+        ...commonData,
+        headers: {
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    };
+    const existingRulesets = await fetchRulesets({
+        octokit,
+        requestData: commonRequestData,
+    });
+    try {
+        await updateRulesetsEnforcement({
+            commonRequestData,
+            enforcement: () => "disabled",
+            existingRulesets,
+            octokit,
+        });
+        await run();
+    }
+    finally {
+        await updateRulesetsEnforcement({
+            commonRequestData,
+            enforcement: (ruleset) => ruleset.enforcement,
+            existingRulesets,
+            octokit,
+            setFailedOnError: true,
+        });
+    }
+}
+
+;// CONCATENATED MODULE: ./src/snapshotNpmUserConfig.ts
+
+
+
+async function snapshotNpmUserConfig() {
+    try {
+        const { stdout: userConfig } = await $ `npm config get userconfig`;
+        const contents = await readFileIfExists(userConfig);
+        return async () => {
+            if (contents) {
+                await external_node_fs_promises_namespaceObject.writeFile(userConfig, contents);
+            }
+            else {
+                await external_node_fs_promises_namespaceObject.rm(userConfig, { force: true });
+            }
+        };
+    }
+    catch (error) {
+        warning(`Could not snapshot the npmrc, so the npm token will be deleted from it after the run instead: ${error}`);
+        return undefined;
+    }
+}
+async function readFileIfExists(filePath) {
+    try {
+        return await external_node_fs_promises_namespaceObject.readFile(filePath);
+    }
+    catch (error) {
+        if (error.code === "ENOENT") {
+            return undefined;
+        }
+        throw error;
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/steps/hasGitHubRelease.ts
 async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
     try {
@@ -44721,12 +44721,9 @@ async function runReleaseIt(releaseItArgs, { allowPublishConflict, githubToken, 
         const startSha = await getHeadSha();
         try {
             const args = parseArgsString(releaseItArgs);
-            const { exitCode } = await $$captured({
+            await $$captured({
                 env: { GITHUB_TOKEN: githubToken },
             }) `npx release-it --verbose ${args}`;
-            if (exitCode) {
-                throw new Error(`Exit code ${exitCode.toString()}.`);
-            }
         }
         catch (error) {
             if (!skipSupersededCheck &&
@@ -44761,8 +44758,16 @@ function describeError(error) {
 
 
 
+
 async function releaseItAction(options) {
-    const { gitUserEmail, gitUserName, npmToken, skipNpmPublish } = options;
+    const { gitUserEmail, gitUserName, npmToken, releaseItArgs, skipNpmPublish } = options;
+    try {
+        parseArgsString(releaseItArgs ?? "");
+    }
+    catch (error) {
+        setFailed(`Invalid release-it-args: ${error.message}`);
+        return;
+    }
     await $$ `git config user.email ${gitUserEmail}`;
     await $$ `git config user.name ${gitUserName}`;
     if (skipNpmPublish) {
