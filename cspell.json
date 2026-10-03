@@ -2,7 +2,6 @@
 	"dictionaries": ["npm", "node", "typescript"],
 	"ignorePaths": [
 		".all-contributorsrc",
-		".github",
 		"CHANGELOG.md",
 		"coverage",
 		"dist",
@@ -11,12 +10,14 @@
 		"pnpm-lock.yaml"
 	],
 	"words": [
+		"apexskier",
 		"Codecov",
 		"contributorsrc",
 		"conventionalcommits",
 		"execa",
 		"knip",
 		"lcov",
+		"mtfoley",
 		"noreply",
 		"npmjs",
 		"npmpackagejsonlintrc",
