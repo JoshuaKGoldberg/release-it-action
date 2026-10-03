@@ -1,7 +1,15 @@
 import * as core from "@actions/core";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { releaseItAction, ReleaseItActionOptions } from "./index.js";
+
+let mockCancellation = new AbortController();
+
+vi.mock("./cancellation.js", () => ({
+	get cancellation() {
+		return mockCancellation;
+	},
+}));
 
 const mock$$ = vi.fn();
 
@@ -84,6 +92,10 @@ const mockOptions = {
 } satisfies ReleaseItActionOptions;
 
 describe("releaseItAction", () => {
+	beforeEach(() => {
+		mockCancellation = new AbortController();
+	});
+
 	afterEach(() => {
 		vi.unstubAllEnvs();
 	});
@@ -137,6 +149,52 @@ describe("releaseItAction", () => {
 
 		await releaseItAction(mockOptions);
 
+		expect(mock$$.mock.calls.at(-1)).toEqual([
+			["npm config delete //registry.npmjs.org/:_authToken"],
+		]);
+	});
+
+	it("removes the npm token once a release-it run is canceled", async () => {
+		mockShouldSemanticRelease.mockResolvedValueOnce(true);
+		mockRunReleaseIt.mockImplementationOnce(
+			async () =>
+				await new Promise((resolve) => {
+					mockCancellation.signal.addEventListener("abort", resolve);
+				}),
+		);
+
+		const releasing = releaseItAction(mockOptions);
+
+		await vi.waitFor(() => {
+			expect(mockRunReleaseIt).toHaveBeenCalled();
+		});
+		expect(mock$$).not.toHaveBeenCalledWith([
+			"npm config delete //registry.npmjs.org/:_authToken",
+		]);
+
+		mockCancellation.abort();
+		await releasing;
+
+		expect(mock$$.mock.calls.at(-1)).toEqual([
+			["npm config delete //registry.npmjs.org/:_authToken"],
+		]);
+	});
+
+	it("does not bypass branch protections or rulesets when canceled before releasing", async () => {
+		mockShouldSemanticRelease.mockImplementationOnce(() => {
+			mockCancellation.abort();
+			return Promise.resolve(true);
+		});
+
+		await releaseItAction({
+			...mockOptions,
+			bypassBranchProtections: "protections-branch",
+			bypassBranchRulesets: "rulesets-branch",
+		});
+
+		expect(mockRunBypassingBranchProtections).not.toHaveBeenCalled();
+		expect(mockRunBypassingBranchRulesets).not.toHaveBeenCalled();
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 		expect(mock$$.mock.calls.at(-1)).toEqual([
 			["npm config delete //registry.npmjs.org/:_authToken"],
 		]);

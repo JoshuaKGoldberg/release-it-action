@@ -3,6 +3,8 @@ import { $ } from "execa";
 import * as fs from "node:fs/promises";
 import { setTimeout } from "node:timers/promises";
 
+import { cancellation } from "../cancellation.js";
+
 const $quiet = $({ reject: false });
 
 // npm can take a few minutes after a publish before it shows the new version.
@@ -84,7 +86,9 @@ export async function getUnpublishedVersion(): Promise<
 		);
 
 		for (let attempt = 0; attempt < recheckAttempts; attempt += 1) {
-			await setTimeout(recheckDelayMs);
+			await setTimeout(recheckDelayMs, undefined, {
+				signal: cancellation.signal,
+			});
 			if (await isOnNpm()) {
 				return undefined;
 			}

@@ -1,5 +1,6 @@
 import * as core from "@actions/core";
 
+import { cancellation } from "../cancellation.js";
 import { $$captured } from "../execa.js";
 import { parseArgsString } from "../parseArgsString.js";
 import { tryCatchInfoAction } from "../tryCatchInfoAction.js";
@@ -17,6 +18,10 @@ export async function runReleaseIt(
 	releaseItArgs?: string,
 	{ allowPublishConflict, skipSupersededCheck }: RunReleaseItOptions = {},
 ) {
+	if (cancellation.signal.aborted) {
+		return;
+	}
+
 	await tryCatchInfoAction("running release-it", async () => {
 		const startSha = await getHeadSha();
 
@@ -29,6 +34,7 @@ export async function runReleaseIt(
 		} catch (error) {
 			if (
 				!skipSupersededCheck &&
+				!cancellation.signal.aborted &&
 				startSha &&
 				(await checkSuperseded(startSha))
 			) {

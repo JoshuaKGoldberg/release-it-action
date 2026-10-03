@@ -2,6 +2,7 @@ import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { shouldSemanticRelease } from "should-semantic-release";
 
+import { cancellation } from "./cancellation.js";
 import { $$ } from "./execa.js";
 import { runBypassingBranchProtections } from "./runBypassingBranchProtections.js";
 import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
@@ -123,6 +124,10 @@ async function runRelease({
 			async () => await shouldSemanticRelease({ verbose: true }),
 		)) === false
 	) {
+		return;
+	}
+
+	if (cancellation.signal.aborted) {
 		return;
 	}
 

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { runReleaseIt } from "./runReleaseIt.js";
 
@@ -19,6 +19,14 @@ vi.mock("@actions/core", () => ({
 	},
 	get warning() {
 		return mockWarning;
+	},
+}));
+
+let mockCancellation = new AbortController();
+
+vi.mock("../cancellation.js", () => ({
+	get cancellation() {
+		return mockCancellation;
 	},
 }));
 
@@ -49,6 +57,10 @@ vi.mock("../tryCatchInfoAction.js", () => ({
 }));
 
 describe("runReleaseIt", () => {
+	beforeEach(() => {
+		mockCancellation = new AbortController();
+	});
+
 	it("logs an error if running release-it has a non-zero exit code", async () => {
 		mock$$.mockResolvedValue({ exitCode: 1 });
 
@@ -259,6 +271,39 @@ describe("runReleaseIt", () => {
 		expect(mock$$).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalledWith(
 			'Error running release-it: Error: Could not parse arguments (Got EOF while in a quoted string): --github.releaseName="oops',
+		);
+	});
+
+	it("does not run release-it when the run was already canceled", async () => {
+		mockCancellation.abort();
+
+		await runReleaseIt();
+
+		expect(mockGetHeadSha).not.toHaveBeenCalled();
+		expect(mock$$).not.toHaveBeenCalled();
+		expect(mockSetFailed).not.toHaveBeenCalled();
+	});
+
+	it("logs an error without checking for superseding when release-it is canceled", async () => {
+		mockGetHeadSha.mockResolvedValue("start-sha");
+		mockCheckSuperseded.mockResolvedValue(true);
+		mock$$.mockImplementationOnce(async () => {
+			mockCancellation.abort();
+			return await Promise.reject(
+				Object.assign(new Error("Command was canceled..."), {
+					isCanceled: true,
+					shortMessage:
+						"Command was canceled: npx release-it --verbose\nReceived SIGINT.",
+				}),
+			);
+		});
+
+		await runReleaseIt();
+
+		expect(mockCheckSuperseded).not.toHaveBeenCalled();
+		expect(mockWarning).not.toHaveBeenCalled();
+		expect(mockSetFailed).toHaveBeenCalledWith(
+			"Error running release-it: Command was canceled: npx release-it --verbose\nReceived SIGINT.",
 		);
 	});
 });

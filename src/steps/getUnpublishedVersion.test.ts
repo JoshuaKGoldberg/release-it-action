@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { cancellation } from "../cancellation.js";
 import { getUnpublishedVersion } from "./getUnpublishedVersion.js";
 
 const mock$quiet = vi.fn();
@@ -218,6 +219,23 @@ describe("getUnpublishedVersion", () => {
 			version: "1.2.3",
 		});
 		expect(mockSetTimeout).toHaveBeenCalledTimes(12);
+	});
+
+	it("stops waiting for npm when the run is canceled", async () => {
+		const error = new Error("The operation was aborted.");
+		mockPackageJson(packageData);
+		mockCommands({
+			"git log -1 --format=%ct v1.2.3": recentTagTime,
+			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+			"npm view test-package@1.2.3 version --json": notFound,
+		});
+		mockSetTimeout.mockRejectedValueOnce(error);
+
+		await expect(getUnpublishedVersion()).rejects.toBe(error);
+		expect(mockSetTimeout).toHaveBeenCalledWith(15_000, undefined, {
+			signal: cancellation.signal,
+		});
+		expect(mockSetTimeout).toHaveBeenCalledTimes(1);
 	});
 
 	it("does not recheck npm when the version was tagged long ago", async () => {
