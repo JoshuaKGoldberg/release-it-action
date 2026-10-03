@@ -44687,15 +44687,18 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
         }
         const hasRelease = await tryCatchInfoAction(`checking for a GitHub release for ${headTag}`, async () => await hasGitHubRelease({ octokit, owner, repo, tag: headTag }));
         info(`Version ${version} was pushed but never published to npm. Publishing it now.`);
+        // Unlike --no-git, this keeps Git config such as git.tagName
+        const retryArgs = "--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
         // First try to create a GitHub release, since they're mutable...
         if (hasRelease === false) {
-            await runReleaseIt(["--no-increment --no-git --no-npm.publish", releaseItArgs]
+            await runReleaseIt([retryArgs, "--no-npm.publish", releaseItArgs]
                 .filter(Boolean)
                 .join(" "), { skipSupersededCheck: true });
         }
         // ...and then if that succeeded (didn't throw), do the immutable npm publish
         await runReleaseIt([
-            "--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
+            retryArgs,
+            "--npm.publish --npm.skipChecks --no-github.release",
             releaseItArgs,
         ]
             .filter(Boolean)
