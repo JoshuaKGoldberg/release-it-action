@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.28](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.27...v0.5.28) (2026-10-03)
+
+### Bug Fixes
+
+- stop publishing compiled tests to npm ([#952](https://github.com/JoshuaKGoldberg/release-it-action/issues/952)) ([44d2885](https://github.com/JoshuaKGoldberg/release-it-action/commit/44d2885425c064d17893ab89b53cfc59cbc9d35b)), closes [#901](https://github.com/JoshuaKGoldberg/release-it-action/issues/901)
+
 ## [0.5.27](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.26...v0.5.27) (2026-10-03)
 
 ### Bug Fixes
