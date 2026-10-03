@@ -5,22 +5,22 @@ import * as core from "@actions/core";
 import {
 	tryCatchSetFailedAction,
 	tryCatchThrowAction,
-} from "../tryCatchInfoAction.js";
+} from "../tryCatchAction.js";
 import { ExistingRuleset, Octokit, RulesetEnforcement } from "../types.js";
 
 export interface UpdateRulesetsEnforcementOptions {
-	commonRequestData: RequestParameters & { owner: string; repo: string };
 	enforcement: (ruleset: ExistingRuleset) => RulesetEnforcement;
 	existingRulesets: ExistingRuleset[];
 	octokit: Octokit;
+	requestData: RequestParameters & { owner: string; repo: string };
 	setFailedOnError?: boolean;
 }
 
 export async function updateRulesetsEnforcement({
-	commonRequestData,
 	enforcement,
 	existingRulesets,
 	octokit,
+	requestData,
 	setFailedOnError,
 }: UpdateRulesetsEnforcementOptions) {
 	if (!existingRulesets.length) {
@@ -33,7 +33,7 @@ export async function updateRulesetsEnforcement({
 		const description = `ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`;
 		const update = async () => {
 			await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
-				...commonRequestData,
+				...requestData,
 				enforcement: nextEnforcement,
 				ruleset_id: existingRuleset.id,
 			});

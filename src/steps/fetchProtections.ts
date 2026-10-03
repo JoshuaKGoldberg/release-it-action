@@ -6,12 +6,12 @@ import {
 	getRequestErrorDetails,
 	isPlanUpgradeRequired,
 } from "../requestErrors.js";
-import { tryCatchThrowAction } from "../tryCatchInfoAction.js";
+import { tryCatchThrowAction } from "../tryCatchAction.js";
 import { ExistingProtections, Octokit } from "../types.js";
 
 export interface FetchProtectionsOptions {
 	octokit: Octokit;
-	requestData: Endpoints["DELETE /repos/{owner}/{repo}/branches/{branch}/protection"]["parameters"];
+	requestData: Endpoints["GET /repos/{owner}/{repo}/branches/{branch}/protection"]["parameters"];
 }
 
 export async function fetchProtections({

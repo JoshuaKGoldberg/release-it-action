@@ -87,17 +87,17 @@ describe("runBypassingBranchProtections", () => {
 			[
 			  [
 			    {
-			      "commonRequestData": {
+			      "existingProtections": undefined,
+			      "octokit": {
+			        "request": [MockFunction],
+			      },
+			      "requestData": {
 			        "branch": "",
 			        "headers": {
 			          "X-GitHub-Api-Version": "2022-11-28",
 			        },
 			        "owner": "",
 			        "repo": "",
-			      },
-			      "existingProtections": undefined,
-			      "octokit": {
-			        "request": [MockFunction],
 			      },
 			    },
 			  ],

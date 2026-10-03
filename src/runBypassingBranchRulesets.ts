@@ -8,27 +8,27 @@ export async function runBypassingBranchRulesets(
 	octokit: Octokit,
 	run: () => Promise<void>,
 ) {
-	const commonRequestData = createCommonRequestData(commonData);
+	const requestData = createCommonRequestData(commonData);
 
 	const existingRulesets = await fetchRulesets({
 		octokit,
-		requestData: commonRequestData,
+		requestData,
 	});
 
 	try {
 		await updateRulesetsEnforcement({
-			commonRequestData,
 			enforcement: () => "disabled",
 			existingRulesets,
 			octokit,
+			requestData,
 		});
 		await run();
 	} finally {
 		await updateRulesetsEnforcement({
-			commonRequestData,
 			enforcement: (ruleset) => ruleset.enforcement,
 			existingRulesets,
 			octokit,
+			requestData,
 			setFailedOnError: true,
 		});
 	}

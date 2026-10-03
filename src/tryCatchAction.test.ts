@@ -4,7 +4,7 @@ import {
 	tryCatchInfoAction,
 	tryCatchSetFailedAction,
 	tryCatchThrowAction,
-} from "./tryCatchInfoAction.js";
+} from "./tryCatchAction.js";
 
 const mockInfo = vi.fn();
 const mockSetFailed = vi.fn();

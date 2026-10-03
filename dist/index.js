@@ -30292,7 +30292,7 @@ module.exports = {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8830);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(166);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(6624);
 
 
 
@@ -30308,7 +30308,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 166:
+/***/ 6624:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -41328,7 +41328,7 @@ function createCommonRequestData(commonData) {
     };
 }
 
-;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
+;// CONCATENATED MODULE: ./src/tryCatchAction.ts
 
 async function tryCatchInfoAction(label, action) {
     return await tryCatchAction(label, action, core/* info */.pq);
@@ -41345,10 +41345,10 @@ async function tryCatchThrowAction(label, action, failure) {
     catch (error) {
         throw new Error(`${failure}: ${String(error)}`, { cause: error });
     }
-    tryCatchInfoAction_logResult(label, result);
+    tryCatchAction_logResult(label, result);
     return result;
 }
-function tryCatchInfoAction_logResult(label, result) {
+function tryCatchAction_logResult(label, result) {
     if (result !== undefined) {
         core/* info */.pq(`Result from ${label}: ${JSON.stringify(result, null, 4)}`);
     }
@@ -41357,7 +41357,7 @@ async function tryCatchAction(label, action, logError) {
     core/* info */.pq(`Start: ${label}`);
     try {
         const result = await action();
-        tryCatchInfoAction_logResult(label, result);
+        tryCatchAction_logResult(label, result);
         return result;
     }
     catch (error) {
@@ -41420,13 +41420,13 @@ async function fetchProtections({ octokit, requestData, }) {
 
 ;// CONCATENATED MODULE: ./src/steps/recreateProtections.ts
 
-async function recreateProtections({ commonRequestData, existingProtections, octokit, }) {
+async function recreateProtections({ existingProtections, octokit, requestData, }) {
     if (!existingProtections) {
         return;
     }
     await tryCatchSetFailedAction("re-creating branch protections", async () => {
         await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
-            ...commonRequestData,
+            ...requestData,
             allow_deletions: !!existingProtections.allow_deletions?.enabled,
             allow_force_pushes: !!existingProtections.allow_force_pushes?.enabled,
             allow_fork_syncing: !!existingProtections.allow_fork_syncing?.enabled,
@@ -41477,7 +41477,7 @@ async function recreateProtections({ commonRequestData, existingProtections, oct
     // The update protection endpoint doesn't accept required_signatures.
     if (existingProtections.required_signatures?.enabled) {
         await tryCatchSetFailedAction("re-enabling required signatures", async () => {
-            await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, commonRequestData);
+            await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, requestData);
         });
     }
 }
@@ -41500,24 +41500,24 @@ function mapReviewRestrictions(restrictions) {
 
 
 async function runBypassingBranchProtections(commonData, octokit, run) {
-    const commonRequestData = createCommonRequestData(commonData);
+    const requestData = createCommonRequestData(commonData);
     const existingProtections = await fetchProtections({
         octokit,
-        requestData: commonRequestData,
+        requestData,
     });
     try {
         await deleteProtections({
             existingProtections,
             octokit,
-            requestData: commonRequestData,
+            requestData,
         });
         await run();
     }
     finally {
         await recreateProtections({
-            commonRequestData,
             existingProtections,
             octokit,
+            requestData,
         });
     }
 }
@@ -41569,7 +41569,7 @@ async function fetchRulesets({ octokit, requestData, }) {
 ;// CONCATENATED MODULE: ./src/steps/updateRulesetsEnforcement.ts
 
 
-async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, setFailedOnError, }) {
+async function updateRulesetsEnforcement({ enforcement, existingRulesets, octokit, requestData, setFailedOnError, }) {
     if (!existingRulesets.length) {
         core/* info */.pq("No existing repository rulesets found to update.");
         return;
@@ -41579,7 +41579,7 @@ async function updateRulesetsEnforcement({ commonRequestData, enforcement, exist
         const description = `ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`;
         const update = async () => {
             await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
-                ...commonRequestData,
+                ...requestData,
                 enforcement: nextEnforcement,
                 ruleset_id: existingRuleset.id,
             });
@@ -41598,26 +41598,26 @@ async function updateRulesetsEnforcement({ commonRequestData, enforcement, exist
 
 
 async function runBypassingBranchRulesets(commonData, octokit, run) {
-    const commonRequestData = createCommonRequestData(commonData);
+    const requestData = createCommonRequestData(commonData);
     const existingRulesets = await fetchRulesets({
         octokit,
-        requestData: commonRequestData,
+        requestData,
     });
     try {
         await updateRulesetsEnforcement({
-            commonRequestData,
             enforcement: () => "disabled",
             existingRulesets,
             octokit,
+            requestData,
         });
         await run();
     }
     finally {
         await updateRulesetsEnforcement({
-            commonRequestData,
             enforcement: (ruleset) => ruleset.enforcement,
             existingRulesets,
             octokit,
+            requestData,
             setFailedOnError: true,
         });
     }

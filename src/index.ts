@@ -13,7 +13,7 @@ import { runReleaseIt, RunReleaseItOptions } from "./steps/runReleaseIt.js";
 import {
 	tryCatchInfoAction,
 	tryCatchSetFailedAction,
-} from "./tryCatchInfoAction.js";
+} from "./tryCatchAction.js";
 
 export interface ReleaseItActionOptions {
 	bypassBranchProtections?: string;

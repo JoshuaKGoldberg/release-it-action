@@ -9,25 +9,25 @@ export async function runBypassingBranchProtections(
 	octokit: Octokit,
 	run: () => Promise<void>,
 ) {
-	const commonRequestData = createCommonRequestData(commonData);
+	const requestData = createCommonRequestData(commonData);
 
 	const existingProtections = await fetchProtections({
 		octokit,
-		requestData: commonRequestData,
+		requestData,
 	});
 
 	try {
 		await deleteProtections({
 			existingProtections,
 			octokit,
-			requestData: commonRequestData,
+			requestData,
 		});
 		await run();
 	} finally {
 		await recreateProtections({
-			commonRequestData,
 			existingProtections,
 			octokit,
+			requestData,
 		});
 	}
 }

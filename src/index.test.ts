@@ -72,8 +72,8 @@ const mockTryCatchInfoAction = vi.fn(
 	async (_: string, action: () => Promise<unknown>) => await action(),
 );
 
-vi.mock("./tryCatchInfoAction.js", async (importOriginal) => ({
-	...(await importOriginal<typeof import("./tryCatchInfoAction.js")>()),
+vi.mock("./tryCatchAction.js", async (importOriginal) => ({
+	...(await importOriginal<typeof import("./tryCatchAction.js")>()),
 	get tryCatchInfoAction() {
 		return mockTryCatchInfoAction;
 	},

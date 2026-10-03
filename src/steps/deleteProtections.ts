@@ -2,11 +2,11 @@ import type { Endpoints } from "@octokit/types";
 
 import * as core from "@actions/core";
 
-import { tryCatchThrowAction } from "../tryCatchInfoAction.js";
-import { Octokit } from "../types.js";
+import { tryCatchThrowAction } from "../tryCatchAction.js";
+import { ExistingProtections, Octokit } from "../types.js";
 
 export interface DeleteProtectionsOptions {
-	existingProtections: object | undefined;
+	existingProtections: ExistingProtections | undefined;
 	octokit: Octokit;
 	requestData: Endpoints["DELETE /repos/{owner}/{repo}/branches/{branch}/protection"]["parameters"];
 }

@@ -7,13 +7,13 @@ const mockTryCatchSetFailedAction = vi.fn(
 	async (_: string, action: () => Promise<unknown>) => await action(),
 );
 
-vi.mock("../tryCatchInfoAction.js", () => ({
+vi.mock("../tryCatchAction.js", () => ({
 	get tryCatchSetFailedAction() {
 		return mockTryCatchSetFailedAction;
 	},
 }));
 
-const commonRequestData = {
+const requestData = {
 	branch: "test-branch",
 	owner: "test-owner",
 	repo: "test-repo",
@@ -69,9 +69,9 @@ const mockOctokit = { request: mockRequest } as unknown as Octokit;
 describe("recreateProtections", () => {
 	it("does not recreate protections when existingProtections is undefined", async () => {
 		await recreateProtections({
-			commonRequestData,
 			existingProtections: undefined,
 			octokit: mockOctokit,
+			requestData,
 		});
 
 		expect(mockRequest).not.toHaveBeenCalled();
@@ -79,9 +79,9 @@ describe("recreateProtections", () => {
 
 	it("recreates protections when existingProtections is a minimal set of protections", async () => {
 		await recreateProtections({
-			commonRequestData,
 			existingProtections: {},
 			octokit: mockOctokit,
+			requestData,
 		});
 
 		expect(mockRequest.mock.calls).toMatchInlineSnapshot(`
@@ -113,9 +113,9 @@ describe("recreateProtections", () => {
 		mockRequest.mockResolvedValue({ data: {}, headers: {}, status: 200 });
 
 		await recreateProtections({
-			commonRequestData,
 			existingProtections: { required_signatures: { enabled: true, url: "" } },
 			octokit: mockOctokit,
+			requestData,
 		});
 
 		expect(mockTryCatchSetFailedAction).toHaveBeenCalledTimes(2);
@@ -126,7 +126,6 @@ describe("recreateProtections", () => {
 
 	it("omits review restrictions when existingProtections has required_pull_request_reviews without them", async () => {
 		await recreateProtections({
-			commonRequestData,
 			existingProtections: {
 				required_pull_request_reviews: {
 					dismiss_stale_reviews: false,
@@ -134,6 +133,7 @@ describe("recreateProtections", () => {
 				},
 			},
 			octokit: mockOctokit,
+			requestData,
 		});
 
 		expect(mockRequest).toHaveBeenCalledWith(
@@ -152,7 +152,6 @@ describe("recreateProtections", () => {
 
 	it("allows any app to provide required checks that were not limited to an app", async () => {
 		await recreateProtections({
-			commonRequestData,
 			existingProtections: {
 				required_status_checks: {
 					checks: [
@@ -164,6 +163,7 @@ describe("recreateProtections", () => {
 				},
 			},
 			octokit: mockOctokit,
+			requestData,
 		});
 
 		expect(mockRequest).toHaveBeenCalledWith(
@@ -182,7 +182,6 @@ describe("recreateProtections", () => {
 
 	it("recreates protections when existingProtections is a full set of protections", async () => {
 		await recreateProtections({
-			commonRequestData,
 			existingProtections: {
 				allow_deletions: { enabled: true },
 				allow_force_pushes: { enabled: true },
@@ -241,6 +240,7 @@ describe("recreateProtections", () => {
 				},
 			},
 			octokit: mockOctokit,
+			requestData,
 		});
 
 		expect(mockRequest.mock.calls).toMatchInlineSnapshot(`
