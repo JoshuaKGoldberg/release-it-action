@@ -33,6 +33,9 @@ Run [`@vercel/ncc`](https://github.com/vercel/ncc) to create an output `dist/` t
 pnpm build:release
 ```
 
+CI fails if the committed `dist/` doesn't match what `pnpm build:release` produces.
+Dependency update PRs that change the bundle, such as from Renovate, won't automerge until someone runs `pnpm build:release` on them and commits `dist/`.
+
 ## Formatting
 
 [Prettier](https://prettier.io) is used to format code.

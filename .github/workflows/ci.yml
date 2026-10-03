@@ -15,9 +15,10 @@ jobs:
       - run: pnpm build:release
       - name: Verify dist is up to date
         run: |
-          if [ -n "$(git status --porcelain -- dist ':!*.d.ts' ':!*.d.ts.map')" ]; then
-            git status --porcelain -- dist ':!*.d.ts' ':!*.d.ts.map'
-            echo "dist/ is out of date. Run pnpm build:release and commit the result."
+          changes=$(git status --porcelain -- dist ':!*.d.ts' ':!*.d.ts.map')
+          if [ -n "$changes" ]; then
+            echo "$changes"
+            echo "::error::dist/ is out of date. Run 'pnpm build:release', then commit all changes under dist/ (git add dist)."
             exit 1
           fi
   lint:
