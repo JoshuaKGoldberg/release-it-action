@@ -1,7 +1,18 @@
+import * as core from "@actions/core";
 import { describe, expect, it, vi } from "vitest";
 
 import { Octokit } from "../types.js";
 import { hasGitHubRelease } from "./hasGitHubRelease.js";
+
+vi.mock("@actions/core");
+
+const mockReadFile = vi.fn();
+
+vi.mock("node:fs/promises", () => ({
+	get readFile() {
+		return mockReadFile;
+	},
+}));
 
 const mockIterator = vi.fn();
 const mockRequest = vi.fn();
@@ -16,9 +27,24 @@ const options = {
 	tag: "v1.2.3",
 };
 
-function mockReleasePages(...pages: { tag_name: string }[][]) {
+interface MockRelease {
+	draft: boolean;
+	tag_name: string;
+}
+
+function mockFiles(files: Record<string, object>) {
+	mockReadFile.mockImplementation((path: string) =>
+		path in files
+			? Promise.resolve(JSON.stringify(files[path]))
+			: Promise.reject(new Error(`ENOENT: ${path}`)),
+	);
+}
+
+function mockReleasePages(...pages: MockRelease[][]) {
 	mockIterator.mockReturnValueOnce(pages.map((data) => ({ data })));
 }
+
+const draftRelease = { draft: true, tag_name: "v1.2.3" };
 
 describe("hasGitHubRelease", () => {
 	it("returns true without listing releases when the published release exists", async () => {
@@ -32,11 +58,11 @@ describe("hasGitHubRelease", () => {
 		expect(mockIterator).not.toHaveBeenCalled();
 	});
 
-	it("returns true when a draft release has the tag", async () => {
+	it("returns true without reading config when a listed published release has the tag", async () => {
 		mockRequest.mockRejectedValueOnce({ status: 404 });
 		mockReleasePages(
-			[{ tag_name: "v1.2.4" }],
-			[{ tag_name: "v1.2.2" }, { tag_name: "v1.2.3" }],
+			[{ draft: false, tag_name: "v1.2.4" }],
+			[{ draft: false, tag_name: "v1.2.3" }],
 		);
 
 		expect(await hasGitHubRelease(options)).toBe(true);
@@ -44,13 +70,66 @@ describe("hasGitHubRelease", () => {
 			"GET /repos/{owner}/{repo}/releases",
 			{ owner: "test-owner", per_page: 100, repo: "test-repo" },
 		);
+		expect(mockReadFile).not.toHaveBeenCalled();
+	});
+
+	it("returns true when a draft release has the tag and .release-it.json makes draft releases", async () => {
+		mockRequest.mockRejectedValueOnce({ status: 404 });
+		mockFiles({ ".release-it.json": { github: { draft: true } } });
+		mockReleasePages(
+			[{ draft: false, tag_name: "v1.2.4" }],
+			[{ draft: false, tag_name: "v1.2.2" }, draftRelease],
+		);
+
+		expect(await hasGitHubRelease(options)).toBe(true);
+	});
+
+	it("returns true when a draft release has the tag and package.json's release-it config makes draft releases", async () => {
+		mockRequest.mockRejectedValueOnce({ status: 404 });
+		mockFiles({
+			".release-it.json": { github: { release: true } },
+			"package.json": { "release-it": { github: { draft: true } } },
+		});
+		mockReleasePages([draftRelease]);
+
+		expect(await hasGitHubRelease(options)).toBe(true);
+	});
+
+	it("returns false and logs when a draft release has the tag but release-it doesn't make draft releases", async () => {
+		mockRequest.mockRejectedValueOnce({ status: 404 });
+		mockFiles({ "package.json": { name: "test-package" } });
+		mockReleasePages([draftRelease]);
+
+		expect(await hasGitHubRelease(options)).toBe(false);
+		expect(core.info).toHaveBeenCalledWith(
+			"Found a leftover draft release for v1.2.3, but release-it isn't configured to make draft releases, so treating the release as missing. You can delete the leftover draft.",
+		);
+	});
+
+	it("returns false when a draft release has the tag and .release-it.json turns off draft releases from package.json", async () => {
+		mockRequest.mockRejectedValueOnce({ status: 404 });
+		mockFiles({
+			".release-it.json": { github: { draft: false } },
+			"package.json": { "release-it": { github: { draft: true } } },
+		});
+		mockReleasePages([draftRelease]);
+
+		expect(await hasGitHubRelease(options)).toBe(false);
+	});
+
+	it("returns false when a draft release has the tag and there is no config to read", async () => {
+		mockRequest.mockRejectedValueOnce({ status: 404 });
+		mockFiles({});
+		mockReleasePages([draftRelease]);
+
+		expect(await hasGitHubRelease(options)).toBe(false);
 	});
 
 	it("stops listing releases once it finds one with the tag", async () => {
 		mockRequest.mockRejectedValueOnce({ status: 404 });
 		mockIterator.mockReturnValueOnce(
 			(function* () {
-				yield { data: [{ tag_name: "v1.2.3" }] };
+				yield { data: [{ draft: false, tag_name: "v1.2.3" }] };
 				throw new Error("Oh no!");
 			})(),
 		);
@@ -60,7 +139,10 @@ describe("hasGitHubRelease", () => {
 
 	it("returns false when no release has the tag", async () => {
 		mockRequest.mockRejectedValueOnce({ status: 404 });
-		mockReleasePages([{ tag_name: "v1.2.2" }], [{ tag_name: "1.2.3" }]);
+		mockReleasePages(
+			[{ draft: false, tag_name: "v1.2.2" }],
+			[{ draft: true, tag_name: "1.2.3" }],
+		);
 
 		expect(await hasGitHubRelease(options)).toBe(false);
 	});
@@ -85,7 +167,7 @@ describe("hasGitHubRelease", () => {
 		mockRequest.mockRejectedValueOnce({ status: 404 });
 		mockIterator.mockReturnValueOnce(
 			(function* () {
-				yield { data: [{ tag_name: "v1.2.2" }] };
+				yield { data: [{ draft: false, tag_name: "v1.2.2" }] };
 				throw error;
 			})(),
 		);
