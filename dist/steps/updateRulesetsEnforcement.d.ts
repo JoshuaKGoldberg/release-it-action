@@ -6,7 +6,7 @@ export interface UpdateRulesetsEnforcementOptions {
         repo: string;
     };
     enforcement: (ruleset: ExistingRuleset) => RulesetEnforcement;
-    existingRulesets: ExistingRuleset[] | undefined;
+    existingRulesets: ExistingRuleset[];
     octokit: Octokit;
     setFailedOnError?: boolean;
 }

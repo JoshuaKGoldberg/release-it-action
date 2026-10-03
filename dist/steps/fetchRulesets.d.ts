@@ -4,5 +4,5 @@ export interface FetchRulesetsOptions {
     octokit: Octokit;
     requestData: Endpoints["GET /repos/{owner}/{repo}/rules/branches/{branch}"]["parameters"];
 }
-export declare function fetchRulesets({ octokit, requestData, }: FetchRulesetsOptions): Promise<ExistingRuleset[] | undefined>;
+export declare function fetchRulesets({ octokit, requestData, }: FetchRulesetsOptions): Promise<ExistingRuleset[]>;
 //# sourceMappingURL=fetchRulesets.d.ts.map

@@ -44087,15 +44087,11 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
 
 ;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
 
-
 async function fetchRulesets({ octokit, requestData, }) {
-    const rules = await tryCatchInfoAction(`fetching existing branch rules for ${requestData.branch}`, async () => await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
+    const rules = await fetchLogged(`existing branch rules for ${requestData.branch}`, async () => await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
         ...requestData,
         per_page: 100,
     }));
-    if (!rules) {
-        return undefined;
-    }
     const rulesetIds = new Set();
     for (const rule of rules) {
         if (rule.ruleset_id === undefined) {
@@ -44111,35 +44107,58 @@ async function fetchRulesets({ octokit, requestData, }) {
     }
     const rulesets = [];
     for (const rulesetId of rulesetIds) {
-        const ruleset = await tryCatchInfoAction(`fetching existing ruleset ${rulesetId.toString()}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+        const ruleset = await fetchLogged(`existing ruleset ${rulesetId.toString()}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
             ...requestData,
             ruleset_id: rulesetId,
         })).data);
-        if (ruleset) {
-            rulesets.push(ruleset);
-        }
+        rulesets.push(ruleset);
     }
     return rulesets;
+}
+async function fetchLogged(description, fetch) {
+    info(`Start: fetching ${description}`);
+    let result;
+    try {
+        result = await fetch();
+    }
+    catch (error) {
+        throw new Error(`Could not fetch ${description}: ${String(error)}`, {
+            cause: error,
+        });
+    }
+    info(`Result from fetching ${description}: ${JSON.stringify(result, null, 4)}`);
+    return result;
 }
 
 ;// CONCATENATED MODULE: ./src/steps/updateRulesetsEnforcement.ts
 
 
 async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, setFailedOnError, }) {
-    if (!existingRulesets?.length) {
+    if (!existingRulesets.length) {
         info("No existing repository rulesets found to update.");
         return;
     }
-    const tryCatchAction = setFailedOnError
-        ? tryCatchSetFailedAction
-        : tryCatchInfoAction;
     for (const existingRuleset of existingRulesets) {
         const nextEnforcement = enforcement(existingRuleset);
-        await tryCatchAction(`setting ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`, async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+        const description = `ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`;
+        const update = async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
             ...commonRequestData,
             enforcement: nextEnforcement,
             ruleset_id: existingRuleset.id,
-        }));
+        });
+        if (setFailedOnError) {
+            await tryCatchSetFailedAction(`setting ${description}`, update);
+            continue;
+        }
+        info(`Start: setting ${description}`);
+        try {
+            await update();
+        }
+        catch (error) {
+            throw new Error(`Could not set ${description}: ${String(error)}`, {
+                cause: error,
+            });
+        }
     }
 }
 
@@ -44157,13 +44176,13 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
         octokit,
         requestData: commonRequestData,
     });
-    await updateRulesetsEnforcement({
-        commonRequestData,
-        enforcement: () => "disabled",
-        existingRulesets,
-        octokit,
-    });
     try {
+        await updateRulesetsEnforcement({
+            commonRequestData,
+            enforcement: () => "disabled",
+            existingRulesets,
+            octokit,
+        });
         await run();
     }
     finally {
