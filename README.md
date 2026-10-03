@@ -96,6 +96,7 @@ It also lets step 2 finish any release that fails to publish.
 ```
 
 Prereleases publish under their own dist-tag, such as `beta` for `1.2.0-beta.0` or `next` for `1.2.0-0`, since newer versions of npm require a `--tag` for them.
+When step 2 republishes an id-less prerelease such as `1.2.0-0`, release-it reuses one of the package's existing prerelease dist-tags if it has any, so prefer prerelease ids such as `--preRelease=beta`.
 Stable releases leave out `--tag` so that newer versions of npm can refuse to move `latest` back to an older version.
 Step 2 skips release-it's npm authentication checks itself, since they don't work with Trusted Publishing.
 
