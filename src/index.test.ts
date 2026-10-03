@@ -1,4 +1,5 @@
 import * as core from "@actions/core";
+import { inspect } from "node:util";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { releaseItAction, ReleaseItActionOptions } from "./index.js";
@@ -153,6 +154,27 @@ describe("releaseItAction", () => {
 		expect(mock$$.mock.calls.at(-1)).toEqual([
 			["npm config delete //registry.npmjs.org/:_authToken"],
 		]);
+	});
+
+	it("does not expose the npm token when setting it fails", async () => {
+		mock$$
+			.mockResolvedValueOnce(undefined)
+			.mockResolvedValueOnce(undefined)
+			.mockRejectedValueOnce(
+				new Error(
+					`Command failed with exit code 1: npm config set //registry.npmjs.org/:_authToken ${mockOptions.npmToken}`,
+				),
+			);
+
+		const error = await releaseItAction(mockOptions).catch(
+			(caught: unknown) => caught,
+		);
+
+		expect(error).toEqual(
+			new Error("Could not set the npm token in the npmrc."),
+		);
+		expect(inspect(error)).not.toContain(mockOptions.npmToken);
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
 	it("publishes a version tagged at HEAD that was never published, without recreating its GitHub release", async () => {
