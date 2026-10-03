@@ -30291,7 +30291,7 @@ module.exports = {
 
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(8377);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(9890);
 
 
 await (0,_runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__/* .runReleaseItAction */ .k)(_actions_github__WEBPACK_IMPORTED_MODULE_0__/* .context */ ._);
@@ -30301,7 +30301,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 8377:
+/***/ 9890:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -44177,6 +44177,40 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
     }
 }
 
+;// CONCATENATED MODULE: ./src/snapshotNpmUserConfig.ts
+
+
+
+async function snapshotNpmUserConfig() {
+    try {
+        const { stdout: userConfig } = await $ `npm config get userconfig`;
+        const contents = await readFileIfExists(userConfig);
+        return async () => {
+            if (contents) {
+                await external_node_fs_promises_namespaceObject.writeFile(userConfig, contents);
+            }
+            else {
+                await external_node_fs_promises_namespaceObject.rm(userConfig, { force: true });
+            }
+        };
+    }
+    catch (error) {
+        warning(`Could not snapshot the npmrc, so the npm token will be deleted from it after the run instead: ${error}`);
+        return undefined;
+    }
+}
+async function readFileIfExists(filePath) {
+    try {
+        return await external_node_fs_promises_namespaceObject.readFile(filePath);
+    }
+    catch (error) {
+        if (error.code === "ENOENT") {
+            return undefined;
+        }
+        throw error;
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/steps/getUnpublishedVersion.ts
 
 
@@ -44648,6 +44682,7 @@ function describeError(error) {
 
 
 
+
 async function releaseItAction(options) {
     const { gitUserEmail, gitUserName, npmToken, skipNpmPublish } = options;
     await $$ `git config user.email ${gitUserEmail}`;
@@ -44655,21 +44690,23 @@ async function releaseItAction(options) {
     if (skipNpmPublish) {
         info("skipNpmPublish is true. Skipping npm publish.");
     }
-    else if (npmToken) {
-        await $$ `npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
-    }
-    else {
+    else if (!npmToken) {
         info("No npm token provided. This is required unless you're using Trusted Publishing.");
     }
     if (skipNpmPublish || !npmToken) {
         await runRelease(options);
         return;
     }
+    const restoreNpmUserConfig = await snapshotNpmUserConfig();
     try {
+        await $$ `npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
         await runRelease(options);
     }
     finally {
-        await tryCatchInfoAction("removing the npm token from the npmrc", async () => await $$ `npm config delete //registry.npmjs.org/:_authToken`);
+        await tryCatchInfoAction("removing the npm token from the npmrc", restoreNpmUserConfig ??
+            (async () => {
+                await $$ `npm config delete //registry.npmjs.org/:_authToken`;
+            }));
     }
 }
 async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githubToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
