@@ -44118,7 +44118,7 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
 
 ;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
 
-const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
+const fetchRulesets_planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
 async function fetchRulesets({ octokit, requestData, }) {
     const rules = await fetchLogged(`existing branch rules for ${requestData.branch}`, async () => {
         try {
@@ -44130,7 +44130,7 @@ async function fetchRulesets({ octokit, requestData, }) {
         catch (error) {
             const { response, status } = error;
             if (status === 403 &&
-                planUpgradeRequired.test(response?.data?.message ?? "")) {
+                fetchRulesets_planUpgradeRequired.test(response?.data?.message ?? "")) {
                 warning(`Repository rulesets aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
                 return [];
             }
