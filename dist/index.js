@@ -44238,6 +44238,8 @@ async function getUnpublishedVersion() {
 }
 
 ;// CONCATENATED MODULE: ./src/steps/hasGitHubRelease.ts
+
+
 async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
     try {
         await octokit.request("GET /repos/{owner}/{repo}/releases/tags/{tag}", {
@@ -44254,11 +44256,31 @@ async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
     }
     // Draft releases aren't found by tag, so look for one in the full list.
     for await (const { data: releases } of octokit.paginate.iterator("GET /repos/{owner}/{repo}/releases", { owner, per_page: 100, repo })) {
-        if (releases.some((release) => release.tag_name === tag)) {
+        const release = releases.find((release) => release.tag_name === tag);
+        if (!release) {
+            continue;
+        }
+        if (!release.draft || (await makesDraftReleases())) {
             return true;
         }
+        info(`Found a leftover draft release for ${tag}, but release-it isn't configured to make draft releases, so treating the release as missing. You can delete the leftover draft.`);
+        return false;
     }
     return false;
+}
+async function makesDraftReleases() {
+    const releaseItJson = await readJsonFile(".release-it.json");
+    const packageJson = await readJsonFile("package.json");
+    return ((releaseItJson?.github?.draft ??
+        packageJson?.["release-it"]?.github?.draft) === true);
+}
+async function readJsonFile(path) {
+    try {
+        return JSON.parse(await external_node_fs_promises_namespaceObject.readFile(path, "utf8"));
+    }
+    catch {
+        return undefined;
+    }
 }
 
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/shlex@3.0.0/node_modules/shlex/shlex.js
