@@ -30292,7 +30292,7 @@ module.exports = {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8830);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(9544);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(5883);
 
 
 
@@ -30308,7 +30308,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 9544:
+/***/ 5883:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -41323,6 +41323,16 @@ function parseArgsString(input) {
     }
 }
 
+;// CONCATENATED MODULE: ./src/createCommonRequestData.ts
+function createCommonRequestData(commonData) {
+    return {
+        ...commonData,
+        headers: {
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    };
+}
+
 ;// CONCATENATED MODULE: ./src/steps/deleteProtections.ts
 
 async function deleteProtections({ existingProtections, octokit, requestData, }) {
@@ -41468,13 +41478,9 @@ function mapReviewRestrictions(restrictions) {
 
 
 
+
 async function runBypassingBranchProtections(commonData, octokit, run) {
-    const commonRequestData = {
-        ...commonData,
-        headers: {
-            "X-GitHub-Api-Version": "2022-11-28",
-        },
-    };
+    const commonRequestData = createCommonRequestData(commonData);
     const existingProtections = await fetchProtections({
         octokit,
         requestData: commonRequestData,
@@ -41590,13 +41596,9 @@ async function updateRulesetsEnforcement({ commonRequestData, enforcement, exist
 ;// CONCATENATED MODULE: ./src/runBypassingBranchRulesets.ts
 
 
+
 async function runBypassingBranchRulesets(commonData, octokit, run) {
-    const commonRequestData = {
-        ...commonData,
-        headers: {
-            "X-GitHub-Api-Version": "2022-11-28",
-        },
-    };
+    const commonRequestData = createCommonRequestData(commonData);
     const existingRulesets = await fetchRulesets({
         octokit,
         requestData: commonRequestData,
@@ -41718,7 +41720,7 @@ const getUnpublishedVersion_$quiet = $({ reject: false });
 const recentTagSeconds = 10 * 60;
 const recheckAttempts = 12;
 const recheckDelayMs = 15_000;
-async function getUnpublishedVersion() {
+async function getUnpublishedVersion(githubToken) {
     const { name, private: isPrivate, publishConfig, version, } = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
     if (isPrivate || !name || !version) {
         return undefined;
@@ -41731,7 +41733,9 @@ async function getUnpublishedVersion() {
         : publishConfig?.registry;
     const registryArgs = registry ? ["--registry", registry] : [];
     const isOnNpm = async () => {
-        const view = await getUnpublishedVersion_$quiet `npm view ${name}@${version} version --json ${registryArgs}`;
+        const view = await getUnpublishedVersion_$quiet({
+            env: { GITHUB_TOKEN: githubToken },
+        }) `npm view ${name}@${version} version --json ${registryArgs}`;
         if (!view.exitCode) {
             return true;
         }
@@ -41771,12 +41775,14 @@ async function getUnpublishedVersion() {
 ;// CONCATENATED MODULE: ./src/steps/checkSuperseded.ts
 
 const checkSuperseded_$quiet = $({ reject: false });
-async function checkSuperseded(startSha) {
+async function checkSuperseded(startSha, githubToken) {
     const branch = await checkSuperseded_$quiet `git rev-parse --abbrev-ref HEAD`;
     if (branch.exitCode || branch.stdout === "HEAD") {
         return false;
     }
-    const fetch = await checkSuperseded_$quiet `git fetch origin ${branch.stdout}`;
+    const fetch = await checkSuperseded_$quiet({
+        env: { GITHUB_TOKEN: githubToken },
+    }) `git fetch origin ${branch.stdout}`;
     if (fetch.exitCode) {
         return false;
     }
@@ -41803,15 +41809,19 @@ async function getHeadSha() {
 
 
 const publishConflict = /cannot publish over (?:the )?previously (?:published|staged) version/i;
-async function runReleaseIt(releaseItArgs, { allowPublishConflict, skipSupersededCheck } = {}) {
+async function runReleaseIt(releaseItArgs, { allowPublishConflict, githubToken, skipSupersededCheck, }) {
     core/* info */.pq("Start: running release-it");
     const startSha = await getHeadSha();
     try {
-        const args = parseArgsString(releaseItArgs ?? "");
-        await $$captured `npx release-it --verbose ${args}`;
+        const args = parseArgsString(releaseItArgs);
+        await $$captured({
+            env: { GITHUB_TOKEN: githubToken },
+        }) `npx release-it --verbose ${args}`;
     }
     catch (error) {
-        if (!skipSupersededCheck && startSha && (await checkSuperseded(startSha))) {
+        if (!skipSupersededCheck &&
+            startSha &&
+            (await checkSuperseded(startSha, githubToken))) {
             core/* warning */.$e(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`);
             return;
         }
@@ -41880,16 +41890,14 @@ async function releaseItAction(options) {
     }
 }
 const retryArgs = "--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
-async function createGitHubRelease(releaseItArgs, options = {}) {
+async function createGitHubRelease(releaseItArgs, options) {
     await runReleaseIt([retryArgs, "--no-npm.publish", releaseItArgs].filter(Boolean).join(" "), { ...options, skipSupersededCheck: true });
 }
 async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githubToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
-    // release-it reads the token from the environment, not from this process.
-    process.env.GITHUB_TOKEN ??= githubToken;
     const octokit = github/* getOctokit */.Q(githubToken);
     const unpublishedVersion = skipNpmPublish
         ? undefined
-        : await tryCatchInfoAction("checking for a version that was pushed but not published", getUnpublishedVersion);
+        : await tryCatchInfoAction("checking for a version that was pushed but not published", async () => await getUnpublishedVersion(githubToken));
     if (unpublishedVersion) {
         const { headTag, version } = unpublishedVersion;
         if (!headTag) {
@@ -41900,7 +41908,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
         core/* info */.pq(`Version ${version} was pushed but never published to npm. Publishing it now.`);
         // First try to create a GitHub release, since they're mutable...
         if (hasRelease === false) {
-            await createGitHubRelease(releaseItArgs);
+            await createGitHubRelease(releaseItArgs, { githubToken });
         }
         // ...and then if that succeeded (didn't throw), do the immutable npm publish
         await runReleaseIt([
@@ -41909,7 +41917,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
             releaseItArgs,
         ]
             .filter(Boolean)
-            .join(" "), { allowPublishConflict: true, skipSupersededCheck: true });
+            .join(" "), { allowPublishConflict: true, githubToken, skipSupersededCheck: true });
         return;
     }
     const tagMissingRelease = await tryCatchInfoAction("checking for a version that was pushed without a GitHub release", async () => await getHeadTagMissingGitHubRelease({
@@ -41921,7 +41929,10 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
     if (tagMissingRelease) {
         core/* info */.pq(`Tag ${tagMissingRelease} was pushed but its GitHub release was never created. Creating it now.`);
         // Hooks such as after:release can try to publish the version npm already has.
-        await createGitHubRelease(releaseItArgs, { allowPublishConflict: true });
+        await createGitHubRelease(releaseItArgs, {
+            allowPublishConflict: true,
+            githubToken,
+        });
         return;
     }
     if (!(await tryCatchSetFailedAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true })))) {
@@ -41931,7 +41942,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
         .filter(Boolean)
         .join(" ");
     const runReleaseItWithArgs = async () => {
-        await runReleaseIt(args);
+        await runReleaseIt(args, { githubToken });
     };
     if (!bypassBranchProtections && !bypassBranchRulesets) {
         await runReleaseItWithArgs();

@@ -1,6 +1,12 @@
 import type * as github from "@actions/github";
 import type { Endpoints } from "@octokit/types";
 
+export interface CommonData {
+	branch: string;
+	owner: string;
+	repo: string;
+}
+
 export type ExistingProtections =
 	Endpoints["GET /repos/{owner}/{repo}/branches/{branch}/protection"]["response"]["data"];
 
