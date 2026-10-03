@@ -30292,7 +30292,7 @@ module.exports = {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8830);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(1317);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(166);
 
 
 
@@ -30308,7 +30308,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 1317:
+/***/ 166:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -41632,6 +41632,29 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
     }
 }
 
+;// CONCATENATED MODULE: ./src/packageData.ts
+
+async function readPackageData() {
+    try {
+        return JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    }
+    catch (error) {
+        if (error.code === "ENOENT") {
+            return undefined;
+        }
+        throw error;
+    }
+}
+
+;// CONCATENATED MODULE: ./src/versionTags.ts
+
+async function getHeadTags() {
+    return (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
+}
+function getVersionTagNames(version) {
+    return [version, `v${version}`];
+}
+
 ;// CONCATENATED MODULE: ./src/steps/hasGitHubRelease.ts
 async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
     try {
@@ -41655,11 +41678,12 @@ async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
 
 
 
+
 const configOverride = /^(?:-c|--config|--(?:no-)?github(?:\.(?:draft|release|web))?)(?:=|$)/;
 async function getHeadTagMissingGitHubRelease({ octokit, owner, releaseItArgs, repo, }) {
-    const packageData = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
-    const { version } = packageData;
-    const { github } = (await readReleaseItJson()) ?? packageData["release-it"] ?? {};
+    const packageData = await readPackageData();
+    const version = packageData?.version;
+    const { github } = (await readReleaseItJson()) ?? packageData?.["release-it"] ?? {};
     // Draft and web releases aren't found by tag, and release-it-args can override the config.
     if (!version ||
         !github?.release ||
@@ -41668,8 +41692,8 @@ async function getHeadTagMissingGitHubRelease({ octokit, owner, releaseItArgs, r
         parseArgsString(releaseItArgs ?? "").some((arg) => configOverride.test(arg))) {
         return undefined;
     }
-    const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
-    const tag = [version, `v${version}`].find((tagName) => headTags.includes(tagName));
+    const headTags = await getHeadTags();
+    const tag = getVersionTagNames(version).find((tagName) => headTags.includes(tagName));
     if (!tag || (await hasGitHubRelease({ octokit, owner, repo, tag }))) {
         return undefined;
     }
@@ -41685,6 +41709,7 @@ async function readReleaseItJson() {
 }
 
 ;// CONCATENATED MODULE: ./src/steps/getUnpublishedVersion.ts
+
 
 
 
@@ -41720,7 +41745,7 @@ async function getUnpublishedVersion(githubToken) {
     if (await isOnNpm()) {
         return undefined;
     }
-    const tagNames = [version, `v${version}`];
+    const tagNames = getVersionTagNames(version);
     const existingTags = (await $quiet `git tag --list ${tagNames}`).stdout
         .split("\n")
         .filter(Boolean);
@@ -41738,7 +41763,7 @@ async function getUnpublishedVersion(githubToken) {
             }
         }
     }
-    const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
+    const headTags = await getHeadTags();
     return {
         headTag: existingTags.find((tag) => headTags.includes(tag)),
         version,
@@ -41751,17 +41776,6 @@ function describeNpmError(stdout) {
     }
     catch {
         return "unknown error";
-    }
-}
-async function readPackageData() {
-    try {
-        return JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
-    }
-    catch (error) {
-        if (error.code === "ENOENT") {
-            return undefined;
-        }
-        throw error;
     }
 }
 
