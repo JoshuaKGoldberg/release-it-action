@@ -13,6 +13,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: ./.github/actions/prepare
       - run: pnpm build:release
+      - name: Verify dist is up to date
+        run: |
+          changes=$(git status --porcelain -- dist ':!*.d.ts' ':!*.d.ts.map')
+          if [ -n "$changes" ]; then
+            echo "$changes"
+            echo "::error::dist/ is out of date. Run 'pnpm build:release', then commit all changes under dist/ (git add dist)."
+            exit 1
+          fi
   lint:
     name: Lint
     runs-on: ubuntu-latest

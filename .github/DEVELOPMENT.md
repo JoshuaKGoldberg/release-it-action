@@ -33,6 +33,9 @@ Run [`@vercel/ncc`](https://github.com/vercel/ncc) to create an output `dist/` t
 pnpm build:release
 ```
 
+CI fails if the committed `dist/` doesn't match what `pnpm build:release` produces.
+On Renovate branches, the [Rebuild Dist workflow](./workflows/rebuild-dist.yml) runs `pnpm build:release` and pushes any `dist/` changes as a `chore: rebuild dist` commit so dependency updates can still automerge.
+
 ## Formatting
 
 [Prettier](https://prettier.io) is used to format code.
