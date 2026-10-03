@@ -42,13 +42,13 @@ vi.mock("./checkSuperseded.js", () => ({
 	},
 }));
 
+const mockTryCatchInfoAction = vi.fn(
+	async (_: string, action: () => Promise<unknown>) => await action(),
+);
+
 vi.mock("../tryCatchInfoAction.js", () => ({
-	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
-		try {
-			return await action();
-		} catch {
-			return undefined;
-		}
+	get tryCatchInfoAction() {
+		return mockTryCatchInfoAction;
 	},
 }));
 
@@ -212,12 +212,19 @@ describe("runReleaseIt", () => {
 		expect(mockSetFailed).toHaveBeenCalled();
 	});
 
-	it("returns false when running release-it throws unexpectedly", async () => {
+	it("returns false and logs the error when running release-it throws unexpectedly", async () => {
+		const { tryCatchInfoAction } = await vi.importActual<
+			typeof import("../tryCatchInfoAction.js")
+		>("../tryCatchInfoAction.js");
+		mockTryCatchInfoAction.mockImplementationOnce(tryCatchInfoAction);
 		mock$$.mockRejectedValueOnce(new Error("Command failed"));
 		mockGetHeadSha.mockResolvedValueOnce("start-sha");
 		mockCheckSuperseded.mockRejectedValueOnce(new Error("Oh no!"));
 
 		expect(await runReleaseIt()).toBe(false);
+		expect(mockInfo).toHaveBeenCalledWith(
+			"Error running release-it: Error: Oh no!",
+		);
 	});
 
 	it("logs an error without checking for superseding if the starting sha is unknown", async () => {
@@ -231,26 +238,28 @@ describe("runReleaseIt", () => {
 	});
 
 	it("returns true when release-it succeeds", async () => {
-		mock$$.mockResolvedValue({ exitCode: 0 });
+		mock$$.mockResolvedValueOnce({ exitCode: 0 });
 
 		expect(await runReleaseIt()).toBe(true);
 	});
 
 	it("returns false when release-it fails and the run is failed", async () => {
-		mock$$.mockRejectedValue(new Error("Oh no!"));
-		mockGetHeadSha.mockResolvedValue("start-sha");
-		mockCheckSuperseded.mockResolvedValue(false);
+		mock$$.mockRejectedValueOnce(new Error("Oh no!"));
+		mockGetHeadSha.mockResolvedValueOnce("start-sha");
+		mockCheckSuperseded.mockResolvedValueOnce(false);
 
 		expect(await runReleaseIt()).toBe(false);
 		expect(mockSetFailed).toHaveBeenCalled();
 	});
 
-	it("returns true when release-it fails but the branch was superseded", async () => {
-		mock$$.mockRejectedValue(new Error("Oh no!"));
-		mockGetHeadSha.mockResolvedValue("start-sha");
-		mockCheckSuperseded.mockResolvedValue(true);
+	it("returns false without failing the run when release-it fails and the branch was superseded", async () => {
+		mock$$.mockRejectedValueOnce(new Error("Oh no!"));
+		mockGetHeadSha.mockResolvedValueOnce("start-sha");
+		mockCheckSuperseded.mockResolvedValueOnce(true);
 
-		expect(await runReleaseIt()).toBe(true);
+		expect(await runReleaseIt()).toBe(false);
+		expect(mockWarning).toHaveBeenCalled();
+		expect(mockSetFailed).not.toHaveBeenCalled();
 	});
 
 	it("does not log an error if running release-it runs smoothly", async () => {

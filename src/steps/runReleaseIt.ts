@@ -37,7 +37,7 @@ export async function runReleaseIt(
 				core.warning(
 					`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`,
 				);
-				return true;
+				return false;
 			}
 
 			if (

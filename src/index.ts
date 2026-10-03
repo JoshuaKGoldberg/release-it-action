@@ -92,7 +92,7 @@ async function runRelease({
 
 		if (hasRelease === undefined) {
 			core.setFailed(
-				`Could not check whether ${headTag} has a GitHub release, so ${version} was not published to npm.`,
+				`Could not check whether ${headTag} has a GitHub release, so ${version} was not published to npm. Fix the error logged above (for example, a github-token that can't read releases), then re-run the release from the commit tagged ${headTag}.`,
 			);
 			return;
 		}
@@ -111,6 +111,9 @@ async function runRelease({
 				{ skipSupersededCheck: true },
 			))
 		) {
+			core.setFailed(
+				`Skipped publishing ${version} to npm because creating the GitHub release for ${headTag} failed. Re-run the release from the commit tagged ${headTag} to retry both.`,
+			);
 			return;
 		}
 

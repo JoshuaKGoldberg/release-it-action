@@ -161,7 +161,9 @@ It also makes the push come from your PAT's user, which matters for ruleset bypa
 
 Sometimes a release gets pushed to GitHub without making it to npm.
 The next run publishes that version without making a new commit or tag.
-It also creates the GitHub release if it's missing.
+It first creates the GitHub release if it's missing.
+If it can't check for or create that release, the run fails without publishing to npm.
+Re-running the release from the tagged commit retries both.
 
 This only works if the version's Git tag is on the latest commit.
 Otherwise the action fails until you publish that version yourself, or bump the version manually if npm won't accept it again.
