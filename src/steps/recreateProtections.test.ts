@@ -3,9 +3,13 @@ import { describe, expect, it, vi } from "vitest";
 import { Octokit } from "../types.js";
 import { recreateProtections } from "./recreateProtections.js";
 
+const mockTryCatchSetFailedAction = vi.fn(
+	async (_: string, action: () => Promise<unknown>) => await action(),
+);
+
 vi.mock("../tryCatchInfoAction.js", () => ({
-	async tryCatchSetFailedAction(_: string, action: () => Promise<unknown>) {
-		return await action();
+	get tryCatchSetFailedAction() {
+		return mockTryCatchSetFailedAction;
 	},
 }));
 
@@ -103,6 +107,21 @@ describe("recreateProtections", () => {
 			  ],
 			]
 		`);
+	});
+
+	it("does not hand the API responses to the logger", async () => {
+		mockRequest.mockResolvedValue({ data: {}, headers: {}, status: 200 });
+
+		await recreateProtections({
+			commonRequestData,
+			existingProtections: { required_signatures: { enabled: true, url: "" } },
+			octokit: mockOctokit,
+		});
+
+		expect(mockTryCatchSetFailedAction).toHaveBeenCalledTimes(2);
+		for (const { value } of mockTryCatchSetFailedAction.mock.results) {
+			expect(await value).toBeUndefined();
+		}
 	});
 
 	it("omits review restrictions when existingProtections has required_pull_request_reviews without them", async () => {
