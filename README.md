@@ -60,7 +60,7 @@ jobs:
       - run: npm run build
       - env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        uses: JoshuaKGoldberg/release-it-action@v0.6.2
+        uses: JoshuaKGoldberg/release-it-action@v0.6.3
 
 name: Release
 
