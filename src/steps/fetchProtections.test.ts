@@ -143,4 +143,15 @@ describe("fetchProtections", () => {
 			`[Error: Could not fetch existing branch protections for test-branch: HttpError: Resource not accessible by integration]`,
 		);
 	});
+
+	it("throws when the request fails without a response", async () => {
+		mockRequest.mockRejectedValueOnce(new Error("Oh no!"));
+
+		await expect(
+			fetchProtections({ octokit: mockOctokit, requestData }),
+		).rejects.toThrowErrorMatchingInlineSnapshot(
+			`[Error: Could not fetch existing branch protections for test-branch: Error: Oh no!]`,
+		);
+		expect(mockWarning).not.toHaveBeenCalled();
+	});
 });
