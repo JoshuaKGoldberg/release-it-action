@@ -76,7 +76,7 @@ permissions:
 ```
 
 You can leave out `NPM_TOKEN` if you use npm's [Trusted Publishing](https://docs.npmjs.com/trusted-publishers).
-Trusted Publishing needs npm 11.5.1 or later, which is newer than the npm on GitHub's `ubuntu-latest` runners, so add an [`actions/setup-node`](https://github.com/actions/setup-node) step with `node-version: 24` before this action.
+Trusted Publishing needs npm 11.5.1 or later, so if your runner's npm is older (such as on GitHub's Ubuntu 24.04 images), add an [`actions/setup-node`](https://github.com/actions/setup-node) step with `node-version: 24` before this action.
 
 ### Recommended `release-it` Config
 
