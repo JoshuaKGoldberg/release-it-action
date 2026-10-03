@@ -20,14 +20,13 @@ export async function runBypassingBranchRulesets(
 		requestData: commonRequestData,
 	});
 
-	await updateRulesetsEnforcement({
-		commonRequestData,
-		enforcement: () => "disabled",
-		existingRulesets,
-		octokit,
-	});
-
 	try {
+		await updateRulesetsEnforcement({
+			commonRequestData,
+			enforcement: () => "disabled",
+			existingRulesets,
+			octokit,
+		});
 		await run();
 	} finally {
 		await updateRulesetsEnforcement({

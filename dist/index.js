@@ -30291,7 +30291,7 @@ module.exports = {
 
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(8377);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(4882);
 
 
 await (0,_runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__/* .runReleaseItAction */ .k)(_actions_github__WEBPACK_IMPORTED_MODULE_0__/* .context */ ._);
@@ -30301,7 +30301,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 8377:
+/***/ 4882:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -44090,15 +44090,25 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
 
 ;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
 
-
+const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
 async function fetchRulesets({ octokit, requestData, }) {
-    const rules = await tryCatchInfoAction(`fetching existing branch rules for ${requestData.branch}`, async () => await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
-        ...requestData,
-        per_page: 100,
-    }));
-    if (!rules) {
-        return undefined;
-    }
+    const rules = await fetchLogged(`existing branch rules for ${requestData.branch}`, async () => {
+        try {
+            return await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
+                ...requestData,
+                per_page: 100,
+            });
+        }
+        catch (error) {
+            const { response, status } = error;
+            if (status === 403 &&
+                planUpgradeRequired.test(response?.data?.message ?? "")) {
+                warning(`Repository rulesets aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
+                return [];
+            }
+            throw error;
+        }
+    });
     const rulesetIds = new Set();
     for (const rule of rules) {
         if (rule.ruleset_id === undefined) {
@@ -44114,35 +44124,58 @@ async function fetchRulesets({ octokit, requestData, }) {
     }
     const rulesets = [];
     for (const rulesetId of rulesetIds) {
-        const ruleset = await tryCatchInfoAction(`fetching existing ruleset ${rulesetId.toString()}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+        const ruleset = await fetchLogged(`existing ruleset ${rulesetId.toString()}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
             ...requestData,
             ruleset_id: rulesetId,
         })).data);
-        if (ruleset) {
-            rulesets.push(ruleset);
-        }
+        rulesets.push(ruleset);
     }
     return rulesets;
+}
+async function fetchLogged(description, fetch) {
+    info(`Start: fetching ${description}`);
+    let result;
+    try {
+        result = await fetch();
+    }
+    catch (error) {
+        throw new Error(`Could not fetch ${description}: ${String(error)}`, {
+            cause: error,
+        });
+    }
+    info(`Result from fetching ${description}: ${JSON.stringify(result, null, 4)}`);
+    return result;
 }
 
 ;// CONCATENATED MODULE: ./src/steps/updateRulesetsEnforcement.ts
 
 
 async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, setFailedOnError, }) {
-    if (!existingRulesets?.length) {
+    if (!existingRulesets.length) {
         info("No existing repository rulesets found to update.");
         return;
     }
-    const tryCatchAction = setFailedOnError
-        ? tryCatchSetFailedAction
-        : tryCatchInfoAction;
     for (const existingRuleset of existingRulesets) {
         const nextEnforcement = enforcement(existingRuleset);
-        await tryCatchAction(`setting ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`, async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+        const description = `ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`;
+        const update = async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
             ...commonRequestData,
             enforcement: nextEnforcement,
             ruleset_id: existingRuleset.id,
-        }));
+        });
+        if (setFailedOnError) {
+            await tryCatchSetFailedAction(`setting ${description}`, update);
+            continue;
+        }
+        info(`Start: setting ${description}`);
+        try {
+            await update();
+        }
+        catch (error) {
+            throw new Error(`Could not set ${description}: ${String(error)}`, {
+                cause: error,
+            });
+        }
     }
 }
 
@@ -44160,13 +44193,13 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
         octokit,
         requestData: commonRequestData,
     });
-    await updateRulesetsEnforcement({
-        commonRequestData,
-        enforcement: () => "disabled",
-        existingRulesets,
-        octokit,
-    });
     try {
+        await updateRulesetsEnforcement({
+            commonRequestData,
+            enforcement: () => "disabled",
+            existingRulesets,
+            octokit,
+        });
         await run();
     }
     finally {
@@ -44177,104 +44210,6 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
             octokit,
             setFailedOnError: true,
         });
-    }
-}
-
-;// CONCATENATED MODULE: ./src/steps/getUnpublishedVersion.ts
-
-
-
-
-const $quiet = $({ reject: false });
-// npm can take a few minutes after a publish before it shows the new version.
-const recentTagSeconds = 10 * 60;
-const recheckAttempts = 12;
-const recheckDelayMs = 15_000;
-async function getUnpublishedVersion() {
-    const { name, private: isPrivate, publishConfig, version, } = (await readPackageData()) ?? {};
-    if (isPrivate || !name || !version) {
-        return undefined;
-    }
-    const scopedRegistry = name.startsWith("@")
-        ? publishConfig?.[`${name.split("/")[0]}:registry`]
-        : undefined;
-    const registry = typeof scopedRegistry === "string" && scopedRegistry
-        ? scopedRegistry
-        : publishConfig?.registry;
-    const registryArgs = registry ? ["--registry", registry] : [];
-    const isOnNpm = async () => {
-        const view = await $quiet `npm view ${name}@${version} version --json ${registryArgs}`;
-        if (!view.exitCode) {
-            return true;
-        }
-        if (!view.stdout.includes('"E404"')) {
-            throw new Error(`Could not check npm for ${name}@${version}: ${describeNpmError(view.stdout)}. Make sure the registry is reachable and npm is authenticated to read the package. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.`);
-        }
-        return false;
-    };
-    if (await isOnNpm()) {
-        return undefined;
-    }
-    const tagNames = [version, `v${version}`];
-    const existingTags = (await $quiet `git tag --list ${tagNames}`).stdout
-        .split("\n")
-        .filter(Boolean);
-    // A version that was never tagged was never released, e.g. a new package.
-    if (!existingTags.length) {
-        return undefined;
-    }
-    const tagSeconds = Number((await $quiet `git log -1 --format=%ct ${existingTags[0]}`).stdout);
-    if (Date.now() / 1000 - tagSeconds < recentTagSeconds) {
-        info(`Version ${version} was tagged recently but isn't on npm yet. Waiting for npm to show it.`);
-        for (let attempt = 0; attempt < recheckAttempts; attempt += 1) {
-            await (0,promises_namespaceObject.setTimeout)(recheckDelayMs);
-            if (await isOnNpm()) {
-                return undefined;
-            }
-        }
-    }
-    const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
-    return {
-        headTag: existingTags.find((tag) => headTags.includes(tag)),
-        version,
-    };
-}
-function describeNpmError(stdout) {
-    try {
-        const { error } = JSON.parse(stdout);
-        return error?.summary ?? "unknown error";
-    }
-    catch {
-        return "unknown error";
-    }
-}
-async function readPackageData() {
-    try {
-        return JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
-    }
-    catch (error) {
-        if (error.code === "ENOENT") {
-            return undefined;
-        }
-        throw error;
-    }
-}
-
-;// CONCATENATED MODULE: ./src/steps/hasGitHubRelease.ts
-async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
-    try {
-        await octokit.request("GET /repos/{owner}/{repo}/releases/tags/{tag}", {
-            owner,
-            repo,
-            tag,
-        });
-        return true;
-    }
-    catch (error) {
-        if (error.status === 404) {
-            return false;
-        }
-        throw error;
     }
 }
 
@@ -44594,6 +44529,139 @@ function parseArgsString(input) {
     }
 }
 
+;// CONCATENATED MODULE: ./src/steps/hasGitHubRelease.ts
+async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
+    try {
+        await octokit.request("GET /repos/{owner}/{repo}/releases/tags/{tag}", {
+            owner,
+            repo,
+            tag,
+        });
+        return true;
+    }
+    catch (error) {
+        if (error.status === 404) {
+            return false;
+        }
+        throw error;
+    }
+}
+
+;// CONCATENATED MODULE: ./src/steps/getHeadTagMissingGitHubRelease.ts
+
+
+
+
+const $quiet = $({ reject: false });
+const configOverride = /^(?:-c|--config|--(?:no-)?github(?:\.(?:draft|release|web))?)(?:=|$)/;
+async function getHeadTagMissingGitHubRelease({ octokit, owner, releaseItArgs, repo, }) {
+    const packageData = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    const { version } = packageData;
+    const { github } = (await readReleaseItJson()) ?? packageData["release-it"] ?? {};
+    // Draft and web releases aren't found by tag, and release-it-args can override the config.
+    if (!version ||
+        !github?.release ||
+        github.draft ||
+        github.web ||
+        parseArgsString(releaseItArgs ?? "").some((arg) => configOverride.test(arg))) {
+        return undefined;
+    }
+    const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
+    const tag = [version, `v${version}`].find((tagName) => headTags.includes(tagName));
+    if (!tag || (await hasGitHubRelease({ octokit, owner, repo, tag }))) {
+        return undefined;
+    }
+    return tag;
+}
+async function readReleaseItJson() {
+    try {
+        return JSON.parse(await external_node_fs_promises_namespaceObject.readFile(".release-it.json", "utf8"));
+    }
+    catch {
+        return undefined;
+    }
+}
+
+;// CONCATENATED MODULE: ./src/steps/getUnpublishedVersion.ts
+
+
+
+
+const getUnpublishedVersion_$quiet = $({ reject: false });
+// npm can take a few minutes after a publish before it shows the new version.
+const recentTagSeconds = 10 * 60;
+const recheckAttempts = 12;
+const recheckDelayMs = 15_000;
+async function getUnpublishedVersion() {
+    const { name, private: isPrivate, publishConfig, version, } = (await readPackageData()) ?? {};
+    if (isPrivate || !name || !version) {
+        return undefined;
+    }
+    const scopedRegistry = name.startsWith("@")
+        ? publishConfig?.[`${name.split("/")[0]}:registry`]
+        : undefined;
+    const registry = typeof scopedRegistry === "string" && scopedRegistry
+        ? scopedRegistry
+        : publishConfig?.registry;
+    const registryArgs = registry ? ["--registry", registry] : [];
+    const isOnNpm = async () => {
+        const view = await getUnpublishedVersion_$quiet `npm view ${name}@${version} version --json ${registryArgs}`;
+        if (!view.exitCode) {
+            return true;
+        }
+        if (!view.stdout.includes('"E404"')) {
+            throw new Error(`Could not check npm for ${name}@${version}: ${describeNpmError(view.stdout)}. Make sure the registry is reachable and npm is authenticated to read the package. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.`);
+        }
+        return false;
+    };
+    if (await isOnNpm()) {
+        return undefined;
+    }
+    const tagNames = [version, `v${version}`];
+    const existingTags = (await getUnpublishedVersion_$quiet `git tag --list ${tagNames}`).stdout
+        .split("\n")
+        .filter(Boolean);
+    // A version that was never tagged was never released, e.g. a new package.
+    if (!existingTags.length) {
+        return undefined;
+    }
+    const tagSeconds = Number((await getUnpublishedVersion_$quiet `git log -1 --format=%ct ${existingTags[0]}`).stdout);
+    if (Date.now() / 1000 - tagSeconds < recentTagSeconds) {
+        info(`Version ${version} was tagged recently but isn't on npm yet. Waiting for npm to show it.`);
+        for (let attempt = 0; attempt < recheckAttempts; attempt += 1) {
+            await (0,promises_namespaceObject.setTimeout)(recheckDelayMs);
+            if (await isOnNpm()) {
+                return undefined;
+            }
+        }
+    }
+    const headTags = (await getUnpublishedVersion_$quiet `git tag --points-at HEAD`).stdout.split("\n");
+    return {
+        headTag: existingTags.find((tag) => headTags.includes(tag)),
+        version,
+    };
+}
+function describeNpmError(stdout) {
+    try {
+        const { error } = JSON.parse(stdout);
+        return error?.summary ?? "unknown error";
+    }
+    catch {
+        return "unknown error";
+    }
+}
+async function readPackageData() {
+    try {
+        return JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    }
+    catch (error) {
+        if (error.code === "ENOENT") {
+            return undefined;
+        }
+        throw error;
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/steps/checkSuperseded.ts
 
 const checkSuperseded_$quiet = $({ reject: false });
@@ -44671,6 +44739,7 @@ function describeError(error) {
 
 
 
+
 async function releaseItAction(options) {
     const { gitUserEmail, gitUserName, npmToken, skipNpmPublish } = options;
     await $$ `git config user.email ${gitUserEmail}`;
@@ -44700,6 +44769,11 @@ async function releaseItAction(options) {
         await tryCatchInfoAction("removing the npm token from the npmrc", async () => await $$ `npm config delete //registry.npmjs.org/:_authToken`);
     }
 }
+async function createGitHubRelease(releaseItArgs, options = {}) {
+    await runReleaseIt(["--no-increment --no-git --no-npm.publish", releaseItArgs]
+        .filter(Boolean)
+        .join(" "), { ...options, skipSupersededCheck: true });
+}
 async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githubToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
     // release-it reads the token from the environment, not from this process.
     process.env.GITHUB_TOKEN ??= githubToken;
@@ -44720,9 +44794,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
         info(`Version ${version} was pushed but never published to npm. Publishing it now.`);
         // First try to create a GitHub release, since they're mutable...
         if (hasRelease === false) {
-            await runReleaseIt(["--no-increment --no-git --no-npm.publish", releaseItArgs]
-                .filter(Boolean)
-                .join(" "), { skipSupersededCheck: true });
+            await createGitHubRelease(releaseItArgs);
         }
         // ...and then if that succeeded (didn't throw), do the immutable npm publish
         await runReleaseIt([
@@ -44731,6 +44803,18 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
         ]
             .filter(Boolean)
             .join(" "), { allowPublishConflict: true, skipSupersededCheck: true });
+        return;
+    }
+    const tagMissingRelease = await tryCatchInfoAction("checking for a version that was pushed without a GitHub release", async () => await getHeadTagMissingGitHubRelease({
+        octokit,
+        owner,
+        releaseItArgs,
+        repo,
+    }));
+    if (tagMissingRelease) {
+        info(`Tag ${tagMissingRelease} was pushed but its GitHub release was never created. Creating it now.`);
+        // Hooks such as after:release can try to publish the version npm already has.
+        await createGitHubRelease(releaseItArgs, { allowPublishConflict: true });
         return;
     }
     if ((await tryCatchInfoAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true }))) === false) {
