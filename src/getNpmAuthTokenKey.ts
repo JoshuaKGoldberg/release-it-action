@@ -1,6 +1,8 @@
+import * as core from "@actions/core";
 import * as fs from "node:fs/promises";
 
 import {
+	defaultRegistry,
 	getPublishRegistry,
 	PublishRegistryData,
 } from "./getPublishRegistry.js";
@@ -8,7 +10,14 @@ import {
 export async function getNpmAuthTokenKey() {
 	const registry = await getPublishRegistry(await readPackageData());
 
-	return `${getNerfDart(registry)}:_authToken`;
+	try {
+		return `${getNerfDart(registry)}:_authToken`;
+	} catch {
+		core.warning(
+			`Could not parse npm registry "${registry}" as a URL. Setting the npm token for ${defaultRegistry} instead.`,
+		);
+		return `${getNerfDart(defaultRegistry)}:_authToken`;
+	}
 }
 
 // This matches npm's nerf-dart, which drops the last path segment of a registry URL.

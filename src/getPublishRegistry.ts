@@ -2,7 +2,7 @@ import { $ } from "execa";
 
 const $quiet = $({ reject: false });
 
-const defaultRegistry = "https://registry.npmjs.org/";
+export const defaultRegistry = "https://registry.npmjs.org/";
 
 export interface PublishRegistryData {
 	name?: string;

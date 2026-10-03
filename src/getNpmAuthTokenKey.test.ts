@@ -1,6 +1,9 @@
+import * as core from "@actions/core";
 import { describe, expect, it, vi } from "vitest";
 
 import { getNpmAuthTokenKey } from "./getNpmAuthTokenKey.js";
+
+vi.mock("@actions/core");
 
 const mockReadFile = vi.fn();
 
@@ -13,6 +16,7 @@ vi.mock("node:fs/promises", () => ({
 const mockGetPublishRegistry = vi.fn();
 
 vi.mock("./getPublishRegistry.js", () => ({
+	defaultRegistry: "https://registry.npmjs.org/",
 	get getPublishRegistry() {
 		return mockGetPublishRegistry;
 	},
@@ -54,5 +58,16 @@ describe("getNpmAuthTokenKey", () => {
 		mockGetPublishRegistry.mockResolvedValueOnce(registry);
 
 		expect(await getNpmAuthTokenKey()).toBe(expected);
+		expect(core.warning).not.toHaveBeenCalled();
+	});
+
+	it("warns and uses the npm registry when the publish registry isn't a URL", async () => {
+		mockReadFile.mockResolvedValueOnce("{}");
+		mockGetPublishRegistry.mockResolvedValueOnce("npm.pkg.github.com");
+
+		expect(await getNpmAuthTokenKey()).toBe("//registry.npmjs.org/:_authToken");
+		expect(core.warning).toHaveBeenCalledWith(
+			'Could not parse npm registry "npm.pkg.github.com" as a URL. Setting the npm token for https://registry.npmjs.org/ instead.',
+		);
 	});
 });
