@@ -30291,7 +30291,7 @@ module.exports = {
 
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(8377);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(8760);
 
 
 await (0,_runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_1__/* .runReleaseItAction */ .k)(_actions_github__WEBPACK_IMPORTED_MODULE_0__/* .context */ ._);
@@ -30301,7 +30301,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 8377:
+/***/ 8760:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -44255,6 +44255,23 @@ async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
     }
 }
 
+;// CONCATENATED MODULE: ./src/enforceArgs.ts
+const enforceArgs_increment = /^(?:(?:pre)?(?:major|minor|patch)|pre(?:release)?|v?\d+\.\d+\.\d+(?:[-+]\S*)?)$/;
+function enforceArgs(args, enforcedArgs) {
+    const end = args.indexOf("--");
+    const options = end === -1 ? args : args.slice(0, end);
+    return [
+        ...(enforcedArgs.includes("--no-increment")
+            ? withoutIncrements(options)
+            : options),
+        ...enforcedArgs,
+    ];
+}
+function withoutIncrements(args) {
+    return args.filter((arg, index) => !enforceArgs_increment.test(arg) ||
+        ["--increment", "-i"].includes(args[index - 1] ?? ""));
+}
+
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/shlex@3.0.0/node_modules/shlex/shlex.js
 
 
@@ -44606,12 +44623,16 @@ async function getHeadSha() {
 
 
 
+
 const publishConflict = /cannot publish over (?:the )?previously (?:published|staged) version/i;
-async function runReleaseIt(releaseItArgs, { allowPublishConflict, skipSupersededCheck } = {}) {
+async function runReleaseIt(releaseItArgs, { allowPublishConflict, enforcedArgs, skipSupersededCheck, } = {}) {
     await tryCatchInfoAction("running release-it", async () => {
         const startSha = await getHeadSha();
         try {
-            const args = parseArgsString(releaseItArgs ?? "");
+            const parsedArgs = parseArgsString(releaseItArgs ?? "");
+            const args = enforcedArgs
+                ? enforceArgs(parsedArgs, enforcedArgs)
+                : parsedArgs;
             const { exitCode } = await $$captured `npx release-it --verbose ${args}`;
             if (exitCode) {
                 throw new Error(`Exit code ${exitCode.toString()}.`);
@@ -44689,17 +44710,21 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
         info(`Version ${version} was pushed but never published to npm. Publishing it now.`);
         // First try to create a GitHub release, since they're mutable...
         if (hasRelease === false) {
-            await runReleaseIt(["--no-increment --no-git --no-npm.publish", releaseItArgs]
-                .filter(Boolean)
-                .join(" "), { skipSupersededCheck: true });
+            await runReleaseIt(["--no-git", releaseItArgs].filter(Boolean).join(" "), {
+                enforcedArgs: ["--no-increment", "--no-npm.publish"],
+                skipSupersededCheck: true,
+            });
         }
         // ...and then if that succeeded (didn't throw), do the immutable npm publish
-        await runReleaseIt([
-            "--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
-            releaseItArgs,
-        ]
-            .filter(Boolean)
-            .join(" "), { allowPublishConflict: true, skipSupersededCheck: true });
+        await runReleaseIt(["--no-git --npm.skipChecks", releaseItArgs].filter(Boolean).join(" "), {
+            allowPublishConflict: true,
+            enforcedArgs: [
+                "--no-increment",
+                "--npm.publish",
+                "--no-github.release",
+            ],
+            skipSupersededCheck: true,
+        });
         return;
     }
     if ((await tryCatchInfoAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true }))) === false) {
