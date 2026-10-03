@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.26](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.25...v0.5.26) (2026-10-03)
+
+### Bug Fixes
+
+- keep Git config when retrying an unpublished version ([#965](https://github.com/JoshuaKGoldberg/release-it-action/issues/965)) ([aa7af72](https://github.com/JoshuaKGoldberg/release-it-action/commit/aa7af72918bf9a366b1e7cf1d3908ca1f50c4f4a)), closes [#964](https://github.com/JoshuaKGoldberg/release-it-action/issues/964)
+- restore the npmrc after the run instead of deleting its auth token ([#959](https://github.com/JoshuaKGoldberg/release-it-action/issues/959)) ([da19195](https://github.com/JoshuaKGoldberg/release-it-action/commit/da191950db19ce499f4594543081fc06ef2685ac)), closes [#958](https://github.com/JoshuaKGoldberg/release-it-action/issues/958)
+
 ## [0.5.25](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.24...v0.5.25) (2026-10-03)
 
 ### Bug Fixes
