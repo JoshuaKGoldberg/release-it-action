@@ -14,12 +14,10 @@
 	"type": "module",
 	"main": "lib/index.js",
 	"files": [
-		"lib/",
-		"!lib/**/*.test.*",
-		"!lib/tests/"
+		"lib/"
 	],
 	"scripts": {
-		"build": "tsc",
+		"build": "tsc --project tsconfig.build.json",
 		"build:release": "rm -rf dist && ncc build src/action/index.ts -o dist",
 		"format": "prettier .",
 		"lint": "eslint . --max-warnings 0",
@@ -30,7 +28,7 @@
 		"prepare": "husky",
 		"prepublishOnly": "rm -rf lib && pnpm build",
 		"test": "vitest",
-		"tsc": "tsc"
+		"tsc": "tsc --noEmit"
 	},
 	"lint-staged": {
 		"*": "prettier --ignore-unknown --write"
