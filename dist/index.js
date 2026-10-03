@@ -44181,7 +44181,8 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
 
 async function getTagNames(packageData) {
     const { name, version } = packageData;
-    const tagName = (await readReleaseItConfig(packageData))?.git?.tagName;
+    const tagName = (await readReleaseItJson())?.git?.tagName ??
+        packageData["release-it"]?.git?.tagName;
     if (typeof tagName === "string" && tagName) {
         const rendered = tagName
             .replaceAll("${version}", version)
@@ -44193,12 +44194,12 @@ async function getTagNames(packageData) {
     }
     return [version, `v${version}`];
 }
-async function readReleaseItConfig(packageData) {
+async function readReleaseItJson() {
     try {
         return JSON.parse(await external_node_fs_promises_namespaceObject.readFile(".release-it.json", "utf8"));
     }
     catch {
-        return packageData["release-it"];
+        return undefined;
     }
 }
 
