@@ -59,22 +59,10 @@ vi.mock("./steps/runReleaseIt.js", () => ({
 	},
 }));
 
-const mockTryCatchSetFailedAction = vi.fn(
-	async (_: string, action: () => Promise<unknown>) => {
-		try {
-			return await action();
-		} catch {
-			return undefined;
-		}
-	},
-);
-
-vi.mock("./tryCatchInfoAction.js", () => ({
+vi.mock("./tryCatchInfoAction.js", async (importOriginal) => ({
+	...(await importOriginal<typeof import("./tryCatchInfoAction.js")>()),
 	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
 		return await action();
-	},
-	get tryCatchSetFailedAction() {
-		return mockTryCatchSetFailedAction;
 	},
 }));
 
@@ -132,9 +120,8 @@ describe("releaseItAction", () => {
 
 		await releaseItAction(mockOptions);
 
-		expect(mockTryCatchSetFailedAction).toHaveBeenCalledWith(
-			"running should-semantic-release",
-			expect.any(Function),
+		expect(mockCore.setFailed).toHaveBeenCalledWith(
+			"Error should-semantic-release: Error: Oh no!",
 		);
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});

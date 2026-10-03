@@ -35,7 +35,7 @@ Each time it runs, the action:
 1. Sets up the Git user for release commits
 2. Sets up your npm token, if you gave one
 3. Finishes any [earlier release that didn't make it to npm](#what-happens-when-a-release-gets-pushed-but-not-published), then stops
-4. Stops if [`should-semantic-release`](https://github.com/JoshuaKGoldberg/should-semantic-release) says there's nothing to release
+4. Stops if [`should-semantic-release`](https://github.com/JoshuaKGoldberg/should-semantic-release) says there's nothing to release, or fails the run if it errors
 5. Runs `npx release-it --verbose`
 
 It also adds in safe handling for common corner cases such as npm being slow to recognize new versions.

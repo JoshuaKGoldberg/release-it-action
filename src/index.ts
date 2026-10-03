@@ -122,7 +122,7 @@ async function runRelease({
 
 	if (
 		!(await tryCatchSetFailedAction(
-			"running should-semantic-release",
+			"should-semantic-release",
 			async () => await shouldSemanticRelease({ verbose: true }),
 		))
 	) {
