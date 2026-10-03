@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.33](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.32...v0.5.33) (2026-10-03)
+
+### Bug Fixes
+
+- fail the run when checking npm for an unpublished version fails ([#971](https://github.com/JoshuaKGoldberg/release-it-action/issues/971)) ([8cbbc8f](https://github.com/JoshuaKGoldberg/release-it-action/commit/8cbbc8ff74fb7d42dd230f282c7b7601a4815bdf)), closes [#970](https://github.com/JoshuaKGoldberg/release-it-action/issues/970)
+- fail when branch protections can't be fetched or deleted ([#977](https://github.com/JoshuaKGoldberg/release-it-action/issues/977)) ([a9a66b0](https://github.com/JoshuaKGoldberg/release-it-action/commit/a9a66b097cb0b6bf2526b6b52c9d167425d3ee4a)), closes [#976](https://github.com/JoshuaKGoldberg/release-it-action/issues/976)
+
 ## [0.5.32](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.31...v0.5.32) (2026-10-03)
 
 ### Bug Fixes
