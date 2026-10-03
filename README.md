@@ -89,7 +89,7 @@ It also lets step 3 finish any release that fails to publish.
 		"pushArgs": ["--follow-tags", "--atomic"]
 	},
 	"hooks": {
-		"after:git:release": "npm publish --tag ${preReleaseId || 'latest'}"
+		"after:git:release": "npm publish${isPreRelease ? ' --tag ' + (preReleaseId || 'next') : ''}"
 	},
 	"npm": {
 		"publish": false,
@@ -98,11 +98,12 @@ It also lets step 3 finish any release that fails to publish.
 }
 ```
 
-The explicit `--tag` publishes prereleases under their own dist-tag, which newer versions of npm require.
+Prereleases publish under their own dist-tag, such as `beta` for `1.2.0-beta.0` or `next` for `1.2.0-0`, since newer versions of npm require a `--tag` for them.
+Stable releases leave out `--tag` so that newer versions of npm can refuse to move `latest` back to an older version.
 `skipChecks` lets step 3 republish a stranded version even without an npm token, such as with Trusted Publishing.
 
 > Tip: releasing from a maintenance branch?
-> Replace the tag expression with that branch's dist-tag.
+> Set `"tag"` under `"npm"` to that branch's dist-tag, which step 3 also uses, and change the hook to `npm publish --tag ${npm.tag}`.
 
 Skip this if you set `skip-npm-publish`, since the hook would still publish.
 
