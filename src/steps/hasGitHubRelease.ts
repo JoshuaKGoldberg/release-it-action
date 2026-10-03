@@ -52,7 +52,7 @@ export async function hasGitHubRelease({
 		}
 
 		core.info(
-			`Found a draft release for ${tag}, but neither .release-it.json nor package.json's "release-it" sets github.draft, so treating the release as missing. If release-it isn't meant to make drafts, the draft is likely left over from a failed release and can be deleted.`,
+			`Found a draft release for ${tag}, but neither .release-it.json nor package.json's "release-it" sets github.draft to true, so treating the release as missing. If release-it isn't meant to make drafts, the draft is likely left over from a failed release and can be deleted.`,
 		);
 		return false;
 	}
