@@ -73,6 +73,9 @@ const mockCore = vi.mocked(core);
 
 const mockReleaseItArgs = "--debug";
 
+const retryArgs =
+	"--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
+
 const mockOptions = {
 	githubToken: "mock-githubToken",
 	gitUserEmail: "mock-gitUserEmail",
@@ -161,7 +164,7 @@ describe("releaseItAction", () => {
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).toHaveBeenCalledTimes(1);
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			`--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
+			`${retryArgs} --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
 			{ allowPublishConflict: true, skipSupersededCheck: true },
 		);
 	});
@@ -177,11 +180,11 @@ describe("releaseItAction", () => {
 
 		expect(mockRunReleaseIt.mock.calls).toEqual([
 			[
-				`--no-increment --no-git --no-npm.publish ${mockReleaseItArgs}`,
+				`${retryArgs} --no-npm.publish ${mockReleaseItArgs}`,
 				{ skipSupersededCheck: true },
 			],
 			[
-				`--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
+				`${retryArgs} --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
 				{ allowPublishConflict: true, skipSupersededCheck: true },
 			],
 		]);
@@ -197,7 +200,7 @@ describe("releaseItAction", () => {
 		await releaseItAction({ ...mockOptions, releaseItArgs: undefined });
 
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			"--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
+			`${retryArgs} --npm.publish --npm.skipChecks --no-github.release`,
 			{ allowPublishConflict: true, skipSupersededCheck: true },
 		);
 	});
