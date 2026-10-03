@@ -2,10 +2,9 @@ import type { Endpoints } from "@octokit/types";
 
 import * as core from "@actions/core";
 
+import { isPlanUpgradeRequired } from "../requestErrors.js";
 import { tryCatchThrowAction } from "../tryCatchInfoAction.js";
 import { ExistingRuleset, Octokit } from "../types.js";
-
-const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
 
 export interface FetchRulesetsOptions {
 	octokit: Octokit;
@@ -28,15 +27,7 @@ export async function fetchRulesets({
 					},
 				);
 			} catch (error) {
-				const { response, status } = error as {
-					response?: { data?: { message?: string } };
-					status?: number;
-				};
-
-				if (
-					status === 403 &&
-					planUpgradeRequired.test(response?.data?.message ?? "")
-				) {
+				if (isPlanUpgradeRequired(error)) {
 					core.warning(
 						`Repository rulesets aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`,
 					);

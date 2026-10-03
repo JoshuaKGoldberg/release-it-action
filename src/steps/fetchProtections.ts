@@ -2,10 +2,12 @@ import type { Endpoints } from "@octokit/types";
 
 import * as core from "@actions/core";
 
+import {
+	getRequestErrorDetails,
+	isPlanUpgradeRequired,
+} from "../requestErrors.js";
 import { tryCatchThrowAction } from "../tryCatchInfoAction.js";
 import { ExistingProtections, Octokit } from "../types.js";
-
-const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
 
 export interface FetchProtectionsOptions {
 	octokit: Octokit;
@@ -27,12 +29,7 @@ export async function fetchProtections({
 					)
 				).data;
 			} catch (error) {
-				const { response, status } = error as {
-					response?: { data?: { message?: string } };
-					status?: number;
-				};
-
-				const message = response?.data?.message ?? "";
+				const { message, status } = getRequestErrorDetails(error);
 
 				if (status === 404 && message === "Branch not protected") {
 					return undefined;
@@ -45,7 +42,7 @@ export async function fetchProtections({
 					return undefined;
 				}
 
-				if (status === 403 && planUpgradeRequired.test(message)) {
+				if (isPlanUpgradeRequired(error)) {
 					core.warning(
 						`Branch protections aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`,
 					);
