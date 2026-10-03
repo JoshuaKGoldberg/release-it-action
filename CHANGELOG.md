@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.22](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.21...v0.5.22) (2026-10-03)
+
+### Bug Fixes
+
+- keep "any source" required checks when recreating branch protections ([#989](https://github.com/JoshuaKGoldberg/release-it-action/issues/989)) ([e1c8c93](https://github.com/JoshuaKGoldberg/release-it-action/commit/e1c8c93f47a2f3d59987d4a261cbeb4430f7c67e)), closes [#988](https://github.com/JoshuaKGoldberg/release-it-action/issues/988)
+
+## [0.5.21](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.20...v0.5.21) (2026-10-03)
+
+### Bug Fixes
+
+- drop @types/node from runtime dependencies ([#936](https://github.com/JoshuaKGoldberg/release-it-action/issues/936)) ([10a3c5c](https://github.com/JoshuaKGoldberg/release-it-action/commit/10a3c5c1c0732121dba35f4bb3251f886df9e5e9)), closes [#908](https://github.com/JoshuaKGoldberg/release-it-action/issues/908)
+
 ## [0.5.20](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.19...v0.5.20) (2026-10-02)
 
 ### Bug Fixes

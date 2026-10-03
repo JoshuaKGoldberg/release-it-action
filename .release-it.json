@@ -6,7 +6,7 @@
 	},
 	"github": { "release": true, "releaseName": "v${version}" },
 	"hooks": {
-		"after:bump": "sed -i \"s/release-it-action@v[^[:space:]]*/release-it-action@v${version}/\" README.md",
+		"after:bump": "sed -i.bak \"s/release-it-action@v[^[:space:]]*/release-it-action@v${version}/\" README.md && rm README.md.bak",
 		"after:git:release": "npm publish"
 	},
 	"npm": {
