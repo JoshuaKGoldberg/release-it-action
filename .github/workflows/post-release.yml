@@ -15,7 +15,7 @@ jobs:
             The release is available on:
 
             * [GitHub releases](https://github.com/JoshuaKGoldberg/release-it-action/releases/tag/{release_tag})
-            * [npm package (@latest dist-tag)](https://www.npmjs.com/package/release-it-action/v/${{ env.npm_version }})
+            * [npm package](https://www.npmjs.com/package/release-it-action/v/${{ env.npm_version }})
 
             Cheers! 📦🚀
 
