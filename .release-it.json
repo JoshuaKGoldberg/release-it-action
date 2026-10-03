@@ -10,8 +10,7 @@
 		"after:git:release": "npm publish"
 	},
 	"npm": {
-		"publish": false,
-		"skipChecks": true
+		"publish": false
 	},
 	"plugins": {
 		"@release-it/conventional-changelog": {
