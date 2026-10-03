@@ -3,6 +3,7 @@ import * as github from "@actions/github";
 import { shouldSemanticRelease } from "should-semantic-release";
 
 import { $$ } from "./execa.js";
+import { parseArgsString } from "./parseArgsString.js";
 import { runBypassingBranchProtections } from "./runBypassingBranchProtections.js";
 import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
 import { snapshotNpmUserConfig } from "./snapshotNpmUserConfig.js";
@@ -26,7 +27,15 @@ export interface ReleaseItActionOptions {
 }
 
 export async function releaseItAction(options: ReleaseItActionOptions) {
-	const { gitUserEmail, gitUserName, npmToken, skipNpmPublish } = options;
+	const { gitUserEmail, gitUserName, npmToken, releaseItArgs, skipNpmPublish } =
+		options;
+
+	try {
+		parseArgsString(releaseItArgs ?? "");
+	} catch (error) {
+		core.setFailed(`Invalid release-it-args: ${(error as Error).message}`);
+		return;
+	}
 
 	await $$`git config user.email ${gitUserEmail}`;
 	await $$`git config user.name ${gitUserName}`;

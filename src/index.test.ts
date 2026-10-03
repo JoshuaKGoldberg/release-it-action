@@ -115,6 +115,23 @@ describe("releaseItAction", () => {
 		vi.unstubAllEnvs();
 	});
 
+	it("fails without doing anything else when releaseItArgs can't be parsed", async () => {
+		await releaseItAction({
+			...mockOptions,
+			bypassBranchProtections: "example-branch",
+			releaseItArgs: '--github.releaseName="oops',
+		});
+
+		expect(mockCore.setFailed).toHaveBeenCalledWith(
+			'Invalid release-it-args: Could not parse arguments (Got EOF while in a quoted string): --github.releaseName="oops',
+		);
+		expect(mock$$).not.toHaveBeenCalled();
+		expect(mockGetUnpublishedVersion).not.toHaveBeenCalled();
+		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
+		expect(mockRunBypassingBranchProtections).not.toHaveBeenCalled();
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
+	});
+
 	it("provides githubToken as GITHUB_TOKEN when the environment variable is not set", async () => {
 		vi.stubEnv("GITHUB_TOKEN", undefined);
 		mockShouldSemanticRelease.mockResolvedValueOnce(false);
