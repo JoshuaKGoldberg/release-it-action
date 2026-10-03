@@ -34,16 +34,23 @@ describe("getNpmAuthTokenKey", () => {
 		expect(await getNpmAuthTokenKey()).toBe("//npm.pkg.github.com/:_authToken");
 	});
 
-	it("keeps the publishConfig registry's path", async () => {
-		mockReadFile.mockResolvedValueOnce(
-			JSON.stringify({
-				name: "test",
-				publishConfig: { registry: "https://example.com/api/npm" },
-			}),
-		);
+	it.each([
+		["https://npm.pkg.github.com", "//npm.pkg.github.com/:_authToken"],
+		["https://npm.pkg.github.com/OWNER", "//npm.pkg.github.com/:_authToken"],
+		["https://example.com/api/npm/", "//example.com/api/npm/:_authToken"],
+		["https://example.com/api/npm", "//example.com/api/:_authToken"],
+		[
+			"https://user:pass@example.com:8080/api/npm/?query#hash",
+			"//example.com:8080/api/npm/:_authToken",
+		],
+	])(
+		"uses npm's key for the publishConfig registry %j",
+		async (registry, expected) => {
+			mockReadFile.mockResolvedValueOnce(
+				JSON.stringify({ name: "test", publishConfig: { registry } }),
+			);
 
-		expect(await getNpmAuthTokenKey()).toBe(
-			"//example.com/api/npm/:_authToken",
-		);
-	});
+			expect(await getNpmAuthTokenKey()).toBe(expected);
+		},
+	);
 });
