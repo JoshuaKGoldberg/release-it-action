@@ -35,6 +35,17 @@ vi.mock("./runBypassingBranchRulesets.js", () => ({
 	},
 }));
 
+const mockRestoreNpmUserConfig = vi.fn();
+const mockSnapshotNpmUserConfig = vi
+	.fn()
+	.mockResolvedValue(mockRestoreNpmUserConfig);
+
+vi.mock("./snapshotNpmUserConfig.js", () => ({
+	get snapshotNpmUserConfig() {
+		return mockSnapshotNpmUserConfig;
+	},
+}));
+
 const mockGetUnpublishedVersion = vi.fn();
 
 vi.mock("./steps/getUnpublishedVersion.js", () => ({
@@ -129,7 +140,7 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
-	it("removes the npm token even when the run fails early", async () => {
+	it("restores the npm user config even when the run fails early", async () => {
 		mockGetUnpublishedVersion.mockResolvedValueOnce({
 			headTag: undefined,
 			version: "1.2.3",
@@ -137,9 +148,29 @@ describe("releaseItAction", () => {
 
 		await releaseItAction(mockOptions);
 
-		expect(mock$$.mock.calls.at(-1)).toEqual([
-			["npm config delete //registry.npmjs.org/:_authToken"],
-		]);
+		expect(mockRestoreNpmUserConfig).toHaveBeenCalledOnce();
+	});
+
+	it("restores the npm user config even when setting the npm token fails", async () => {
+		mock$$
+			.mockResolvedValueOnce(undefined)
+			.mockResolvedValueOnce(undefined)
+			.mockRejectedValueOnce(new Error("Oh no!"));
+
+		await expect(releaseItAction(mockOptions)).rejects.toThrow();
+
+		expect(mockRestoreNpmUserConfig).toHaveBeenCalledOnce();
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
+	});
+
+	it("snapshots the npm user config before setting the npm token", async () => {
+		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		expect(mockSnapshotNpmUserConfig.mock.invocationCallOrder[0]).toBeLessThan(
+			mock$$.mock.invocationCallOrder[2],
+		);
 	});
 
 	it("publishes a version tagged at HEAD that was never published, without recreating its GitHub release", async () => {
@@ -238,11 +269,6 @@ describe("releaseItAction", () => {
 			    ],
 			    "mock-npmToken",
 			  ],
-			  [
-			    [
-			      "npm config delete //registry.npmjs.org/:_authToken",
-			    ],
-			  ],
 			]
 		`);
 		expect(mockRunBypassingBranchProtections).not.toHaveBeenCalled();
@@ -280,11 +306,6 @@ describe("releaseItAction", () => {
 			      "",
 			    ],
 			    "mock-npmToken",
-			  ],
-			  [
-			    [
-			      "npm config delete //registry.npmjs.org/:_authToken",
-			    ],
 			  ],
 			]
 		`);
@@ -371,6 +392,7 @@ describe("releaseItAction", () => {
 		expect(mockCore.info).toHaveBeenCalledWith(
 			"skipNpmPublish is true. Skipping npm publish.",
 		);
+		expect(mockSnapshotNpmUserConfig).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
 			`--no-npm.publish ${mockReleaseItArgs}`,
 		);
@@ -402,5 +424,6 @@ describe("releaseItAction", () => {
 		expect(mockCore.info).toHaveBeenCalledWith(
 			"No npm token provided. This is required unless you're using Trusted Publishing.",
 		);
+		expect(mockSnapshotNpmUserConfig).not.toHaveBeenCalled();
 	});
 });

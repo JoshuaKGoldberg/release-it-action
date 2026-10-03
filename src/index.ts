@@ -5,6 +5,7 @@ import { shouldSemanticRelease } from "should-semantic-release";
 import { $$ } from "./execa.js";
 import { runBypassingBranchProtections } from "./runBypassingBranchProtections.js";
 import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
+import { snapshotNpmUserConfig } from "./snapshotNpmUserConfig.js";
 import { getUnpublishedVersion } from "./steps/getUnpublishedVersion.js";
 import { hasGitHubRelease } from "./steps/hasGitHubRelease.js";
 import { runReleaseIt } from "./steps/runReleaseIt.js";
@@ -30,9 +31,7 @@ export async function releaseItAction(options: ReleaseItActionOptions) {
 	await $$`git config user.name ${gitUserName}`;
 	if (skipNpmPublish) {
 		core.info("skipNpmPublish is true. Skipping npm publish.");
-	} else if (npmToken) {
-		await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
-	} else {
+	} else if (!npmToken) {
 		core.info(
 			"No npm token provided. This is required unless you're using Trusted Publishing.",
 		);
@@ -43,12 +42,15 @@ export async function releaseItAction(options: ReleaseItActionOptions) {
 		return;
 	}
 
+	const restoreNpmUserConfig = await snapshotNpmUserConfig();
+
 	try {
+		await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
 		await runRelease(options);
 	} finally {
 		await tryCatchInfoAction(
 			"removing the npm token from the npmrc",
-			async () => await $$`npm config delete //registry.npmjs.org/:_authToken`,
+			restoreNpmUserConfig,
 		);
 	}
 }
