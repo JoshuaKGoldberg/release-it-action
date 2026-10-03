@@ -30292,7 +30292,7 @@ module.exports = {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8830);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(6195);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(166);
 
 
 
@@ -30308,7 +30308,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 6195:
+/***/ 166:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -41328,17 +41328,52 @@ function createCommonRequestData(commonData) {
     };
 }
 
+;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
+
+async function tryCatchInfoAction(label, action) {
+    return await tryCatchAction(label, action, core/* info */.pq);
+}
+async function tryCatchSetFailedAction(label, action) {
+    return await tryCatchAction(label, action, core/* setFailed */.C1);
+}
+async function tryCatchThrowAction(label, action, failure) {
+    core/* info */.pq(`Start: ${label}`);
+    let result;
+    try {
+        result = await action();
+    }
+    catch (error) {
+        throw new Error(`${failure}: ${String(error)}`, { cause: error });
+    }
+    tryCatchInfoAction_logResult(label, result);
+    return result;
+}
+function tryCatchInfoAction_logResult(label, result) {
+    if (result !== undefined) {
+        core/* info */.pq(`Result from ${label}: ${JSON.stringify(result, null, 4)}`);
+    }
+}
+async function tryCatchAction(label, action, logError) {
+    core/* info */.pq(`Start: ${label}`);
+    try {
+        const result = await action();
+        tryCatchInfoAction_logResult(label, result);
+        return result;
+    }
+    catch (error) {
+        logError(`Error ${label}: ${error}`);
+        return undefined;
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/steps/deleteProtections.ts
+
 
 async function deleteProtections({ existingProtections, octokit, requestData, }) {
     if (existingProtections) {
-        core/* info */.pq(`Start: deleting existing protections for ${requestData.branch}`);
-        try {
+        await tryCatchThrowAction(`deleting existing protections for ${requestData.branch}`, async () => {
             await octokit.request(`DELETE /repos/{owner}/{repo}/branches/{branch}/protection`, requestData);
-        }
-        catch (error) {
-            throw new Error(`Could not delete existing branch protections for ${requestData.branch}: ${String(error)}`, { cause: error });
-        }
+        }, `Could not delete existing branch protections for ${requestData.branch}`);
     }
     else {
         core/* info */.pq(`No existing branch protections found for ${requestData.branch}.`);
@@ -41359,63 +41394,39 @@ function isPlanUpgradeRequired(error) {
 ;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
 
 
+
 async function fetchProtections({ octokit, requestData, }) {
-    const label = `fetching existing branch protections for ${requestData.branch}`;
-    core/* info */.pq(`Start: ${label}`);
-    try {
-        const { data } = await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData);
-        core/* info */.pq(`Result from ${label}: ${JSON.stringify(data, null, 4)}`);
-        return data;
-    }
-    catch (error) {
-        const { message, status } = getRequestErrorDetails(error);
-        if (status === 404 && message === "Branch not protected") {
-            return undefined;
+    return await tryCatchThrowAction(`fetching existing branch protections for ${requestData.branch}`, async () => {
+        try {
+            return (await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData)).data;
         }
-        if (status === 404 && message === "Branch not found") {
-            core/* warning */.$e(`Branch ${requestData.branch} doesn't exist, so it has no branch protections to bypass.`);
-            return undefined;
+        catch (error) {
+            const { message, status } = getRequestErrorDetails(error);
+            if (status === 404 && message === "Branch not protected") {
+                return undefined;
+            }
+            if (status === 404 && message === "Branch not found") {
+                core/* warning */.$e(`Branch ${requestData.branch} doesn't exist, so it has no branch protections to bypass.`);
+                return undefined;
+            }
+            if (isPlanUpgradeRequired(error)) {
+                core/* warning */.$e(`Branch protections aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
+                return undefined;
+            }
+            throw error;
         }
-        if (isPlanUpgradeRequired(error)) {
-            core/* warning */.$e(`Branch protections aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
-            return undefined;
-        }
-        throw new Error(`Could not fetch existing branch protections for ${requestData.branch}: ${String(error)}`, { cause: error });
-    }
-}
-
-;// CONCATENATED MODULE: ./src/tryCatchAction.ts
-
-async function tryCatchInfoAction(label, action) {
-    return await tryCatchAction(label, action, core/* info */.pq);
-}
-async function tryCatchSetFailedAction(label, action) {
-    return await tryCatchAction(label, action, core/* setFailed */.C1);
-}
-async function tryCatchAction(label, action, logError) {
-    core/* info */.pq(`Start: ${label}`);
-    try {
-        const result = await action();
-        if (result !== undefined) {
-            core/* info */.pq(`Result from ${label}: ${JSON.stringify(result, null, 4)}`);
-        }
-        return result;
-    }
-    catch (error) {
-        logError(`Error ${label}: ${error}`);
-        return undefined;
-    }
+    }, `Could not fetch existing branch protections for ${requestData.branch}`);
 }
 
 ;// CONCATENATED MODULE: ./src/steps/recreateProtections.ts
 
-async function recreateProtections({ existingProtections, octokit, requestData, }) {
+async function recreateProtections({ commonRequestData, existingProtections, octokit, }) {
     if (!existingProtections) {
         return;
     }
     await tryCatchSetFailedAction("re-creating branch protections", async () => {
         await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
-            ...requestData,
+            ...commonRequestData,
             allow_deletions: !!existingProtections.allow_deletions?.enabled,
             allow_force_pushes: !!existingProtections.allow_force_pushes?.enabled,
             allow_fork_syncing: !!existingProtections.allow_fork_syncing?.enabled,
@@ -41466,7 +41477,7 @@ async function recreateProtections({ existingProtections, octokit, requestData, 
     // The update protection endpoint doesn't accept required_signatures.
     if (existingProtections.required_signatures?.enabled) {
         await tryCatchSetFailedAction("re-enabling required signatures", async () => {
-            await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, requestData);
+            await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, commonRequestData);
         });
     }
 }
@@ -41489,24 +41500,24 @@ function mapReviewRestrictions(restrictions) {
 
 
 async function runBypassingBranchProtections(commonData, octokit, run) {
-    const requestData = createCommonRequestData(commonData);
+    const commonRequestData = createCommonRequestData(commonData);
     const existingProtections = await fetchProtections({
         octokit,
-        requestData,
+        requestData: commonRequestData,
     });
     try {
         await deleteProtections({
             existingProtections,
             octokit,
-            requestData,
+            requestData: commonRequestData,
         });
         await run();
     }
     finally {
         await recreateProtections({
+            commonRequestData,
             existingProtections,
             octokit,
-            requestData,
         });
     }
 }
@@ -41514,8 +41525,9 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
 ;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
 
 
+
 async function fetchRulesets({ octokit, requestData, }) {
-    const rules = await fetchLogged(`existing branch rules for ${requestData.branch}`, async () => {
+    const rules = await tryCatchThrowAction(`fetching existing branch rules for ${requestData.branch}`, async () => {
         try {
             return await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
                 ...requestData,
@@ -41529,7 +41541,7 @@ async function fetchRulesets({ octokit, requestData, }) {
             }
             throw error;
         }
-    });
+    }, `Could not fetch existing branch rules for ${requestData.branch}`);
     const rulesetIds = new Set();
     for (const rule of rules) {
         if (rule.ruleset_id === undefined) {
@@ -41545,33 +41557,19 @@ async function fetchRulesets({ octokit, requestData, }) {
     }
     const rulesets = [];
     for (const rulesetId of rulesetIds) {
-        const ruleset = await fetchLogged(`existing ruleset ${rulesetId.toString()}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+        const ruleset = await tryCatchThrowAction(`fetching existing ruleset ${rulesetId.toString()}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
             ...requestData,
             ruleset_id: rulesetId,
-        })).data);
+        })).data, `Could not fetch existing ruleset ${rulesetId.toString()}`);
         rulesets.push(ruleset);
     }
     return rulesets;
-}
-async function fetchLogged(description, fetch) {
-    core/* info */.pq(`Start: fetching ${description}`);
-    let result;
-    try {
-        result = await fetch();
-    }
-    catch (error) {
-        throw new Error(`Could not fetch ${description}: ${String(error)}`, {
-            cause: error,
-        });
-    }
-    core/* info */.pq(`Result from fetching ${description}: ${JSON.stringify(result, null, 4)}`);
-    return result;
 }
 
 ;// CONCATENATED MODULE: ./src/steps/updateRulesetsEnforcement.ts
 
 
-async function updateRulesetsEnforcement({ enforcement, existingRulesets, octokit, requestData, setFailedOnError, }) {
+async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, setFailedOnError, }) {
     if (!existingRulesets.length) {
         core/* info */.pq("No existing repository rulesets found to update.");
         return;
@@ -41581,23 +41579,16 @@ async function updateRulesetsEnforcement({ enforcement, existingRulesets, octoki
         const description = `ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`;
         const update = async () => {
             await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
-                ...requestData,
+                ...commonRequestData,
                 enforcement: nextEnforcement,
                 ruleset_id: existingRuleset.id,
             });
         };
         if (setFailedOnError) {
             await tryCatchSetFailedAction(`setting ${description}`, update);
-            continue;
         }
-        core/* info */.pq(`Start: setting ${description}`);
-        try {
-            await update();
-        }
-        catch (error) {
-            throw new Error(`Could not set ${description}: ${String(error)}`, {
-                cause: error,
-            });
+        else {
+            await tryCatchThrowAction(`setting ${description}`, update, `Could not set ${description}`);
         }
     }
 }
@@ -41607,29 +41598,52 @@ async function updateRulesetsEnforcement({ enforcement, existingRulesets, octoki
 
 
 async function runBypassingBranchRulesets(commonData, octokit, run) {
-    const requestData = createCommonRequestData(commonData);
+    const commonRequestData = createCommonRequestData(commonData);
     const existingRulesets = await fetchRulesets({
         octokit,
-        requestData,
+        requestData: commonRequestData,
     });
     try {
         await updateRulesetsEnforcement({
+            commonRequestData,
             enforcement: () => "disabled",
             existingRulesets,
             octokit,
-            requestData,
         });
         await run();
     }
     finally {
         await updateRulesetsEnforcement({
+            commonRequestData,
             enforcement: (ruleset) => ruleset.enforcement,
             existingRulesets,
             octokit,
-            requestData,
             setFailedOnError: true,
         });
     }
+}
+
+;// CONCATENATED MODULE: ./src/packageData.ts
+
+async function readPackageData() {
+    try {
+        return JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    }
+    catch (error) {
+        if (error.code === "ENOENT") {
+            return undefined;
+        }
+        throw error;
+    }
+}
+
+;// CONCATENATED MODULE: ./src/versionTags.ts
+
+async function getHeadTags() {
+    return (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
+}
+function getVersionTagNames(version) {
+    return [version, `v${version}`];
 }
 
 ;// CONCATENATED MODULE: ./src/steps/hasGitHubRelease.ts
@@ -41655,11 +41669,12 @@ async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
 
 
 
+
 const configOverride = /^(?:-c|--config|--(?:no-)?github(?:\.(?:draft|release|web))?)(?:=|$)/;
 async function getHeadTagMissingGitHubRelease({ octokit, owner, releaseItArgs, repo, }) {
-    const packageData = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
-    const { version } = packageData;
-    const { github } = (await readReleaseItJson()) ?? packageData["release-it"] ?? {};
+    const packageData = await readPackageData();
+    const version = packageData?.version;
+    const { github } = (await readReleaseItJson()) ?? packageData?.["release-it"] ?? {};
     // Draft and web releases aren't found by tag, and release-it-args can override the config.
     if (!version ||
         !github?.release ||
@@ -41668,8 +41683,8 @@ async function getHeadTagMissingGitHubRelease({ octokit, owner, releaseItArgs, r
         parseArgsString(releaseItArgs ?? "").some((arg) => configOverride.test(arg))) {
         return undefined;
     }
-    const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
-    const tag = [version, `v${version}`].find((tagName) => headTags.includes(tagName));
+    const headTags = await getHeadTags();
+    const tag = getVersionTagNames(version).find((tagName) => headTags.includes(tagName));
     if (!tag || (await hasGitHubRelease({ octokit, owner, repo, tag }))) {
         return undefined;
     }
@@ -41685,6 +41700,7 @@ async function readReleaseItJson() {
 }
 
 ;// CONCATENATED MODULE: ./src/steps/getUnpublishedVersion.ts
+
 
 
 
@@ -41720,7 +41736,7 @@ async function getUnpublishedVersion(githubToken) {
     if (await isOnNpm()) {
         return undefined;
     }
-    const tagNames = [version, `v${version}`];
+    const tagNames = getVersionTagNames(version);
     const existingTags = (await $quiet `git tag --list ${tagNames}`).stdout
         .split("\n")
         .filter(Boolean);
@@ -41738,7 +41754,7 @@ async function getUnpublishedVersion(githubToken) {
             }
         }
     }
-    const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
+    const headTags = await getHeadTags();
     return {
         headTag: existingTags.find((tag) => headTags.includes(tag)),
         version,
@@ -41751,17 +41767,6 @@ function describeNpmError(stdout) {
     }
     catch {
         return "unknown error";
-    }
-}
-async function readPackageData() {
-    try {
-        return JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
-    }
-    catch (error) {
-        if (error.code === "ENOENT") {
-            return undefined;
-        }
-        throw error;
     }
 }
 
@@ -41861,6 +41866,7 @@ async function releaseItAction(options) {
     await runRelease(options);
 }
 const retryArgs = "--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
+const restoreTaggedFiles = "'--hooks.before:npm:release=git checkout -- .'";
 async function createGitHubRelease(releaseItArgs, options) {
     return await runReleaseIt([retryArgs, "--no-npm.publish", releaseItArgs].filter(Boolean).join(" "), { ...options, skipSupersededCheck: true });
 }
@@ -41894,6 +41900,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
         await runReleaseIt([
             retryArgs,
             "--npm.publish --npm.skipChecks --no-github.release",
+            restoreTaggedFiles,
             releaseItArgs,
         ]
             .filter(Boolean)

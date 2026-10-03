@@ -2,6 +2,7 @@ import * as core from "@actions/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { releaseItAction, ReleaseItActionOptions } from "./index.js";
+import { parseArgsString } from "./parseArgsString.js";
 
 const mock$$ = vi.fn().mockResolvedValue({ exitCode: 0, stdout: "" });
 
@@ -88,6 +89,8 @@ const mockReleaseItArgs = "--debug";
 
 const retryArgs =
 	"--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
+
+const restoreTaggedFiles = "'--hooks.before:npm:release=git checkout -- .'";
 
 const mockOptions = {
 	githubToken: "mock-githubToken",
@@ -211,7 +214,7 @@ describe("releaseItAction", () => {
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).toHaveBeenCalledTimes(1);
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			`${retryArgs} --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
+			`${retryArgs} --npm.publish --npm.skipChecks --no-github.release ${restoreTaggedFiles} ${mockReleaseItArgs}`,
 			{
 				allowPublishConflict: true,
 				githubToken: "mock-githubToken",
@@ -236,7 +239,7 @@ describe("releaseItAction", () => {
 				{ githubToken: "mock-githubToken", skipSupersededCheck: true },
 			],
 			[
-				`${retryArgs} --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
+				`${retryArgs} --npm.publish --npm.skipChecks --no-github.release ${restoreTaggedFiles} ${mockReleaseItArgs}`,
 				{
 					allowPublishConflict: true,
 					githubToken: "mock-githubToken",
@@ -244,6 +247,20 @@ describe("releaseItAction", () => {
 				},
 			],
 		]);
+	});
+
+	it("restores the tagged files right before republishing a version that was never published", async () => {
+		mockGetUnpublishedVersion.mockResolvedValueOnce({
+			headTag: "v1.2.3",
+			version: "1.2.3",
+		});
+		mockHasGitHubRelease.mockResolvedValueOnce(true);
+
+		await releaseItAction(mockOptions);
+
+		expect(
+			parseArgsString(mockRunReleaseIt.mock.calls[0][0] as string),
+		).toContain("--hooks.before:npm:release=git checkout -- .");
 	});
 
 	it("fails without publishing to npm when creating the missing GitHub release fails", async () => {
@@ -292,7 +309,7 @@ describe("releaseItAction", () => {
 		await releaseItAction({ ...mockOptions, releaseItArgs: undefined });
 
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			`${retryArgs} --npm.publish --npm.skipChecks --no-github.release`,
+			`${retryArgs} --npm.publish --npm.skipChecks --no-github.release ${restoreTaggedFiles}`,
 			{
 				allowPublishConflict: true,
 				githubToken: "mock-githubToken",

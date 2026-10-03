@@ -1,6 +1,6 @@
 {
 	"name": "release-it-action",
-	"version": "0.6.2",
+	"version": "0.6.4",
 	"description": "Runs release-it as a GitHub Action, with handling for semantic releases and protected branches. 📤",
 	"repository": {
 		"type": "git",
@@ -16,7 +16,8 @@
 	"exports": "./lib/index.js",
 	"main": "lib/index.js",
 	"files": [
-		"lib/"
+		"lib/",
+		"!lib/action/"
 	],
 	"scripts": {
 		"build": "tsc --project tsconfig.build.json",

@@ -49,6 +49,8 @@ export async function releaseItAction(options: ReleaseItActionOptions) {
 const retryArgs =
 	"--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
 
+const restoreTaggedFiles = "'--hooks.before:npm:release=git checkout -- .'";
+
 async function createGitHubRelease(
 	releaseItArgs: string | undefined,
 	options: RunReleaseItOptions,
@@ -124,6 +126,7 @@ async function runRelease({
 			[
 				retryArgs,
 				"--npm.publish --npm.skipChecks --no-github.release",
+				restoreTaggedFiles,
 				releaseItArgs,
 			]
 				.filter(Boolean)

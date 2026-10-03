@@ -2,7 +2,10 @@ import type { RequestParameters } from "@octokit/types";
 
 import * as core from "@actions/core";
 
-import { tryCatchSetFailedAction } from "../tryCatchAction.js";
+import {
+	tryCatchSetFailedAction,
+	tryCatchThrowAction,
+} from "../tryCatchAction.js";
 import { ExistingRuleset, Octokit, RulesetEnforcement } from "../types.js";
 
 export interface UpdateRulesetsEnforcementOptions {
@@ -38,17 +41,12 @@ export async function updateRulesetsEnforcement({
 
 		if (setFailedOnError) {
 			await tryCatchSetFailedAction(`setting ${description}`, update);
-			continue;
-		}
-
-		core.info(`Start: setting ${description}`);
-
-		try {
-			await update();
-		} catch (error) {
-			throw new Error(`Could not set ${description}: ${String(error)}`, {
-				cause: error,
-			});
+		} else {
+			await tryCatchThrowAction(
+				`setting ${description}`,
+				update,
+				`Could not set ${description}`,
+			);
 		}
 	}
 }

@@ -1,8 +1,9 @@
 import * as fs from "node:fs/promises";
 
-import { $quiet } from "../execa.js";
+import { readPackageData, ReleaseItConfig } from "../packageData.js";
 import { parseArgsString } from "../parseArgsString.js";
 import { Octokit } from "../types.js";
+import { getHeadTags, getVersionTagNames } from "../versionTags.js";
 import { hasGitHubRelease } from "./hasGitHubRelease.js";
 
 const configOverride =
@@ -15,27 +16,16 @@ export interface GetHeadTagMissingGitHubReleaseOptions {
 	repo: string;
 }
 
-interface PackageData {
-	"release-it"?: ReleaseItConfig;
-	version?: string;
-}
-
-interface ReleaseItConfig {
-	github?: { draft?: boolean; release?: boolean; web?: boolean };
-}
-
 export async function getHeadTagMissingGitHubRelease({
 	octokit,
 	owner,
 	releaseItArgs,
 	repo,
 }: GetHeadTagMissingGitHubReleaseOptions) {
-	const packageData = JSON.parse(
-		await fs.readFile("package.json", "utf8"),
-	) as PackageData;
-	const { version } = packageData;
+	const packageData = await readPackageData();
+	const version = packageData?.version;
 	const { github } =
-		(await readReleaseItJson()) ?? packageData["release-it"] ?? {};
+		(await readReleaseItJson()) ?? packageData?.["release-it"] ?? {};
 
 	// Draft and web releases aren't found by tag, and release-it-args can override the config.
 	if (
@@ -48,8 +38,8 @@ export async function getHeadTagMissingGitHubRelease({
 		return undefined;
 	}
 
-	const headTags = (await $quiet`git tag --points-at HEAD`).stdout.split("\n");
-	const tag = [version, `v${version}`].find((tagName) =>
+	const headTags = await getHeadTags();
+	const tag = getVersionTagNames(version).find((tagName) =>
 		headTags.includes(tagName),
 	);
 
