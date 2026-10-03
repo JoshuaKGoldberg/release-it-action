@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.2](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.6.1...v0.6.2) (2026-10-03)
+
+### Bug Fixes
+
+- stop logging full GitHub API responses when restoring protections and rulesets ([#1015](https://github.com/JoshuaKGoldberg/release-it-action/issues/1015)) ([dd41fce](https://github.com/JoshuaKGoldberg/release-it-action/commit/dd41fcec2bf9bbe051e72df3c223fb6232f162aa)), closes [#1014](https://github.com/JoshuaKGoldberg/release-it-action/issues/1014)
+
 ## [0.6.1](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.6.0...v0.6.1) (2026-10-03)
 
 ### Performance Improvements
