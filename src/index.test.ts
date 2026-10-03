@@ -323,6 +323,7 @@ describe("releaseItAction", () => {
 			version: "1.2.3",
 		});
 		mockHasGitHubRelease.mockResolvedValueOnce(false);
+		mockRunReleaseIt.mockResolvedValueOnce(true);
 
 		await releaseItAction(mockOptions);
 
@@ -340,6 +341,42 @@ describe("releaseItAction", () => {
 				},
 			],
 		]);
+	});
+
+	it("fails without publishing to npm when creating the missing GitHub release fails", async () => {
+		mockGetUnpublishedVersion.mockResolvedValueOnce({
+			headTag: "v1.2.3",
+			version: "1.2.3",
+		});
+		mockHasGitHubRelease.mockResolvedValueOnce(false);
+		mockRunReleaseIt.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		expect(mockRunReleaseIt.mock.calls).toEqual([
+			[
+				`${retryArgs} --no-npm.publish ${mockReleaseItArgs}`,
+				{ githubToken: "mock-githubToken", skipSupersededCheck: true },
+			],
+		]);
+		expect(mockCore.setFailed).toHaveBeenCalledWith(
+			"Skipped publishing 1.2.3 to npm because creating the GitHub release for v1.2.3 failed. Re-run the release from the commit tagged v1.2.3 to retry both.",
+		);
+	});
+
+	it("fails without publishing when checking for the GitHub release fails", async () => {
+		mockGetUnpublishedVersion.mockResolvedValueOnce({
+			headTag: "v1.2.3",
+			version: "1.2.3",
+		});
+		mockHasGitHubRelease.mockResolvedValueOnce(undefined);
+
+		await releaseItAction(mockOptions);
+
+		expect(mockCore.setFailed).toHaveBeenCalledWith(
+			"Could not check whether v1.2.3 has a GitHub release, so 1.2.3 was not published to npm. Fix the error logged above (for example, a github-token that can't read releases), then re-run the release from the commit tagged v1.2.3.",
+		);
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
 	it("publishes a version tagged at HEAD that was never published without extra arguments when releaseItArgs is undefined", async () => {

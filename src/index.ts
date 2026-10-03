@@ -83,7 +83,7 @@ async function createGitHubRelease(
 	releaseItArgs: string | undefined,
 	options: RunReleaseItOptions,
 ) {
-	await runReleaseIt(
+	return await runReleaseIt(
 		[retryArgs, "--no-npm.publish", releaseItArgs].filter(Boolean).join(" "),
 		{ ...options, skipSupersededCheck: true },
 	);
@@ -127,16 +127,29 @@ async function runRelease({
 				await hasGitHubRelease({ octokit, owner, repo, tag: headTag }),
 		);
 
+		if (hasRelease === undefined) {
+			core.setFailed(
+				`Could not check whether ${headTag} has a GitHub release, so ${version} was not published to npm. Fix the error logged above (for example, a github-token that can't read releases), then re-run the release from the commit tagged ${headTag}.`,
+			);
+			return;
+		}
+
 		core.info(
 			`Version ${version} was pushed but never published to npm. Publishing it now.`,
 		);
 
 		// First try to create a GitHub release, since they're mutable...
-		if (hasRelease === false) {
-			await createGitHubRelease(releaseItArgs, { githubToken });
+		if (
+			!hasRelease &&
+			!(await createGitHubRelease(releaseItArgs, { githubToken }))
+		) {
+			core.setFailed(
+				`Skipped publishing ${version} to npm because creating the GitHub release for ${headTag} failed. Re-run the release from the commit tagged ${headTag} to retry both.`,
+			);
+			return;
 		}
 
-		// ...and then if that succeeded (didn't throw), do the immutable npm publish
+		// ...and only if that succeeded, do the immutable npm publish
 		await runReleaseIt(
 			[
 				retryArgs,
