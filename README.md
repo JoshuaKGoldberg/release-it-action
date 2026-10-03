@@ -163,12 +163,15 @@ Sometimes a release gets pushed to GitHub without making it to npm.
 The next run publishes that version without making a new commit or tag.
 It also creates the GitHub release if it's missing.
 
-This only works if the version's Git tag is on the latest commit.
+This only works if the version's Git tag is on the checked-out commit.
+Since the [usage example](#usage) checks out `main`, even the release commit's own run gets a newer commit if another push lands before that run checks out.
 Once newer commits land, every run fails until that version is published, since the action can't publish a commit it didn't build.
-To publish it, run your release workflow from the version's tag.
+To publish it, dispatch your release workflow with the version's tag checked out.
 For example, a `workflow_dispatch` trigger can take the ref to check out:
 
 ```yml
+# ...
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -180,6 +183,8 @@ jobs:
           token: ${{ secrets.ACCESS_TOKEN }}
       # ...
 
+name: Release
+
 on:
   push:
     branches:
@@ -189,14 +194,14 @@ on:
       ref:
         description: Git ref to release from, such as a tag whose npm publish failed.
         type: string
+
+# ...
 ```
 
-Then dispatch it with the tag, such as with `gh workflow run release.yml -f ref=v1.2.3`.
+Then dispatch it with the tag, such as with `gh workflow run Release -f ref=v1.2.3`.
+Steps after the checkout use the tag's files, so fixes made after the tag to local actions, scripts, or dependencies won't apply.
+The dispatched run joins the same `concurrency` group, so a push that queues while it's waiting can cancel it.
 If npm won't accept that version again, bump the version manually instead.
-
-A newer push can also get in the way of the retry.
-The release commit's own run is the one that retries a failed publish, but the `concurrency` group cancels a waiting run when a newer one queues.
-When that happens, the newer run finds the tag behind the latest commit, so you'll need to dispatch from the tag.
 
 The check assumes your package belongs on npm.
 If it doesn't, set `skip-npm-publish` or mark the package as `"private": true`.
