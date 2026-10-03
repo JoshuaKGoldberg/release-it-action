@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.31](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.30...v0.5.31) (2026-10-03)
+
+### Bug Fixes
+
+- let the github-token input override an existing GITHUB_TOKEN ([#946](https://github.com/JoshuaKGoldberg/release-it-action/issues/946)) ([717b2aa](https://github.com/JoshuaKGoldberg/release-it-action/commit/717b2aabb8bb1918285e69f736e43c5d1f6005d8)), closes [#897](https://github.com/JoshuaKGoldberg/release-it-action/issues/897)
+
 ## [0.5.30](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.29...v0.5.30) (2026-10-03)
 
 ### Bug Fixes
