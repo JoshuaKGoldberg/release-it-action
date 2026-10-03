@@ -41896,7 +41896,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
         await createGitHubRelease(releaseItArgs, { allowPublishConflict: true });
         return;
     }
-    if ((await tryCatchInfoAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true }))) === false) {
+    if (!(await tryCatchSetFailedAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true })))) {
         return;
     }
     const args = [skipNpmPublish && "--no-npm.publish", releaseItArgs]
