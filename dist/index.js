@@ -41683,7 +41683,7 @@ const recheckDelayMs = 15_000;
 async function getUnpublishedVersion(githubToken) {
     const { name, private: isPrivate, publishConfig, version, } = (await readPackageData()) ?? {};
     if (isPrivate || !name || !version) {
-        return undefined;
+        return false;
     }
     const scopedRegistry = name.startsWith("@")
         ? publishConfig?.[`${name.split("/")[0]}:registry`]
@@ -41705,7 +41705,7 @@ async function getUnpublishedVersion(githubToken) {
         return false;
     };
     if (await isOnNpm()) {
-        return undefined;
+        return false;
     }
     const tagNames = [version, `v${version}`];
     const existingTags = (await getUnpublishedVersion_$quiet `git tag --list ${tagNames}`).stdout
@@ -41713,7 +41713,7 @@ async function getUnpublishedVersion(githubToken) {
         .filter(Boolean);
     // A version that was never tagged was never released, e.g. a new package.
     if (!existingTags.length) {
-        return undefined;
+        return false;
     }
     const tagSeconds = Number((await getUnpublishedVersion_$quiet `git log -1 --format=%ct ${existingTags[0]}`).stdout);
     if (Date.now() / 1000 - tagSeconds < recentTagSeconds) {
@@ -41721,7 +41721,7 @@ async function getUnpublishedVersion(githubToken) {
         for (let attempt = 0; attempt < recheckAttempts; attempt += 1) {
             await (0,promises_namespaceObject.setTimeout)(recheckDelayMs);
             if (await isOnNpm()) {
-                return undefined;
+                return false;
             }
         }
     }
@@ -41856,7 +41856,8 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
     const octokit = github/* getOctokit */.Q(githubToken);
     const unpublishedVersion = skipNpmPublish
         ? false
-        : await tryCatchSetFailedAction("checking for a version that was pushed but not published", async () => (await getUnpublishedVersion(githubToken)) ?? false);
+        : await tryCatchSetFailedAction("checking for a version that was pushed but not published", async () => await getUnpublishedVersion(githubToken));
+    // tryCatchSetFailedAction already failed the run.
     if (unpublishedVersion === undefined) {
         return;
     }

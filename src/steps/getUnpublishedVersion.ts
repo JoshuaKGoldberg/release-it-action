@@ -27,7 +27,7 @@ interface PackageData {
 
 export async function getUnpublishedVersion(
 	githubToken: string,
-): Promise<undefined | UnpublishedVersion> {
+): Promise<false | UnpublishedVersion> {
 	const {
 		name,
 		private: isPrivate,
@@ -36,7 +36,7 @@ export async function getUnpublishedVersion(
 	} = (await readPackageData()) ?? {};
 
 	if (isPrivate || !name || !version) {
-		return undefined;
+		return false;
 	}
 
 	const scopedRegistry = name.startsWith("@")
@@ -65,7 +65,7 @@ export async function getUnpublishedVersion(
 	};
 
 	if (await isOnNpm()) {
-		return undefined;
+		return false;
 	}
 
 	const tagNames = [version, `v${version}`];
@@ -75,7 +75,7 @@ export async function getUnpublishedVersion(
 
 	// A version that was never tagged was never released, e.g. a new package.
 	if (!existingTags.length) {
-		return undefined;
+		return false;
 	}
 
 	const tagSeconds = Number(
@@ -89,7 +89,7 @@ export async function getUnpublishedVersion(
 		for (let attempt = 0; attempt < recheckAttempts; attempt += 1) {
 			await setTimeout(recheckDelayMs);
 			if (await isOnNpm()) {
-				return undefined;
+				return false;
 			}
 		}
 	}

@@ -43,7 +43,7 @@ vi.mock("./steps/getHeadTagMissingGitHubRelease.js", () => ({
 	},
 }));
 
-const mockGetUnpublishedVersion = vi.fn();
+const mockGetUnpublishedVersion = vi.fn().mockResolvedValue(false);
 
 vi.mock("./steps/getUnpublishedVersion.js", () => ({
 	get getUnpublishedVersion() {
