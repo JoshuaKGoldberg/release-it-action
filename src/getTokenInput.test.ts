@@ -39,7 +39,7 @@ describe("getTokenInput", () => {
 			expect(actual).toBe(token);
 		});
 
-		it("returns the process.env backup when it exists and †he core input doesn't", () => {
+		it("returns the process.env backup when it exists and the core input doesn't", () => {
 			mockGetInfo.mockReturnValueOnce(undefined);
 			mockEnv.mockReturnValueOnce({ [backup]: token });
 
@@ -85,7 +85,7 @@ describe("getTokenInput", () => {
 			expect(actual).toBe(token);
 		});
 
-		it("returns the process.env backup when it exists and †he core input doesn't", () => {
+		it("returns the process.env backup when it exists and the core input doesn't", () => {
 			mockGetInfo.mockReturnValueOnce(undefined);
 			mockEnv.mockReturnValueOnce({ [backup]: token });
 

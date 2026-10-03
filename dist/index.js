@@ -44031,7 +44031,7 @@ async function recreateProtections({ commonRequestData, existingProtections, oct
         required_status_checks: existingProtections.required_status_checks
             ? {
                 checks: existingProtections.required_status_checks.checks.map((check) => ({
-                    app_id: check.app_id ?? undefined,
+                    app_id: check.app_id ?? -1,
                     context: check.context,
                 })),
                 strict: existingProtections.required_status_checks.strict,
