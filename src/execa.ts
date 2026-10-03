@@ -8,3 +8,5 @@ export const $$captured = $({
 	stdin: "inherit",
 	stdout: ["inherit", "pipe"],
 });
+
+export const $quiet = $({ reject: false });

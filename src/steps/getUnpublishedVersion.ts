@@ -1,9 +1,8 @@
 import * as core from "@actions/core";
-import { $ } from "execa";
 import * as fs from "node:fs/promises";
 import { setTimeout } from "node:timers/promises";
 
-const $quiet = $({ reject: false });
+import { $quiet } from "../execa.js";
 
 // npm can take a few minutes after a publish before it shows the new version.
 const recentTagSeconds = 10 * 60;
