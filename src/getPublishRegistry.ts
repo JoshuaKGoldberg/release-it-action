@@ -18,13 +18,14 @@ export async function getPublishRegistry({
 		? [scopedRegistryKey, "registry"]
 		: ["registry"];
 
-	// This matches npm's order: publishConfig, then npm config, for each key.
+	// This matches npm: a publishConfig key, even an empty one, overrides npm config.
 	for (const key of keys) {
 		const registry =
-			getRegistryValue(publishConfig?.[key]) ??
-			(await getNpmConfigRegistry(key));
+			publishConfig && Object.hasOwn(publishConfig, key)
+				? publishConfig[key]
+				: await getNpmConfigRegistry(key);
 
-		if (registry) {
+		if (typeof registry === "string" && registry) {
 			return registry;
 		}
 	}
@@ -40,11 +41,5 @@ async function getNpmConfigRegistry(key: string) {
 	const { exitCode, stdout } = await $quiet`npm config get ${key}`;
 	const value = stdout.trim();
 
-	return exitCode || value === "undefined"
-		? undefined
-		: getRegistryValue(value);
-}
-
-function getRegistryValue(value: unknown) {
-	return typeof value === "string" && value ? value : undefined;
+	return exitCode || value === "undefined" ? undefined : value;
 }

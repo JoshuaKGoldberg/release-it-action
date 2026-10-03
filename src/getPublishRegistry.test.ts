@@ -111,26 +111,60 @@ describe("getPublishRegistry", () => {
 		);
 	});
 
-	it("treats empty registries as unset", async () => {
+	it("treats empty npm config registries as unset", async () => {
 		mockNpmConfig({ "@scope:registry": "", registry: "" });
+
+		expect(await getPublishRegistry({ name: "@scope/test-package" })).toBe(
+			"https://registry.npmjs.org/",
+		);
+	});
+
+	it.each(["", null, 123])(
+		"returns the npm registry instead of the npm config registry when the publishConfig registry is %j",
+		async (registry) => {
+			mockNpmConfig({ registry: "https://npmrc.example.com/" });
+
+			expect(
+				await getPublishRegistry({
+					name: "test-package",
+					publishConfig: { registry },
+				}),
+			).toBe("https://registry.npmjs.org/");
+			expect(mock$quiet).not.toHaveBeenCalled();
+		},
+	);
+
+	it.each(["", null])(
+		"skips the scoped npm config registry when the scoped publishConfig registry is %j",
+		async (scopedRegistry) => {
+			mockNpmConfig({
+				"@scope:registry": "https://npmrc-scope.example.com/",
+				registry: "https://npmrc.example.com/",
+			});
+
+			expect(
+				await getPublishRegistry({
+					name: "@scope/test-package",
+					publishConfig: { "@scope:registry": scopedRegistry },
+				}),
+			).toBe("https://npmrc.example.com/");
+			expect(mock$quiet).toHaveBeenCalledTimes(1);
+			expect(mock$quiet).toHaveBeenCalledWith(expect.anything(), "registry");
+		},
+	);
+
+	it("falls back to the publishConfig registry when the scoped publishConfig registry is empty", async () => {
+		mockNpmConfig({ "@scope:registry": "https://npmrc-scope.example.com/" });
 
 		expect(
 			await getPublishRegistry({
 				name: "@scope/test-package",
-				publishConfig: { "@scope:registry": "", registry: "" },
+				publishConfig: {
+					"@scope:registry": "",
+					registry: "https://example.com",
+				},
 			}),
-		).toBe("https://registry.npmjs.org/");
-	});
-
-	it("treats non-string publishConfig registries as unset", async () => {
-		mockNpmConfig({ registry: "https://npmrc.example.com/" });
-
-		expect(
-			await getPublishRegistry({
-				name: "test-package",
-				publishConfig: { registry: 123 },
-			}),
-		).toBe("https://npmrc.example.com/");
+		).toBe("https://example.com");
 	});
 
 	it("treats npm config registries as unset when npm config fails", async () => {
