@@ -2,7 +2,10 @@ import type { RequestParameters } from "@octokit/types";
 
 import * as core from "@actions/core";
 
-import { tryCatchSetFailedAction } from "../tryCatchInfoAction.js";
+import {
+	tryCatchSetFailedAction,
+	tryCatchThrowAction,
+} from "../tryCatchInfoAction.js";
 import { ExistingRuleset, Octokit, RulesetEnforcement } from "../types.js";
 
 export interface UpdateRulesetsEnforcementOptions {
@@ -28,26 +31,22 @@ export async function updateRulesetsEnforcement({
 	for (const existingRuleset of existingRulesets) {
 		const nextEnforcement = enforcement(existingRuleset);
 		const description = `ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`;
-		const update = async () =>
+		const update = async () => {
 			await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
 				...commonRequestData,
 				enforcement: nextEnforcement,
 				ruleset_id: existingRuleset.id,
 			});
+		};
 
 		if (setFailedOnError) {
 			await tryCatchSetFailedAction(`setting ${description}`, update);
-			continue;
-		}
-
-		core.info(`Start: setting ${description}`);
-
-		try {
-			await update();
-		} catch (error) {
-			throw new Error(`Could not set ${description}: ${String(error)}`, {
-				cause: error,
-			});
+		} else {
+			await tryCatchThrowAction(
+				`setting ${description}`,
+				update,
+				`Could not set ${description}`,
+			);
 		}
 	}
 }
