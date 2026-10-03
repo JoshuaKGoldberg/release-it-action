@@ -16,7 +16,8 @@
 	"exports": "./lib/index.js",
 	"main": "lib/index.js",
 	"files": [
-		"lib/"
+		"lib/",
+		"!lib/action/"
 	],
 	"scripts": {
 		"build": "tsc --project tsconfig.build.json",
