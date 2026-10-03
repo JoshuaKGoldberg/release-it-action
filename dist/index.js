@@ -44248,11 +44248,17 @@ async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
         return true;
     }
     catch (error) {
-        if (error.status === 404) {
-            return false;
+        if (error.status !== 404) {
+            throw error;
         }
-        throw error;
     }
+    // Draft releases aren't found by tag, so look for one in the full list.
+    for await (const { data: releases } of octokit.paginate.iterator("GET /repos/{owner}/{repo}/releases", { owner, per_page: 100, repo })) {
+        if (releases.some((release) => release.tag_name === tag)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/shlex@3.0.0/node_modules/shlex/shlex.js
