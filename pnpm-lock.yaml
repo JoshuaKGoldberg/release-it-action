@@ -260,6 +260,9 @@ importers:
       markdownlint-cli:
         specifier: 0.49.1
         version: 0.49.1
+      markdownlint-sentences-per-line:
+        specifier: 0.1.7
+        version: 0.1.7(markdownlint@0.41.1)
       prettier:
         specifier: 3.9.7
         version: 3.9.7
@@ -275,9 +278,6 @@ importers:
       release-it:
         specifier: 21.1.0
         version: 21.1.0(@types/node@24.19.0)(magicast@0.5.5)
-      sentences-per-line:
-        specifier: 0.3.0
-        version: 0.3.0
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -2792,9 +2792,14 @@ packages:
     engines: {node: '>=22'}
     hasBin: true
 
-  markdownlint-rule-helpers@0.28.0:
-    resolution: {integrity: sha512-qBOQWESmc/yTNe6nVu3D7AU7pFg2e7T5svbQI+S7rocw4g4xZ3GHerKPl0Rw0cx4fnAViEdzoAcbrxeuXUCEAA==}
-    engines: {node: '>=18'}
+  markdownlint-rule-helpers@0.31.0:
+    resolution: {integrity: sha512-UgVL6v1CB+5ds7W2IBTU6yVDRDH1gSGoWWTRrwZmniU/4AKO8nz0d42gySOIVllfRxzaIMn7Gei4u65y6Rcs2A==}
+    engines: {node: '>=22'}
+
+  markdownlint-sentences-per-line@0.1.7:
+    resolution: {integrity: sha512-Rwt3SNhx8CkhXzfa+hy2d2M4tTIzVmoPyjYMV5cODRnJzTa4iFZYhmh14e12JyrgVSPjH3bWEdL4X1UUTLZ8lQ==}
+    peerDependencies:
+      markdownlint: ^0.37.0 || ^0.39.0 || ^0.40.0 || ^0.41.0
 
   markdownlint@0.41.1:
     resolution: {integrity: sha512-qHKeU2E1bdyNAT077go2FVTNXvYcktN5IHtF6XyeD1l0PClxzSp2tUApAV14ORI8DGX4H9bNKZEzelZp4qn8IA==}
@@ -3380,9 +3385,9 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  sentences-per-line@0.3.0:
-    resolution: {integrity: sha512-/cSQgaLDEmed+AIC2KAd1A5k4sy8bbWy3ObBDUE2+JmiwolTBuc87TlwlTSnBJVPa7+zfGv28J63xzznFRv5tQ==}
-    engines: {node: '>=18'}
+  sentences-per-line@0.5.6:
+    resolution: {integrity: sha512-Nr8nl/K1oqxcSX5jle3/dDlQyej1DYzhoSTbWRMNECV/NTl5KTIjxhgElmn167PEAqgMEdaXMRQo7kaGbXUS5Q==}
+    engines: {node: '>=22.14.0'}
 
   set-github-repository-labels@0.2.3:
     resolution: {integrity: sha512-rbwdaar7bNfwxStOtNxD3k2yHutiFq606lbwMK5Cd+Jf0UK+ieoGhUj22QrnvEMEXy0oEpOV9q8rKOOhyayILA==}
@@ -6517,7 +6522,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  markdownlint-rule-helpers@0.28.0: {}
+  markdownlint-rule-helpers@0.31.0: {}
+
+  markdownlint-sentences-per-line@0.1.7(markdownlint@0.41.1):
+    dependencies:
+      markdownlint: 0.41.1
+      markdownlint-rule-helpers: 0.31.0
+      sentences-per-line: 0.5.6
 
   markdownlint@0.41.1:
     dependencies:
@@ -7273,9 +7284,7 @@ snapshots:
 
   semver@7.8.5: {}
 
-  sentences-per-line@0.3.0:
-    dependencies:
-      markdownlint-rule-helpers: 0.28.0
+  sentences-per-line@0.5.6: {}
 
   set-github-repository-labels@0.2.3:
     dependencies:
