@@ -237,6 +237,20 @@ describe("runReleaseIt", () => {
 		expect(mockSetFailed).not.toHaveBeenCalled();
 	});
 
+	it("removes an increment and ends with --no-increment when keepVersion is true", async () => {
+		mock$$.mockResolvedValue({ exitCode: 0 });
+
+		await runReleaseIt("--no-git major --preRelease=beta --increment=minor", {
+			keepVersion: true,
+		});
+
+		expect(mock$$).toHaveBeenCalledWith(
+			["npx release-it --verbose ", ""],
+			["--no-git", "--preRelease=beta", "--increment=minor", "--no-increment"],
+		);
+		expect(mockSetFailed).not.toHaveBeenCalled();
+	});
+
 	it("keeps a quoted releaseItArgs value with spaces as a single argument", async () => {
 		mock$$.mockResolvedValue({ exitCode: 0 });
 

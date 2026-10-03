@@ -97,22 +97,24 @@ async function runRelease({
 		// First try to create a GitHub release, since they're mutable...
 		if (hasRelease === false) {
 			await runReleaseIt(
-				["--no-increment --no-git --no-npm.publish", releaseItArgs]
-					.filter(Boolean)
-					.join(" "),
-				{ skipSupersededCheck: true },
+				["--no-git --no-npm.publish", releaseItArgs].filter(Boolean).join(" "),
+				{ keepVersion: true, skipSupersededCheck: true },
 			);
 		}
 
 		// ...and then if that succeeded (didn't throw), do the immutable npm publish
 		await runReleaseIt(
 			[
-				"--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
+				"--no-git --npm.publish --npm.skipChecks --no-github.release",
 				releaseItArgs,
 			]
 				.filter(Boolean)
 				.join(" "),
-			{ allowPublishConflict: true, skipSupersededCheck: true },
+			{
+				allowPublishConflict: true,
+				keepVersion: true,
+				skipSupersededCheck: true,
+			},
 		);
 		return;
 	}
