@@ -56,6 +56,24 @@ describe("getUnpublishedVersion", () => {
 		expect(mock$quiet).not.toHaveBeenCalled();
 	});
 
+	it("returns undefined when there is no package.json", async () => {
+		mockReadFile.mockRejectedValueOnce(
+			Object.assign(new Error("Not found."), { code: "ENOENT" }),
+		);
+
+		expect(await getUnpublishedVersion(githubToken)).toBeUndefined();
+		expect(mock$quiet).not.toHaveBeenCalled();
+	});
+
+	it("throws when package.json can't be read for another reason", async () => {
+		const error = Object.assign(new Error("Permission denied."), {
+			code: "EACCES",
+		});
+		mockReadFile.mockRejectedValueOnce(error);
+
+		await expect(getUnpublishedVersion(githubToken)).rejects.toBe(error);
+	});
+
 	it("returns undefined when the version is on npm", async () => {
 		mockPackageJson(packageData);
 		mockCommands(mock$quiet, {});
@@ -130,18 +148,48 @@ describe("getUnpublishedVersion", () => {
 		);
 	});
 
-	it("throws when npm fails for a reason other than a missing version", async () => {
+	it("throws with npm's error summary when npm fails for a reason other than a missing version", async () => {
 		mockPackageJson(packageData);
 		mockCommands(mock$quiet, {
 			"npm view test-package@1.2.3 version --json": {
 				exitCode: 1,
-				stdout: '{"error":{"code":"ECONNRESET"}}',
+				stdout: '{"error":{"code":"E401","summary":"Unable to authenticate"}}',
 			},
 		});
 
 		await expect(getUnpublishedVersion(githubToken)).rejects.toThrow(
-			"Could not check npm for test-package@1.2.3.",
+			"Could not check npm for test-package@1.2.3: Unable to authenticate. Make sure the registry is reachable and npm is authenticated to read the package. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.",
 		);
+	});
+
+	it.each(["", "Oh no!", '{"error":{"code":"ECONNRESET"}}'])(
+		"throws without a summary when npm fails with output %j",
+		async (stdout) => {
+			mockPackageJson(packageData);
+			mockCommands(mock$quiet, {
+				"npm view test-package@1.2.3 version --json": { exitCode: 1, stdout },
+			});
+
+			await expect(getUnpublishedVersion(githubToken)).rejects.toThrow(
+				"Could not check npm for test-package@1.2.3: unknown error.",
+			);
+		},
+	);
+
+	it("throws when npm fails while rechecking a recently tagged version", async () => {
+		const npmResults = [notFound, { exitCode: 1, stdout: "" }];
+		mockPackageJson(packageData);
+		mockCommands(mock$quiet, {
+			"git log -1 --format=%ct v1.2.3": recentTagTime,
+			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+			"npm view test-package@1.2.3 version --json": () =>
+				npmResults.shift() ?? {},
+		});
+
+		await expect(getUnpublishedVersion(githubToken)).rejects.toThrow(
+			"Could not check npm for test-package@1.2.3",
+		);
+		expect(mockSetTimeout).toHaveBeenCalledTimes(1);
 	});
 
 	it("returns undefined when the version is not on npm and was never tagged", async () => {

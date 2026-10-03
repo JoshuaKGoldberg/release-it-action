@@ -193,6 +193,18 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
+	it("fails without releasing when checking npm for an unpublished version fails", async () => {
+		mockGetUnpublishedVersion.mockRejectedValueOnce(new Error("Oh no!"));
+
+		await releaseItAction(mockOptions);
+
+		expect(mockCore.setFailed).toHaveBeenCalledWith(
+			"Error checking for a version that was pushed but not published: Error: Oh no!",
+		);
+		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
+	});
+
 	it("restores the npm user config even when the run fails early", async () => {
 		mockGetUnpublishedVersion.mockResolvedValueOnce({
 			headTag: undefined,

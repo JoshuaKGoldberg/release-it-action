@@ -41721,7 +41721,7 @@ const recentTagSeconds = 10 * 60;
 const recheckAttempts = 12;
 const recheckDelayMs = 15_000;
 async function getUnpublishedVersion(githubToken) {
-    const { name, private: isPrivate, publishConfig, version, } = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    const { name, private: isPrivate, publishConfig, version, } = (await readPackageData()) ?? {};
     if (isPrivate || !name || !version) {
         return undefined;
     }
@@ -41740,7 +41740,7 @@ async function getUnpublishedVersion(githubToken) {
             return true;
         }
         if (!view.stdout.includes('"E404"')) {
-            throw new Error(`Could not check npm for ${name}@${version}.`);
+            throw new Error(`Could not check npm for ${name}@${version}: ${describeNpmError(view.stdout)}. Make sure the registry is reachable and npm is authenticated to read the package. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.`);
         }
         return false;
     };
@@ -41770,6 +41770,26 @@ async function getUnpublishedVersion(githubToken) {
         headTag: existingTags.find((tag) => headTags.includes(tag)),
         version,
     };
+}
+function describeNpmError(stdout) {
+    try {
+        const { error } = JSON.parse(stdout);
+        return error?.summary ?? "unknown error";
+    }
+    catch {
+        return "unknown error";
+    }
+}
+async function readPackageData() {
+    try {
+        return JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    }
+    catch (error) {
+        if (error.code === "ENOENT") {
+            return undefined;
+        }
+        throw error;
+    }
 }
 
 ;// CONCATENATED MODULE: ./src/steps/checkSuperseded.ts
@@ -41898,8 +41918,11 @@ async function createGitHubRelease(releaseItArgs, options) {
 async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githubToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
     const octokit = github/* getOctokit */.Q(githubToken);
     const unpublishedVersion = skipNpmPublish
-        ? undefined
-        : await tryCatchInfoAction("checking for a version that was pushed but not published", async () => await getUnpublishedVersion(githubToken));
+        ? false
+        : await tryCatchSetFailedAction("checking for a version that was pushed but not published", async () => (await getUnpublishedVersion(githubToken)) ?? false);
+    if (unpublishedVersion === undefined) {
+        return;
+    }
     if (unpublishedVersion) {
         const { headTag, version } = unpublishedVersion;
         if (!headTag) {

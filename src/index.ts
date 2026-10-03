@@ -101,11 +101,15 @@ async function runRelease({
 	const octokit = github.getOctokit(githubToken);
 
 	const unpublishedVersion = skipNpmPublish
-		? undefined
-		: await tryCatchInfoAction(
+		? false
+		: await tryCatchSetFailedAction(
 				"checking for a version that was pushed but not published",
-				async () => await getUnpublishedVersion(githubToken),
+				async () => (await getUnpublishedVersion(githubToken)) ?? false,
 			);
+
+	if (unpublishedVersion === undefined) {
+		return;
+	}
 
 	if (unpublishedVersion) {
 		const { headTag, version } = unpublishedVersion;
