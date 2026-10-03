@@ -44263,7 +44263,7 @@ async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
         if (!release.draft || (await makesDraftReleases())) {
             return true;
         }
-        info(`Found a leftover draft release for ${tag}, but release-it isn't configured to make draft releases, so treating the release as missing. You can delete the leftover draft.`);
+        info(`Found a draft release for ${tag}, but neither .release-it.json nor package.json's "release-it" sets github.draft, so treating the release as missing. If release-it isn't meant to make drafts, the draft is likely left over from a failed release and can be deleted.`);
         return false;
     }
     return false;
