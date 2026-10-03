@@ -94,7 +94,6 @@ async function runRelease({
 			`Version ${version} was pushed but never published to npm. Publishing it now.`,
 		);
 
-		// Unlike --no-git, this keeps Git config such as git.tagName
 		const retryArgs =
 			"--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
 
