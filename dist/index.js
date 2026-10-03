@@ -30292,7 +30292,7 @@ module.exports = {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8830);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(9544);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(5883);
 
 
 
@@ -30308,7 +30308,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 9544:
+/***/ 5883:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -41323,6 +41323,16 @@ function parseArgsString(input) {
     }
 }
 
+;// CONCATENATED MODULE: ./src/createCommonRequestData.ts
+function createCommonRequestData(commonData) {
+    return {
+        ...commonData,
+        headers: {
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    };
+}
+
 ;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
 
 async function tryCatchInfoAction(label, action) {
@@ -41440,13 +41450,9 @@ function mapReviewRestrictions(restrictions) {
 
 
 
+
 async function runBypassingBranchProtections(commonData, octokit, run) {
-    const commonRequestData = {
-        ...commonData,
-        headers: {
-            "X-GitHub-Api-Version": "2022-11-28",
-        },
-    };
+    const commonRequestData = createCommonRequestData(commonData);
     const existingProtections = await fetchProtections({
         octokit,
         requestData: commonRequestData,
@@ -41562,13 +41568,9 @@ async function updateRulesetsEnforcement({ commonRequestData, enforcement, exist
 ;// CONCATENATED MODULE: ./src/runBypassingBranchRulesets.ts
 
 
+
 async function runBypassingBranchRulesets(commonData, octokit, run) {
-    const commonRequestData = {
-        ...commonData,
-        headers: {
-            "X-GitHub-Api-Version": "2022-11-28",
-        },
-    };
+    const commonRequestData = createCommonRequestData(commonData);
     const existingRulesets = await fetchRulesets({
         octokit,
         requestData: commonRequestData,
