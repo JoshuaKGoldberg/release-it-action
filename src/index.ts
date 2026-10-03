@@ -58,14 +58,15 @@ export async function releaseItAction(options: ReleaseItActionOptions) {
 	}
 }
 
+const retryArgs =
+	"--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
+
 async function createGitHubRelease(
 	releaseItArgs: string | undefined,
 	options: RunReleaseItOptions = {},
 ) {
 	await runReleaseIt(
-		["--no-increment --no-git --no-npm.publish", releaseItArgs]
-			.filter(Boolean)
-			.join(" "),
+		[retryArgs, "--no-npm.publish", releaseItArgs].filter(Boolean).join(" "),
 		{ ...options, skipSupersededCheck: true },
 	);
 }
@@ -119,7 +120,8 @@ async function runRelease({
 		// ...and then if that succeeded (didn't throw), do the immutable npm publish
 		await runReleaseIt(
 			[
-				"--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
+				retryArgs,
+				"--npm.publish --npm.skipChecks --no-github.release",
 				releaseItArgs,
 			]
 				.filter(Boolean)
