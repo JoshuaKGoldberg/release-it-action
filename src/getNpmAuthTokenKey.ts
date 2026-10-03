@@ -8,7 +8,14 @@ import {
 } from "./getPublishRegistry.js";
 
 export async function getNpmAuthTokenKey() {
-	const registry = await getPublishRegistry(await readPackageData());
+	const registry = await getPublishRegistry(await readPackageData()).catch(
+		(error: unknown) => {
+			core.warning(
+				`${(error as Error).message} Setting the npm token for ${defaultRegistry} instead.`,
+			);
+			return defaultRegistry;
+		},
+	);
 
 	try {
 		return `${getNerfDart(registry)}:_authToken`;

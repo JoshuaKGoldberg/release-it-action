@@ -167,14 +167,11 @@ describe("getPublishRegistry", () => {
 		).toBe("https://example.com");
 	});
 
-	it("treats npm config registries as unset when npm config fails", async () => {
-		mock$quiet.mockResolvedValue({
-			exitCode: 1,
-			stdout: "https://npmrc.example.com/",
-		});
+	it("throws when npm config can't be read", async () => {
+		mock$quiet.mockResolvedValue({ exitCode: 1, stdout: "" });
 
-		expect(await getPublishRegistry({ name: "test-package" })).toBe(
-			"https://registry.npmjs.org/",
+		await expect(getPublishRegistry({ name: "test-package" })).rejects.toThrow(
+			"Could not read registry from npm config.",
 		);
 	});
 });

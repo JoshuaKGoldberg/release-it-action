@@ -39,7 +39,13 @@ export function getScopedRegistryKey(name: string | undefined) {
 
 async function getNpmConfigRegistry(key: string) {
 	const { exitCode, stdout } = await $quiet`npm config get ${key}`;
+
+	// npm refuses to print some values, such as URLs with credentials or UUIDs.
+	if (exitCode) {
+		throw new Error(`Could not read ${key} from npm config.`);
+	}
+
 	const value = stdout.trim();
 
-	return exitCode || value === "undefined" ? undefined : value;
+	return value === "undefined" ? undefined : value;
 }

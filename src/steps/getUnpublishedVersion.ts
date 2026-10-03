@@ -41,12 +41,15 @@ export async function getUnpublishedVersion(): Promise<
 		return undefined;
 	}
 
-	const registry = await getPublishRegistry(packageData);
+	// If npm config can't be read, npm view can still find the registry itself.
+	const registry = await getPublishRegistry(packageData).catch(() => undefined);
 	// npm view prefers a scope's registry config over --registry.
-	const registryArg = `--${getScopedRegistryKey(name) ?? "registry"}=${registry}`;
+	const registryArgs = registry
+		? [`--${getScopedRegistryKey(name) ?? "registry"}=${registry}`]
+		: [];
 	const isOnNpm = async () => {
 		const view =
-			await $quiet`npm view ${name}@${version} version --json ${registryArg}`;
+			await $quiet`npm view ${name}@${version} version --json ${registryArgs}`;
 		if (!view.exitCode) {
 			return true;
 		}

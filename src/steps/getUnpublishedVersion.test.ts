@@ -98,7 +98,7 @@ describe("getUnpublishedVersion", () => {
 			expect.anything(),
 			"test-package",
 			"1.2.3",
-			"--registry=https://npm.pkg.github.com",
+			["--registry=https://npm.pkg.github.com"],
 		);
 	});
 
@@ -123,7 +123,7 @@ describe("getUnpublishedVersion", () => {
 			expect.anything(),
 			"@scope/test-package",
 			"1.2.3",
-			"--@scope:registry=https://npm.pkg.github.com",
+			["--@scope:registry=https://npm.pkg.github.com"],
 		);
 	});
 
@@ -145,7 +145,7 @@ describe("getUnpublishedVersion", () => {
 			expect.anything(),
 			"@scope/test-package",
 			"1.2.3",
-			"--@scope:registry=https://npm.pkg.github.com/",
+			["--@scope:registry=https://npm.pkg.github.com/"],
 		);
 	});
 
@@ -168,7 +168,7 @@ describe("getUnpublishedVersion", () => {
 			expect.anything(),
 			"@scope/test-package",
 			"1.2.3",
-			"--@scope:registry=https://example.com/",
+			["--@scope:registry=https://example.com/"],
 		);
 	});
 
@@ -184,7 +184,7 @@ describe("getUnpublishedVersion", () => {
 			expect.anything(),
 			"test-package",
 			"1.2.3",
-			"--registry=https://registry.npmjs.org/",
+			["--registry=https://registry.npmjs.org/"],
 		);
 	});
 
@@ -202,7 +202,21 @@ describe("getUnpublishedVersion", () => {
 			expect.anything(),
 			"@scope/test-package",
 			"1.2.3",
-			"--@scope:registry=https://example.com",
+			["--@scope:registry=https://example.com"],
+		);
+	});
+
+	it("lets npm view find the registry when npm config can't be read", async () => {
+		mockPackageJson(packageData);
+		mockCommands({ "npm config get registry": { exitCode: 1 } });
+
+		await getUnpublishedVersion();
+
+		expect(mock$quiet).toHaveBeenCalledWith(
+			expect.anything(),
+			"test-package",
+			"1.2.3",
+			[],
 		);
 	});
 

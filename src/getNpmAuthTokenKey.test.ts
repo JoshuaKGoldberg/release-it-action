@@ -61,6 +61,18 @@ describe("getNpmAuthTokenKey", () => {
 		expect(core.warning).not.toHaveBeenCalled();
 	});
 
+	it("warns and uses the npm registry when the publish registry can't be read", async () => {
+		mockReadFile.mockResolvedValueOnce("{}");
+		mockGetPublishRegistry.mockRejectedValueOnce(
+			new Error("Could not read registry from npm config."),
+		);
+
+		expect(await getNpmAuthTokenKey()).toBe("//registry.npmjs.org/:_authToken");
+		expect(core.warning).toHaveBeenCalledWith(
+			"Could not read registry from npm config. Setting the npm token for https://registry.npmjs.org/ instead.",
+		);
+	});
+
 	it("warns and uses the npm registry when the publish registry isn't a URL", async () => {
 		mockReadFile.mockResolvedValueOnce("{}");
 		mockGetPublishRegistry.mockResolvedValueOnce("npm.pkg.github.com");
