@@ -12,7 +12,9 @@ interface ReleaseItConfig {
 
 export async function getTagNames(packageData: TagNamesPackageData) {
 	const { name, version } = packageData;
-	const tagName = (await readReleaseItConfig(packageData))?.git?.tagName;
+	const tagName =
+		(await readReleaseItJson())?.git?.tagName ??
+		packageData["release-it"]?.git?.tagName;
 
 	if (typeof tagName === "string" && tagName) {
 		const rendered = tagName
@@ -28,12 +30,12 @@ export async function getTagNames(packageData: TagNamesPackageData) {
 	return [version, `v${version}`];
 }
 
-async function readReleaseItConfig(packageData: TagNamesPackageData) {
+async function readReleaseItJson() {
 	try {
 		return JSON.parse(
 			await fs.readFile(".release-it.json", "utf8"),
 		) as ReleaseItConfig;
 	} catch {
-		return packageData["release-it"];
+		return undefined;
 	}
 }

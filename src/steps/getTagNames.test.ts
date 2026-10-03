@@ -52,6 +52,17 @@ describe("getTagNames", () => {
 		).toEqual(["release-1.2.3"]);
 	});
 
+	it("renders a tagName from package.json when .release-it.json does not set one", async () => {
+		mockReleaseItJson({ git: { requireCommits: true } });
+
+		expect(
+			await getTagNames({
+				...packageData,
+				"release-it": { git: { tagName: "release-${version}" } },
+			}),
+		).toEqual(["release-1.2.3"]);
+	});
+
 	it("prefers .release-it.json over package.json", async () => {
 		mockReleaseItJson({ git: { tagName: "json-${version}" } });
 

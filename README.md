@@ -166,6 +166,9 @@ It also creates the GitHub release if it's missing.
 This only works if the version's Git tag is on the latest commit.
 Otherwise the action fails until you publish that version yourself, or bump the version manually if npm won't accept it again.
 
+The action finds that tag using `git.tagName` from `.release-it.json` or `package.json`'s `"release-it"` key, filling in `${version}`, `${name}`, and `${npm.name}`.
+It looks for `<version>` or `v<version>` instead if `git.tagName` is set elsewhere, such as another config file format, `extends`, or `release-it-args`, or uses other variables.
+
 The check assumes your package belongs on npm.
 If it doesn't, set `skip-npm-publish` or mark the package as `"private": true`.
 Otherwise every push fails as an unpublished version.
