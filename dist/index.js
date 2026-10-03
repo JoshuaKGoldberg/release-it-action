@@ -41817,20 +41817,22 @@ async function runReleaseIt(releaseItArgs, { allowPublishConflict, githubToken, 
         await $$captured({
             env: { GITHUB_TOKEN: githubToken },
         }) `npx release-it --verbose ${args}`;
+        return true;
     }
     catch (error) {
         if (!skipSupersededCheck &&
             startSha &&
             (await checkSuperseded(startSha, githubToken))) {
             core/* warning */.$e(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`);
-            return;
+            return false;
         }
         if (allowPublishConflict &&
             publishConflict.test(error.all ?? "")) {
             core/* info */.pq(`release-it failed because npm already has this version. A previous release run must have published it: ${describeError(error)}`);
-            return;
+            return true;
         }
         core/* setFailed */.C1(`Error running release-it: ${describeError(error)}`);
+        return false;
     }
 }
 function describeError(error) {
@@ -41891,7 +41893,7 @@ async function releaseItAction(options) {
 }
 const retryArgs = "--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
 async function createGitHubRelease(releaseItArgs, options) {
-    await runReleaseIt([retryArgs, "--no-npm.publish", releaseItArgs].filter(Boolean).join(" "), { ...options, skipSupersededCheck: true });
+    return await runReleaseIt([retryArgs, "--no-npm.publish", releaseItArgs].filter(Boolean).join(" "), { ...options, skipSupersededCheck: true });
 }
 async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githubToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
     const octokit = github/* getOctokit */.Q(githubToken);
@@ -41905,12 +41907,18 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
             return;
         }
         const hasRelease = await tryCatchInfoAction(`checking for a GitHub release for ${headTag}`, async () => await hasGitHubRelease({ octokit, owner, repo, tag: headTag }));
+        if (hasRelease === undefined) {
+            core/* setFailed */.C1(`Could not check whether ${headTag} has a GitHub release, so ${version} was not published to npm. Fix the error logged above (for example, a github-token that can't read releases), then re-run the release from the commit tagged ${headTag}.`);
+            return;
+        }
         core/* info */.pq(`Version ${version} was pushed but never published to npm. Publishing it now.`);
         // First try to create a GitHub release, since they're mutable...
-        if (hasRelease === false) {
-            await createGitHubRelease(releaseItArgs, { githubToken });
+        if (!hasRelease &&
+            !(await createGitHubRelease(releaseItArgs, { githubToken }))) {
+            core/* setFailed */.C1(`Skipped publishing ${version} to npm because creating the GitHub release for ${headTag} failed. Re-run the release from the commit tagged ${headTag} to retry both.`);
+            return;
         }
-        // ...and then if that succeeded (didn't throw), do the immutable npm publish
+        // ...and only if that succeeded, do the immutable npm publish
         await runReleaseIt([
             retryArgs,
             "--npm.publish --npm.skipChecks --no-github.release",
