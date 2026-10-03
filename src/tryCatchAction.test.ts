@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	tryCatchInfoAction,
 	tryCatchSetFailedAction,
-} from "./tryCatchInfoAction.js";
+} from "./tryCatchAction.js";
 
 const mockInfo = vi.fn();
 const mockSetFailed = vi.fn();

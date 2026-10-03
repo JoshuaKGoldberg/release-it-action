@@ -8,7 +8,7 @@ const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
 
 export interface FetchProtectionsOptions {
 	octokit: Octokit;
-	requestData: Endpoints["DELETE /repos/{owner}/{repo}/branches/{branch}/protection"]["parameters"];
+	requestData: Endpoints["GET /repos/{owner}/{repo}/branches/{branch}/protection"]["parameters"];
 }
 
 export async function fetchProtections({

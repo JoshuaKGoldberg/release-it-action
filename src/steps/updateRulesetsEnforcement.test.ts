@@ -15,7 +15,7 @@ const mockTryCatchSetFailedAction = vi.fn(
 	async (_: string, action: () => Promise<unknown>) => await action(),
 );
 
-vi.mock("../tryCatchInfoAction.js", () => ({
+vi.mock("../tryCatchAction.js", () => ({
 	get tryCatchSetFailedAction() {
 		return mockTryCatchSetFailedAction;
 	},
@@ -23,7 +23,7 @@ vi.mock("../tryCatchInfoAction.js", () => ({
 
 const mockRequest = vi.fn();
 const mockOctokit = { request: mockRequest } as unknown as Octokit;
-const commonRequestData = {
+const requestData = {
 	branch: "test-branch",
 	owner: "test-owner",
 	repo: "test-repo",
@@ -41,10 +41,10 @@ describe("updateRulesetsEnforcement", () => {
 
 	it("logs and does not request when existingRulesets is empty", async () => {
 		await updateRulesetsEnforcement({
-			commonRequestData,
 			enforcement: () => "disabled",
 			existingRulesets: [],
 			octokit: mockOctokit,
+			requestData,
 		});
 
 		expect(mockInfo).toHaveBeenCalledWith(
@@ -55,10 +55,10 @@ describe("updateRulesetsEnforcement", () => {
 
 	it("updates each ruleset through tryCatchSetFailedAction when setFailedOnError is true", async () => {
 		await updateRulesetsEnforcement({
-			commonRequestData,
 			enforcement: (ruleset) => ruleset.enforcement,
 			existingRulesets,
 			octokit: mockOctokit,
+			requestData,
 			setFailedOnError: true,
 		});
 
@@ -69,10 +69,10 @@ describe("updateRulesetsEnforcement", () => {
 
 	it("updates each ruleset with the computed enforcement", async () => {
 		await updateRulesetsEnforcement({
-			commonRequestData,
 			enforcement: (ruleset) => ruleset.enforcement,
 			existingRulesets,
 			octokit: mockOctokit,
+			requestData,
 		});
 
 		expect(mockInfo.mock.calls).toMatchInlineSnapshot(`
@@ -117,10 +117,10 @@ describe("updateRulesetsEnforcement", () => {
 
 		await expect(
 			updateRulesetsEnforcement({
-				commonRequestData,
 				enforcement: () => "disabled",
 				existingRulesets,
 				octokit: mockOctokit,
+				requestData,
 			}),
 		).rejects.toThrowErrorMatchingInlineSnapshot(
 			`[Error: Could not set ruleset 1 (A) enforcement to disabled: Error: Oh no!]`,

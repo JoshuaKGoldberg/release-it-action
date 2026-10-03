@@ -65,14 +65,6 @@ describe("runBypassingBranchRulesets", () => {
 			[
 			  [
 			    {
-			      "commonRequestData": {
-			        "branch": "",
-			        "headers": {
-			          "X-GitHub-Api-Version": "2022-11-28",
-			        },
-			        "owner": "",
-			        "repo": "",
-			      },
 			      "enforcement": [Function],
 			      "existingRulesets": [
 			        {
@@ -88,19 +80,19 @@ describe("runBypassingBranchRulesets", () => {
 			      ],
 			      "octokit": {
 			        "request": [MockFunction],
+			      },
+			      "requestData": {
+			        "branch": "",
+			        "headers": {
+			          "X-GitHub-Api-Version": "2022-11-28",
+			        },
+			        "owner": "",
+			        "repo": "",
 			      },
 			    },
 			  ],
 			  [
 			    {
-			      "commonRequestData": {
-			        "branch": "",
-			        "headers": {
-			          "X-GitHub-Api-Version": "2022-11-28",
-			        },
-			        "owner": "",
-			        "repo": "",
-			      },
 			      "enforcement": [Function],
 			      "existingRulesets": [
 			        {
@@ -116,6 +108,14 @@ describe("runBypassingBranchRulesets", () => {
 			      ],
 			      "octokit": {
 			        "request": [MockFunction],
+			      },
+			      "requestData": {
+			        "branch": "",
+			        "headers": {
+			          "X-GitHub-Api-Version": "2022-11-28",
+			        },
+			        "owner": "",
+			        "repo": "",
 			      },
 			      "setFailedOnError": true,
 			    },

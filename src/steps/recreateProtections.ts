@@ -1,16 +1,16 @@
 import type { RequestParameters } from "@octokit/types";
 
-import { tryCatchSetFailedAction } from "../tryCatchInfoAction.js";
+import { tryCatchSetFailedAction } from "../tryCatchAction.js";
 import { ExistingProtections, Octokit } from "../types.js";
 
 export interface RecreateProtectionsOptions {
-	commonRequestData: RequestParameters & {
+	existingProtections: ExistingProtections | undefined;
+	octokit: Octokit;
+	requestData: RequestParameters & {
 		branch: string;
 		owner: string;
 		repo: string;
 	};
-	existingProtections: ExistingProtections | undefined;
-	octokit: Octokit;
 }
 
 type ExistingPullRequestReviews = NonNullable<
@@ -23,9 +23,9 @@ type ExistingReviewRestrictions = NonNullable<
 >;
 
 export async function recreateProtections({
-	commonRequestData,
 	existingProtections,
 	octokit,
+	requestData,
 }: RecreateProtectionsOptions) {
 	if (!existingProtections) {
 		return;
@@ -37,7 +37,7 @@ export async function recreateProtections({
 			await octokit.request(
 				`PUT /repos/{owner}/{repo}/branches/{branch}/protection`,
 				{
-					...commonRequestData,
+					...requestData,
 					allow_deletions: !!existingProtections.allow_deletions?.enabled,
 					allow_force_pushes: !!existingProtections.allow_force_pushes?.enabled,
 					allow_fork_syncing: !!existingProtections.allow_fork_syncing?.enabled,
@@ -112,7 +112,7 @@ export async function recreateProtections({
 			async () =>
 				await octokit.request(
 					`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`,
-					commonRequestData,
+					requestData,
 				),
 		);
 	}
