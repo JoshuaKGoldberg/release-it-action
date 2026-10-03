@@ -44187,7 +44187,7 @@ const $quiet = $({ reject: false });
 const recentTagSeconds = 10 * 60;
 const recheckAttempts = 12;
 const recheckDelayMs = 15_000;
-async function getUnpublishedVersion() {
+async function getUnpublishedVersion(githubToken) {
     const { name, private: isPrivate, publishConfig, version, } = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
     if (isPrivate || !name || !version) {
         return undefined;
@@ -44200,7 +44200,9 @@ async function getUnpublishedVersion() {
         : publishConfig?.registry;
     const registryArgs = registry ? ["--registry", registry] : [];
     const isOnNpm = async () => {
-        const view = await $quiet `npm view ${name}@${version} version --json ${registryArgs}`;
+        const view = await $quiet({
+            env: { GITHUB_TOKEN: githubToken },
+        }) `npm view ${name}@${version} version --json ${registryArgs}`;
         if (!view.exitCode) {
             return true;
         }
@@ -44574,12 +44576,14 @@ function parseArgsString(input) {
 ;// CONCATENATED MODULE: ./src/steps/checkSuperseded.ts
 
 const checkSuperseded_$quiet = $({ reject: false });
-async function checkSuperseded(startSha) {
+async function checkSuperseded(startSha, githubToken) {
     const branch = await checkSuperseded_$quiet `git rev-parse --abbrev-ref HEAD`;
     if (branch.exitCode || branch.stdout === "HEAD") {
         return false;
     }
-    const fetch = await checkSuperseded_$quiet `git fetch origin ${branch.stdout}`;
+    const fetch = await checkSuperseded_$quiet({
+        env: { GITHUB_TOKEN: githubToken },
+    }) `git fetch origin ${branch.stdout}`;
     if (fetch.exitCode) {
         return false;
     }
@@ -44622,7 +44626,7 @@ async function runReleaseIt(releaseItArgs, { allowPublishConflict, githubToken, 
         catch (error) {
             if (!skipSupersededCheck &&
                 startSha &&
-                (await checkSuperseded(startSha))) {
+                (await checkSuperseded(startSha, githubToken))) {
                 warning(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`);
                 return;
             }
@@ -44678,7 +44682,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
     const octokit = github/* getOctokit */.Q(githubToken);
     const unpublishedVersion = skipNpmPublish
         ? undefined
-        : await tryCatchInfoAction("checking for a version that was pushed but not published", getUnpublishedVersion);
+        : await tryCatchInfoAction("checking for a version that was pushed but not published", async () => await getUnpublishedVersion(githubToken));
     if (unpublishedVersion) {
         const { headTag, version } = unpublishedVersion;
         if (!headTag) {

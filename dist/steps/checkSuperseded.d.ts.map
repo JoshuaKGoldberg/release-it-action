@@ -1,1 +1,1 @@
-{"version":3,"file":"checkSuperseded.d.ts","sourceRoot":"","sources":["file:///Users/josh/repos/release-it-action/src/steps/checkSuperseded.ts"],"names":[],"mappings":"AAIA,wBAAsB,eAAe,CAAC,QAAQ,EAAE,MAAM,oBAyBrD;AAED,wBAAsB,UAAU,gCAG/B"}
+{"version":3,"file":"checkSuperseded.d.ts","sourceRoot":"","sources":["file:///Users/josh/repos/release-it-action/src/steps/checkSuperseded.ts"],"names":[],"mappings":"AAIA,wBAAsB,eAAe,CAAC,QAAQ,EAAE,MAAM,EAAE,WAAW,EAAE,MAAM,oBA2B1E;AAED,wBAAsB,UAAU,gCAG/B"}

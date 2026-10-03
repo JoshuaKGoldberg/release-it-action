@@ -5,5 +5,5 @@ export interface UnpublishedVersion {
     headTag: string | undefined;
     version: string;
 }
-export declare function getUnpublishedVersion(): Promise<undefined | UnpublishedVersion>;
+export declare function getUnpublishedVersion(githubToken: string): Promise<undefined | UnpublishedVersion>;
 //# sourceMappingURL=getUnpublishedVersion.d.ts.map
