@@ -43949,11 +43949,12 @@ async function getPublishRegistry({ name, publishConfig, }) {
     const keys = scopedRegistryKey
         ? [scopedRegistryKey, "registry"]
         : ["registry"];
-    // This matches npm's order: publishConfig, then npm config, for each key.
+    // This matches npm: a publishConfig key, even an empty one, overrides npm config.
     for (const key of keys) {
-        const registry = getRegistryValue(publishConfig?.[key]) ??
-            (await getNpmConfigRegistry(key));
-        if (registry) {
+        const registry = publishConfig && Object.hasOwn(publishConfig, key)
+            ? publishConfig[key]
+            : await getNpmConfigRegistry(key);
+        if (typeof registry === "string" && registry) {
             return registry;
         }
     }
@@ -43964,13 +43965,12 @@ function getScopedRegistryKey(name) {
 }
 async function getNpmConfigRegistry(key) {
     const { exitCode, stdout } = await $quiet `npm config get ${key}`;
+    // npm refuses to print some values, such as URLs with credentials or UUIDs.
+    if (exitCode) {
+        throw new Error(`Could not read ${key} from npm config.`);
+    }
     const value = stdout.trim();
-    return exitCode || value === "undefined"
-        ? undefined
-        : getRegistryValue(value);
-}
-function getRegistryValue(value) {
-    return typeof value === "string" && value ? value : undefined;
+    return value === "undefined" ? undefined : value;
 }
 
 ;// CONCATENATED MODULE: ./src/getNpmAuthTokenKey.ts
@@ -43978,7 +43978,10 @@ function getRegistryValue(value) {
 
 
 async function getNpmAuthTokenKey() {
-    const registry = await getPublishRegistry(await readPackageData());
+    const registry = await getPublishRegistry(await readPackageData()).catch((error) => {
+        warning(`${error.message} Setting the npm token for ${defaultRegistry} instead.`);
+        return defaultRegistry;
+    });
     try {
         return `${getNerfDart(registry)}:_authToken`;
     }
@@ -44256,11 +44259,14 @@ async function getUnpublishedVersion() {
     if (isPrivate || !name || !version) {
         return undefined;
     }
-    const registry = await getPublishRegistry(packageData);
+    // If npm config can't be read, npm view can still find the registry itself.
+    const registry = await getPublishRegistry(packageData).catch(() => undefined);
     // npm view prefers a scope's registry config over --registry.
-    const registryArg = `--${getScopedRegistryKey(name) ?? "registry"}=${registry}`;
+    const registryArgs = registry
+        ? [`--${getScopedRegistryKey(name) ?? "registry"}=${registry}`]
+        : [];
     const isOnNpm = async () => {
-        const view = await getUnpublishedVersion_$quiet `npm view ${name}@${version} version --json ${registryArg}`;
+        const view = await getUnpublishedVersion_$quiet `npm view ${name}@${version} version --json ${registryArgs}`;
         if (!view.exitCode) {
             return true;
         }
