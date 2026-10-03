@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.30](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.29...v0.5.30) (2026-10-03)
+
+### Bug Fixes
+
+- fail the run when should-semantic-release errors ([#947](https://github.com/JoshuaKGoldberg/release-it-action/issues/947)) ([056e554](https://github.com/JoshuaKGoldberg/release-it-action/commit/056e5542da3f2374820bf0d08464dbfa3b401ba5)), closes [#898](https://github.com/JoshuaKGoldberg/release-it-action/issues/898) [#967](https://github.com/JoshuaKGoldberg/release-it-action/issues/967)
+
+## [0.5.29](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.28...v0.5.29) (2026-10-03)
+
+### Bug Fixes
+
+- replace the redundant runReleaseIt wrapper with a top-level failure handler ([#942](https://github.com/JoshuaKGoldberg/release-it-action/issues/942)) ([23bbb72](https://github.com/JoshuaKGoldberg/release-it-action/commit/23bbb726293d8705b64a06ba4ad6f97062bb6c7c)), closes [#904](https://github.com/JoshuaKGoldberg/release-it-action/issues/904)
+
 ## [0.5.28](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.27...v0.5.28) (2026-10-03)
 
 ### Bug Fixes

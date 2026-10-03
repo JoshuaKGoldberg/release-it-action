@@ -159,6 +159,17 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
+	it("fails the run and does not run release-it when shouldSemanticRelease throws", async () => {
+		mockShouldSemanticRelease.mockRejectedValueOnce(new Error("Oh no!"));
+
+		await releaseItAction(mockOptions);
+
+		expect(mockCore.setFailed).toHaveBeenCalledWith(
+			"Error should-semantic-release: Error: Oh no!",
+		);
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
+	});
+
 	it("fails without releasing when an older tagged version was never published", async () => {
 		mockGetUnpublishedVersion.mockResolvedValueOnce({
 			headTag: undefined,
