@@ -56,6 +56,7 @@ jobs:
           fetch-depth: 0
           ref: main
           token: ${{ secrets.ACCESS_TOKEN }}
+      - run: npm ci
       - run: npm run build
       - env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -69,7 +70,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
   id-token: write
 ```
 
