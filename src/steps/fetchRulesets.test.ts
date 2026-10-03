@@ -62,6 +62,19 @@ describe("fetchRulesets", () => {
 		expect(mockWarning).not.toHaveBeenCalled();
 	});
 
+	it("throws when fetching branch rules is forbidden without a message", async () => {
+		mockPaginate.mockRejectedValueOnce(
+			Object.assign(new Error("Forbidden"), { name: "HttpError", status: 403 }),
+		);
+
+		await expect(
+			fetchRulesets({ octokit: mockOctokit, requestData }),
+		).rejects.toThrowErrorMatchingInlineSnapshot(
+			`[Error: Could not fetch existing branch rules for test-branch: HttpError: Forbidden]`,
+		);
+		expect(mockWarning).not.toHaveBeenCalled();
+	});
+
 	it("returns an empty array with a warning when rulesets aren't available on the repository's plan", async () => {
 		mockPaginate.mockRejectedValueOnce(
 			createRequestError(
