@@ -7,7 +7,7 @@
 	"github": { "release": true, "releaseName": "v${version}" },
 	"hooks": {
 		"after:bump": "sed -i \"s/release-it-action@v[^[:space:]]*/release-it-action@v${version}/\" README.md",
-		"after:git:release": "npm publish --tag ${preReleaseId || 'latest'}"
+		"after:git:release": "npm publish${isPreRelease ? ' --tag ' + (preReleaseId || 'next') : ''}"
 	},
 	"npm": {
 		"publish": false,
