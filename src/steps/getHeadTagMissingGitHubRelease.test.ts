@@ -42,7 +42,9 @@ function mockFiles(files: Record<string, object>) {
 	mockReadFile.mockImplementation((path: string) =>
 		path in files
 			? Promise.resolve(JSON.stringify(files[path]))
-			: Promise.reject(new Error(`ENOENT: ${path}`)),
+			: Promise.reject(
+					Object.assign(new Error(`ENOENT: ${path}`), { code: "ENOENT" }),
+				),
 	);
 }
 
@@ -51,6 +53,13 @@ function mockHeadTags(stdout: string) {
 }
 
 describe("getHeadTagMissingGitHubRelease", () => {
+	it("returns undefined without checking tags when there is no package.json", async () => {
+		mockFiles({ ".release-it.json": releaseItJson });
+
+		expect(await getHeadTagMissingGitHubRelease(options)).toBeUndefined();
+		expect(mock$quiet).not.toHaveBeenCalled();
+	});
+
 	it("returns undefined without checking tags when there is no release-it config", async () => {
 		mockFiles({ "package.json": packageData });
 

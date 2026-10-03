@@ -1,7 +1,9 @@
 import * as core from "@actions/core";
 import { $ } from "execa";
-import * as fs from "node:fs/promises";
 import { setTimeout } from "node:timers/promises";
+
+import { readPackageData } from "../packageData.js";
+import { getHeadTags, getVersionTagNames } from "../versionTags.js";
 
 const $quiet = $({ reject: false });
 
@@ -16,13 +18,6 @@ export interface UnpublishedVersion {
 	 */
 	headTag: string | undefined;
 	version: string;
-}
-
-interface PackageData {
-	name?: string;
-	private?: boolean;
-	publishConfig?: Record<string, unknown> & { registry?: string };
-	version?: string;
 }
 
 export async function getUnpublishedVersion(
@@ -68,7 +63,7 @@ export async function getUnpublishedVersion(
 		return undefined;
 	}
 
-	const tagNames = [version, `v${version}`];
+	const tagNames = getVersionTagNames(version);
 	const existingTags = (await $quiet`git tag --list ${tagNames}`).stdout
 		.split("\n")
 		.filter(Boolean);
@@ -94,7 +89,7 @@ export async function getUnpublishedVersion(
 		}
 	}
 
-	const headTags = (await $quiet`git tag --points-at HEAD`).stdout.split("\n");
+	const headTags = await getHeadTags();
 
 	return {
 		headTag: existingTags.find((tag) => headTags.includes(tag)),
@@ -108,17 +103,5 @@ function describeNpmError(stdout: string) {
 		return error?.summary ?? "unknown error";
 	} catch {
 		return "unknown error";
-	}
-}
-
-async function readPackageData() {
-	try {
-		return JSON.parse(await fs.readFile("package.json", "utf8")) as PackageData;
-	} catch (error) {
-		if ((error as { code?: string }).code === "ENOENT") {
-			return undefined;
-		}
-
-		throw error;
 	}
 }
