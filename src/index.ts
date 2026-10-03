@@ -5,9 +5,10 @@ import { shouldSemanticRelease } from "should-semantic-release";
 import { $$ } from "./execa.js";
 import { runBypassingBranchProtections } from "./runBypassingBranchProtections.js";
 import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
+import { getHeadTagMissingGitHubRelease } from "./steps/getHeadTagMissingGitHubRelease.js";
 import { getUnpublishedVersion } from "./steps/getUnpublishedVersion.js";
 import { hasGitHubRelease } from "./steps/hasGitHubRelease.js";
-import { runReleaseIt } from "./steps/runReleaseIt.js";
+import { runReleaseIt, RunReleaseItOptions } from "./steps/runReleaseIt.js";
 import { tryCatchInfoAction } from "./tryCatchInfoAction.js";
 
 export interface ReleaseItActionOptions {
@@ -31,7 +32,11 @@ export async function releaseItAction(options: ReleaseItActionOptions) {
 	if (skipNpmPublish) {
 		core.info("skipNpmPublish is true. Skipping npm publish.");
 	} else if (npmToken) {
-		await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
+		try {
+			await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
+		} catch {
+			throw new Error("Could not set the npm token in the npmrc.");
+		}
 	} else {
 		core.info(
 			"No npm token provided. This is required unless you're using Trusted Publishing.",
@@ -51,6 +56,19 @@ export async function releaseItAction(options: ReleaseItActionOptions) {
 			async () => await $$`npm config delete //registry.npmjs.org/:_authToken`,
 		);
 	}
+}
+
+const retryArgs =
+	"--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
+
+async function createGitHubRelease(
+	releaseItArgs: string | undefined,
+	options: RunReleaseItOptions = {},
+) {
+	await runReleaseIt(
+		[retryArgs, "--no-npm.publish", releaseItArgs].filter(Boolean).join(" "),
+		{ ...options, skipSupersededCheck: true },
+	);
 }
 
 async function runRelease({
@@ -94,17 +112,9 @@ async function runRelease({
 			`Version ${version} was pushed but never published to npm. Publishing it now.`,
 		);
 
-		const retryArgs =
-			"--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
-
 		// First try to create a GitHub release, since they're mutable...
 		if (hasRelease === false) {
-			await runReleaseIt(
-				[retryArgs, "--no-npm.publish", releaseItArgs]
-					.filter(Boolean)
-					.join(" "),
-				{ skipSupersededCheck: true },
-			);
+			await createGitHubRelease(releaseItArgs);
 		}
 
 		// ...and then if that succeeded (didn't throw), do the immutable npm publish
@@ -118,6 +128,26 @@ async function runRelease({
 				.join(" "),
 			{ allowPublishConflict: true, skipSupersededCheck: true },
 		);
+		return;
+	}
+
+	const tagMissingRelease = await tryCatchInfoAction(
+		"checking for a version that was pushed without a GitHub release",
+		async () =>
+			await getHeadTagMissingGitHubRelease({
+				octokit,
+				owner,
+				releaseItArgs,
+				repo,
+			}),
+	);
+
+	if (tagMissingRelease) {
+		core.info(
+			`Tag ${tagMissingRelease} was pushed but its GitHub release was never created. Creating it now.`,
+		);
+		// Hooks such as after:release can try to publish the version npm already has.
+		await createGitHubRelease(releaseItArgs, { allowPublishConflict: true });
 		return;
 	}
 
