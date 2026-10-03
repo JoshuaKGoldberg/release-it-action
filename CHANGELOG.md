@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.24](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.23...v0.5.24) (2026-10-03)
+
+### Bug Fixes
+
+- create a missing GitHub release even when the version is already on npm ([#961](https://github.com/JoshuaKGoldberg/release-it-action/issues/961)) ([05d7972](https://github.com/JoshuaKGoldberg/release-it-action/commit/05d79727280ce995f560c846e76f5f4eecb32737)), closes [#960](https://github.com/JoshuaKGoldberg/release-it-action/issues/960)
+
 ## [0.5.23](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.22...v0.5.23) (2026-10-03)
 
 ### Bug Fixes
