@@ -6,7 +6,6 @@ import { $$ } from "./execa.js";
 import { parseArgsString } from "./parseArgsString.js";
 import { runBypassingBranchProtections } from "./runBypassingBranchProtections.js";
 import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
-import { snapshotNpmUserConfig } from "./snapshotNpmUserConfig.js";
 import { getHeadTagMissingGitHubRelease } from "./steps/getHeadTagMissingGitHubRelease.js";
 import { getUnpublishedVersion } from "./steps/getUnpublishedVersion.js";
 import { hasGitHubRelease } from "./steps/hasGitHubRelease.js";
@@ -22,7 +21,6 @@ export interface ReleaseItActionOptions {
 	githubToken: string;
 	gitUserEmail: string;
 	gitUserName: string;
-	npmToken: string | undefined;
 	owner: string;
 	releaseItArgs?: string;
 	repo: string;
@@ -30,8 +28,7 @@ export interface ReleaseItActionOptions {
 }
 
 export async function releaseItAction(options: ReleaseItActionOptions) {
-	const { gitUserEmail, gitUserName, npmToken, releaseItArgs, skipNpmPublish } =
-		options;
+	const { gitUserEmail, gitUserName, releaseItArgs, skipNpmPublish } = options;
 
 	try {
 		parseArgsString(releaseItArgs ?? "");
@@ -44,36 +41,9 @@ export async function releaseItAction(options: ReleaseItActionOptions) {
 	await $$`git config user.name ${gitUserName}`;
 	if (skipNpmPublish) {
 		core.info("skipNpmPublish is true. Skipping npm publish.");
-	} else if (!npmToken) {
-		core.info(
-			"No npm token provided. This is required unless you're using Trusted Publishing.",
-		);
 	}
 
-	if (skipNpmPublish || !npmToken) {
-		await runRelease(options);
-		return;
-	}
-
-	const restoreNpmUserConfig = await snapshotNpmUserConfig();
-
-	try {
-		try {
-			await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
-		} catch {
-			throw new Error("Could not set the npm token in the npmrc.");
-		}
-
-		await runRelease(options);
-	} finally {
-		await tryCatchInfoAction(
-			"removing the npm token from the npmrc",
-			restoreNpmUserConfig ??
-				(async () => {
-					await $$`npm config delete //registry.npmjs.org/:_authToken`;
-				}),
-		);
-	}
+	await runRelease(options);
 }
 
 const retryArgs =

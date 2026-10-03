@@ -1,11 +1,9 @@
-import { $ } from "execa";
 import * as fs from "node:fs/promises";
 
+import { $quiet } from "../execa.js";
 import { parseArgsString } from "../parseArgsString.js";
 import { Octokit } from "../types.js";
 import { hasGitHubRelease } from "./hasGitHubRelease.js";
-
-const $quiet = $({ reject: false });
 
 const configOverride =
 	/^(?:-c|--config|--(?:no-)?github(?:\.(?:draft|release|web))?)(?:=|$)/;

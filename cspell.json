@@ -20,13 +20,10 @@
 		"mtfoley",
 		"noreply",
 		"npmjs",
-		"npmpackagejsonlintrc",
-		"outro",
 		"packagejson",
 		"rulesets",
 		"shlex",
 		"tseslint",
-		"unstub",
-		"userconfig"
+		"unstub"
 	]
 }

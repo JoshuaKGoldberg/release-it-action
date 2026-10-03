@@ -33,10 +33,9 @@ This action handles all of that for you.
 Each time it runs, the action:
 
 1. Sets up the Git user for release commits
-2. Sets up your npm token, if you gave one
-3. Finishes any [earlier release that didn't make it to npm or GitHub releases](#what-happens-when-a-release-gets-pushed-but-not-published), then stops
-4. Stops if [`should-semantic-release`](https://github.com/JoshuaKGoldberg/should-semantic-release) says there's nothing to release
-5. Runs `npx release-it --verbose`
+2. Finishes any [earlier release that didn't make it to npm or GitHub releases](#what-happens-when-a-release-gets-pushed-but-not-published), then stops
+3. Stops if [`should-semantic-release`](https://github.com/JoshuaKGoldberg/should-semantic-release) says there's nothing to release
+4. Runs `npx release-it --verbose`
 
 It also adds in safe handling for common corner cases such as npm being slow to recognize new versions.
 
@@ -57,11 +56,11 @@ jobs:
           fetch-depth: 0
           ref: main
           token: ${{ secrets.ACCESS_TOKEN }}
+      - run: npm ci
       - run: npm run build
       - env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        uses: JoshuaKGoldberg/release-it-action@v0.5.33
+        uses: JoshuaKGoldberg/release-it-action@v0.6.2
 
 name: Release
 
@@ -71,17 +70,17 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
   id-token: write
 ```
 
-You can leave out `NPM_TOKEN` if you use npm's [Trusted Publishing](https://docs.npmjs.com/trusted-publishers).
+Publishing to npm uses npm's [Trusted Publishing](https://docs.npmjs.com/trusted-publishers), which needs the `id-token: write` permission and this workflow added as a trusted publisher for your package on npm.
 
 ### Recommended `release-it` Config
 
 It's strongly recommended to have `release-it` push before it publishes to npm.
 Then if a newer push wins the race, nothing gets published.
-It also lets step 3 finish any release that fails to publish.
+It also lets step 2 finish any release that fails to publish.
 
 ```json
 {
@@ -99,12 +98,12 @@ It also lets step 3 finish any release that fails to publish.
 
 Prereleases publish under their own dist-tag, such as `beta` for `1.2.0-beta.0` or `next` for `1.2.0-0`, since newer versions of npm require a `--tag` for them.
 Stable releases leave out `--tag` so that newer versions of npm can refuse to move `latest` back to an older version.
-Step 3 skips release-it's npm authentication checks itself, so it can republish a stranded version even without an npm token, such as with Trusted Publishing.
+Step 2 skips release-it's npm authentication checks itself, since they don't work with Trusted Publishing.
 
 > Tip: releasing from a maintenance branch?
-> Set `"tag"` under `"npm"` to that branch's dist-tag, which step 3 also uses, and change the hook to `npm publish --tag ${npm.tag}`.
+> Set `"tag"` under `"npm"` to that branch's dist-tag, which step 2 also uses, and change the hook to `npm publish --tag ${npm.tag}`.
 
-Skip this if you set `skip-npm-publish`, since the hook would still publish.
+If you set `skip-npm-publish`, leave out this config's `after:git:release` hook, since it would still publish.
 
 ## Options
 
@@ -115,7 +114,6 @@ Skip this if you set `skip-npm-publish`, since the hook would still publish.
 | `git-user-email`            | `string`  | `${<git-user-name>}@users.noreply.github.com` | `git config user.email` value for Git commits.                 |
 | `git-user-name`             | `string`  | `${github.context.actor}`                     | `git config user.name` value for Git commits.                  |
 | `github-token`              | `string`  | `${GITHUB_TOKEN}`                             | GitHub token (PAT) with _repo_ and _workflow_ permissions.     |
-| `npm-token`                 | `string`  | `${NPM_TOKEN}`                                | npm access token (not needed with Trusted Publishing).         |
 | `release-it-args`           | `string`  | `""`                                          | Any arbitrary arguments to pass to `npx release-it --verbose`. |
 | `skip-npm-publish`          | `boolean` | `false`                                       | Whether to skip publishing to npm.                             |
 
@@ -134,7 +132,6 @@ await releaseItAction({
 	githubToken: process.env.GITHUB_TOKEN,
 	gitUserEmail: "your@email.com",
 	gitUserName: "YourUsername",
-	npmToken: process.env.NPM_TOKEN,
 	owner: "YourUsername",
 	releaseItArgs: "--preRelease=beta",
 	repo: "your-repository",
