@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { withoutIncrement } from "./withoutIncrement.js";
+import { enforceArgs } from "./enforceArgs.js";
 
-describe("withoutIncrement", () => {
+describe("enforceArgs", () => {
 	it.each([
 		[[], ["--no-increment"]],
 		[["--ci"], ["--ci", "--no-increment"]],
@@ -57,7 +57,33 @@ describe("withoutIncrement", () => {
 			["--git.commitMessage=chore: release v${version}"],
 			["--git.commitMessage=chore: release v${version}", "--no-increment"],
 		],
-	])("turns %j into %j", (args, expected) => {
-		expect(withoutIncrement(args)).toEqual(expected);
+	])(
+		"drops increments from %j when enforcing --no-increment",
+		(args, expected) => {
+			expect(enforceArgs(args, ["--no-increment"])).toEqual(expected);
+		},
+	);
+
+	it("keeps increments before -- when not enforcing --no-increment", () => {
+		expect(enforceArgs(["patch", "--", "minor"], ["--no-git"])).toEqual([
+			"patch",
+			"--no-git",
+		]);
+	});
+
+	it("puts enforced args after the given args", () => {
+		expect(
+			enforceArgs(
+				["--github.release", "--no-npm.publish", "--npm.tag=next"],
+				["--no-increment", "--npm.publish", "--no-github.release"],
+			),
+		).toEqual([
+			"--github.release",
+			"--no-npm.publish",
+			"--npm.tag=next",
+			"--no-increment",
+			"--npm.publish",
+			"--no-github.release",
+		]);
 	});
 });

@@ -161,10 +161,14 @@ describe("releaseItAction", () => {
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).toHaveBeenCalledTimes(1);
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			`--no-git --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
+			`--no-git --npm.skipChecks ${mockReleaseItArgs}`,
 			{
 				allowPublishConflict: true,
-				keepVersion: true,
+				enforcedArgs: [
+					"--no-increment",
+					"--npm.publish",
+					"--no-github.release",
+				],
 				skipSupersededCheck: true,
 			},
 		);
@@ -181,14 +185,21 @@ describe("releaseItAction", () => {
 
 		expect(mockRunReleaseIt.mock.calls).toEqual([
 			[
-				`--no-git --no-npm.publish ${mockReleaseItArgs}`,
-				{ keepVersion: true, skipSupersededCheck: true },
+				`--no-git ${mockReleaseItArgs}`,
+				{
+					enforcedArgs: ["--no-increment", "--no-npm.publish"],
+					skipSupersededCheck: true,
+				},
 			],
 			[
-				`--no-git --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
+				`--no-git --npm.skipChecks ${mockReleaseItArgs}`,
 				{
 					allowPublishConflict: true,
-					keepVersion: true,
+					enforcedArgs: [
+						"--no-increment",
+						"--npm.publish",
+						"--no-github.release",
+					],
 					skipSupersededCheck: true,
 				},
 			],
@@ -204,14 +215,11 @@ describe("releaseItAction", () => {
 
 		await releaseItAction({ ...mockOptions, releaseItArgs: undefined });
 
-		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			"--no-git --npm.publish --npm.skipChecks --no-github.release",
-			{
-				allowPublishConflict: true,
-				keepVersion: true,
-				skipSupersededCheck: true,
-			},
-		);
+		expect(mockRunReleaseIt).toHaveBeenCalledWith("--no-git --npm.skipChecks", {
+			allowPublishConflict: true,
+			enforcedArgs: ["--no-increment", "--npm.publish", "--no-github.release"],
+			skipSupersededCheck: true,
+		});
 	});
 
 	it("does not check for an unpublished version when skipNpmPublish is true", async () => {

@@ -1,14 +1,14 @@
 import * as core from "@actions/core";
 
+import { enforceArgs } from "../enforceArgs.js";
 import { $$captured } from "../execa.js";
 import { parseArgsString } from "../parseArgsString.js";
 import { tryCatchInfoAction } from "../tryCatchInfoAction.js";
-import { withoutIncrement } from "../withoutIncrement.js";
 import { checkSuperseded, getHeadSha } from "./checkSuperseded.js";
 
 export interface RunReleaseItOptions {
 	allowPublishConflict?: boolean;
-	keepVersion?: boolean;
+	enforcedArgs?: string[];
 	skipSupersededCheck?: boolean;
 }
 
@@ -19,7 +19,7 @@ export async function runReleaseIt(
 	releaseItArgs?: string,
 	{
 		allowPublishConflict,
-		keepVersion,
+		enforcedArgs,
 		skipSupersededCheck,
 	}: RunReleaseItOptions = {},
 ) {
@@ -28,7 +28,9 @@ export async function runReleaseIt(
 
 		try {
 			const parsedArgs = parseArgsString(releaseItArgs ?? "");
-			const args = keepVersion ? withoutIncrement(parsedArgs) : parsedArgs;
+			const args = enforcedArgs
+				? enforceArgs(parsedArgs, enforcedArgs)
+				: parsedArgs;
 			const { exitCode } = await $$captured`npx release-it --verbose ${args}`;
 			if (exitCode) {
 				throw new Error(`Exit code ${exitCode.toString()}.`);
