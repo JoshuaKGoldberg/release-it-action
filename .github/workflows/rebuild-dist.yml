@@ -1,0 +1,71 @@
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  build_dist:
+    if: github.repository == 'JoshuaKGoldberg/release-it-action' && !github.event.deleted
+    name: Build Dist
+    outputs:
+      changed: ${{ steps.check.outputs.changed }}
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/prepare
+      - run: pnpm build:release
+      - id: check
+        name: Check for dist changes
+        run: |
+          changes=$(git status --porcelain -- dist ':!*.d.ts' ':!*.d.ts.map')
+          if [ -n "$changes" ]; then
+            echo "$changes"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.check.outputs.changed
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          if-no-files-found: error
+          name: dist
+          path: dist/
+          retention-days: 1
+  commit_dist:
+    if: needs.build_dist.outputs.changed == 'true' && github.event.head_commit.author.email != '41898282+github-actions[bot]@users.noreply.github.com'
+    name: Commit Dist
+    needs: build_dist
+    permissions: {}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+      - run: rm -rf dist
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: dist
+          path: dist
+      - env:
+          BRANCH: ${{ github.ref_name }}
+        name: Commit and push dist changes
+        run: |
+          git add --all -- dist ':!*.d.ts' ':!*.d.ts.map'
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit --no-verify --message "chore: rebuild dist"
+          if ! git push --no-verify origin "HEAD:refs/heads/$BRANCH"; then
+            if [ "$(git ls-remote origin "refs/heads/$BRANCH" | cut -f1)" != "$GITHUB_SHA" ]; then
+              echo "::notice::Not pushing because $BRANCH moved since this run started."
+              exit 0
+            fi
+            exit 1
+          fi
+
+name: Rebuild Dist
+
+on:
+  push:
+    branches:
+      - renovate/**
+
+permissions: {}
