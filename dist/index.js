@@ -41861,6 +41861,7 @@ async function releaseItAction(options) {
     await runRelease(options);
 }
 const retryArgs = "--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
+const restoreTaggedFiles = "'--hooks.before:npm:release=git checkout -- .'";
 async function createGitHubRelease(releaseItArgs, options) {
     return await runReleaseIt([retryArgs, "--no-npm.publish", releaseItArgs].filter(Boolean).join(" "), { ...options, skipSupersededCheck: true });
 }
@@ -41894,6 +41895,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
         await runReleaseIt([
             retryArgs,
             "--npm.publish --npm.skipChecks --no-github.release",
+            restoreTaggedFiles,
             releaseItArgs,
         ]
             .filter(Boolean)
