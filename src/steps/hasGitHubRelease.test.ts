@@ -102,7 +102,7 @@ describe("hasGitHubRelease", () => {
 
 		expect(await hasGitHubRelease(options)).toBe(false);
 		expect(core.info).toHaveBeenCalledWith(
-			"Found a leftover draft release for v1.2.3, but release-it isn't configured to make draft releases, so treating the release as missing. You can delete the leftover draft.",
+			"Found a draft release for v1.2.3, but neither .release-it.json nor package.json's \"release-it\" sets github.draft, so treating the release as missing. If release-it isn't meant to make drafts, the draft is likely left over from a failed release and can be deleted.",
 		);
 	});
 
