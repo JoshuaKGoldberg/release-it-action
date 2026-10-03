@@ -214,9 +214,9 @@ describe("runReleaseIt", () => {
 
 	it("rejects instead of passing when checking for superseding throws unexpectedly", async () => {
 		const error = new Error("Oh no!");
-		mock$$.mockRejectedValue(new Error("Command failed"));
-		mockGetHeadSha.mockResolvedValue("start-sha");
-		mockCheckSuperseded.mockRejectedValue(error);
+		mock$$.mockRejectedValueOnce(new Error("Command failed"));
+		mockGetHeadSha.mockResolvedValueOnce("start-sha");
+		mockCheckSuperseded.mockRejectedValueOnce(error);
 
 		await expect(runReleaseIt()).rejects.toBe(error);
 	});
