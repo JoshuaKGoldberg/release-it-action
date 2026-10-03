@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.5.28](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.27...v0.5.28) (2026-10-03)
+
+### Bug Fixes
+
+- stop publishing compiled tests to npm ([#952](https://github.com/JoshuaKGoldberg/release-it-action/issues/952)) ([44d2885](https://github.com/JoshuaKGoldberg/release-it-action/commit/44d2885425c064d17893ab89b53cfc59cbc9d35b)), closes [#901](https://github.com/JoshuaKGoldberg/release-it-action/issues/901)
+
+## [0.5.27](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.26...v0.5.27) (2026-10-03)
+
+### Bug Fixes
+
+- always fail on unparseable release-it-args ([#945](https://github.com/JoshuaKGoldberg/release-it-action/issues/945)) ([23f9790](https://github.com/JoshuaKGoldberg/release-it-action/commit/23f9790978b62ea0e7906adf9576cde6748210f3)), closes [#896](https://github.com/JoshuaKGoldberg/release-it-action/issues/896)
+- stop logging the npm token cleanup's command result ([#941](https://github.com/JoshuaKGoldberg/release-it-action/issues/941)) ([e4111e1](https://github.com/JoshuaKGoldberg/release-it-action/commit/e4111e11d59a81d1c04198422194796534c13664)), closes [#903](https://github.com/JoshuaKGoldberg/release-it-action/issues/903)
+
+## [0.5.26](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.25...v0.5.26) (2026-10-03)
+
+### Bug Fixes
+
+- keep Git config when retrying an unpublished version ([#965](https://github.com/JoshuaKGoldberg/release-it-action/issues/965)) ([aa7af72](https://github.com/JoshuaKGoldberg/release-it-action/commit/aa7af72918bf9a366b1e7cf1d3908ca1f50c4f4a)), closes [#964](https://github.com/JoshuaKGoldberg/release-it-action/issues/964)
+- restore the npmrc after the run instead of deleting its auth token ([#959](https://github.com/JoshuaKGoldberg/release-it-action/issues/959)) ([da19195](https://github.com/JoshuaKGoldberg/release-it-action/commit/da191950db19ce499f4594543081fc06ef2685ac)), closes [#958](https://github.com/JoshuaKGoldberg/release-it-action/issues/958)
+
 ## [0.5.25](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.24...v0.5.25) (2026-10-03)
 
 ### Bug Fixes
