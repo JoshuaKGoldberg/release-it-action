@@ -28,7 +28,7 @@
 		"lint:packages": "pnpm dedupe --check",
 		"lint:spelling": "cspell \"**\" \".github/**/*\"",
 		"prepare": "husky",
-		"prepublishOnly": "pnpm build",
+		"prepublishOnly": "rm -rf lib && pnpm build",
 		"test": "vitest",
 		"tsc": "tsc"
 	},
