@@ -36,6 +36,17 @@ vi.mock("./runBypassingBranchRulesets.js", () => ({
 	},
 }));
 
+const mockRestoreNpmUserConfig = vi.fn();
+const mockSnapshotNpmUserConfig = vi
+	.fn()
+	.mockResolvedValue(mockRestoreNpmUserConfig);
+
+vi.mock("./snapshotNpmUserConfig.js", () => ({
+	get snapshotNpmUserConfig() {
+		return mockSnapshotNpmUserConfig;
+	},
+}));
+
 const mockGetHeadTagMissingGitHubRelease = vi.fn();
 
 vi.mock("./steps/getHeadTagMissingGitHubRelease.js", () => ({
@@ -82,6 +93,9 @@ vi.mock("@actions/core", () => ({
 const mockCore = vi.mocked(core);
 
 const mockReleaseItArgs = "--debug";
+
+const retryArgs =
+	"--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
 
 const mockOptions = {
 	githubToken: "mock-githubToken",
@@ -151,7 +165,7 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
-	it("removes the npm token even when the run fails early", async () => {
+	it("restores the npm user config even when the run fails early", async () => {
 		mockGetUnpublishedVersion.mockResolvedValueOnce({
 			headTag: undefined,
 			version: "1.2.3",
@@ -159,9 +173,45 @@ describe("releaseItAction", () => {
 
 		await releaseItAction(mockOptions);
 
-		expect(mock$$.mock.calls.at(-1)).toEqual([
-			["npm config delete //registry.npmjs.org/:_authToken"],
+		expect(mockRestoreNpmUserConfig).toHaveBeenCalledOnce();
+	});
+
+	it("restores the npm user config even when setting the npm token fails", async () => {
+		mock$$
+			.mockResolvedValueOnce(undefined)
+			.mockResolvedValueOnce(undefined)
+			.mockRejectedValueOnce(new Error("Oh no!"));
+
+		await expect(releaseItAction(mockOptions)).rejects.toThrow();
+
+		expect(mockRestoreNpmUserConfig).toHaveBeenCalledOnce();
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
+	});
+
+	it("deletes the npm token from the npmrc when the npm user config could not be snapshotted", async () => {
+		mockSnapshotNpmUserConfig.mockResolvedValueOnce(undefined);
+		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		expect(mock$$.mock.calls.slice(2)).toEqual([
+			[
+				["npm config set //registry.npmjs.org/:_authToken ", ""],
+				"mock-npmToken",
+			],
+			[["npm config delete //registry.npmjs.org/:_authToken"]],
 		]);
+		expect(mockRestoreNpmUserConfig).not.toHaveBeenCalled();
+	});
+
+	it("snapshots the npm user config before setting the npm token", async () => {
+		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		expect(mockSnapshotNpmUserConfig.mock.invocationCallOrder[0]).toBeLessThan(
+			mock$$.mock.invocationCallOrder[2],
+		);
 	});
 
 	it("does not expose the npm token when setting it fails", async () => {
@@ -204,7 +254,7 @@ describe("releaseItAction", () => {
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).toHaveBeenCalledTimes(1);
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			`--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
+			`${retryArgs} --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
 			{ allowPublishConflict: true, skipSupersededCheck: true },
 		);
 	});
@@ -220,11 +270,11 @@ describe("releaseItAction", () => {
 
 		expect(mockRunReleaseIt.mock.calls).toEqual([
 			[
-				`--no-increment --no-git --no-npm.publish ${mockReleaseItArgs}`,
+				`${retryArgs} --no-npm.publish ${mockReleaseItArgs}`,
 				{ skipSupersededCheck: true },
 			],
 			[
-				`--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
+				`${retryArgs} --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
 				{ allowPublishConflict: true, skipSupersededCheck: true },
 			],
 		]);
@@ -240,7 +290,7 @@ describe("releaseItAction", () => {
 		await releaseItAction({ ...mockOptions, releaseItArgs: undefined });
 
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			"--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
+			`${retryArgs} --npm.publish --npm.skipChecks --no-github.release`,
 			{ allowPublishConflict: true, skipSupersededCheck: true },
 		);
 	});
@@ -272,7 +322,7 @@ describe("releaseItAction", () => {
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt.mock.calls).toEqual([
 			[
-				`--no-increment --no-git --no-npm.publish ${mockReleaseItArgs}`,
+				`${retryArgs} --no-npm.publish ${mockReleaseItArgs}`,
 				{ allowPublishConflict: true, skipSupersededCheck: true },
 			],
 		]);
@@ -286,7 +336,7 @@ describe("releaseItAction", () => {
 		expect(mockGetUnpublishedVersion).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt.mock.calls).toEqual([
 			[
-				`--no-increment --no-git --no-npm.publish ${mockReleaseItArgs}`,
+				`${retryArgs} --no-npm.publish ${mockReleaseItArgs}`,
 				{ allowPublishConflict: true, skipSupersededCheck: true },
 			],
 		]);
@@ -338,11 +388,6 @@ describe("releaseItAction", () => {
 			    ],
 			    "mock-npmToken",
 			  ],
-			  [
-			    [
-			      "npm config delete //registry.npmjs.org/:_authToken",
-			    ],
-			  ],
 			]
 		`);
 		expect(mockRunBypassingBranchProtections).not.toHaveBeenCalled();
@@ -380,11 +425,6 @@ describe("releaseItAction", () => {
 			      "",
 			    ],
 			    "mock-npmToken",
-			  ],
-			  [
-			    [
-			      "npm config delete //registry.npmjs.org/:_authToken",
-			    ],
 			  ],
 			]
 		`);
@@ -471,6 +511,7 @@ describe("releaseItAction", () => {
 		expect(mockCore.info).toHaveBeenCalledWith(
 			"skipNpmPublish is true. Skipping npm publish.",
 		);
+		expect(mockSnapshotNpmUserConfig).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
 			`--no-npm.publish ${mockReleaseItArgs}`,
 		);
@@ -502,5 +543,6 @@ describe("releaseItAction", () => {
 		expect(mockCore.info).toHaveBeenCalledWith(
 			"No npm token provided. This is required unless you're using Trusted Publishing.",
 		);
+		expect(mockSnapshotNpmUserConfig).not.toHaveBeenCalled();
 	});
 });

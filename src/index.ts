@@ -5,6 +5,7 @@ import { shouldSemanticRelease } from "should-semantic-release";
 import { $$ } from "./execa.js";
 import { runBypassingBranchProtections } from "./runBypassingBranchProtections.js";
 import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
+import { snapshotNpmUserConfig } from "./snapshotNpmUserConfig.js";
 import { getHeadTagMissingGitHubRelease } from "./steps/getHeadTagMissingGitHubRelease.js";
 import { getUnpublishedVersion } from "./steps/getUnpublishedVersion.js";
 import { hasGitHubRelease } from "./steps/hasGitHubRelease.js";
@@ -34,13 +35,7 @@ export async function releaseItAction(options: ReleaseItActionOptions) {
 	await $$`git config user.name ${gitUserName}`;
 	if (skipNpmPublish) {
 		core.info("skipNpmPublish is true. Skipping npm publish.");
-	} else if (npmToken) {
-		try {
-			await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
-		} catch {
-			throw new Error("Could not set the npm token in the npmrc.");
-		}
-	} else {
+	} else if (!npmToken) {
 		core.info(
 			"No npm token provided. This is required unless you're using Trusted Publishing.",
 		);
@@ -51,24 +46,36 @@ export async function releaseItAction(options: ReleaseItActionOptions) {
 		return;
 	}
 
+	const restoreNpmUserConfig = await snapshotNpmUserConfig();
+
 	try {
+		try {
+			await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
+		} catch {
+			throw new Error("Could not set the npm token in the npmrc.");
+		}
+
 		await runRelease(options);
 	} finally {
 		await tryCatchInfoAction(
 			"removing the npm token from the npmrc",
-			async () => await $$`npm config delete //registry.npmjs.org/:_authToken`,
+			restoreNpmUserConfig ??
+				(async () => {
+					await $$`npm config delete //registry.npmjs.org/:_authToken`;
+				}),
 		);
 	}
 }
+
+const retryArgs =
+	"--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
 
 async function createGitHubRelease(
 	releaseItArgs: string | undefined,
 	options: RunReleaseItOptions = {},
 ) {
 	await runReleaseIt(
-		["--no-increment --no-git --no-npm.publish", releaseItArgs]
-			.filter(Boolean)
-			.join(" "),
+		[retryArgs, "--no-npm.publish", releaseItArgs].filter(Boolean).join(" "),
 		{ ...options, skipSupersededCheck: true },
 	);
 }
@@ -126,7 +133,8 @@ async function runRelease({
 		// ...and then if that succeeded (didn't throw), do the immutable npm publish
 		await runReleaseIt(
 			[
-				"--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
+				retryArgs,
+				"--npm.publish --npm.skipChecks --no-github.release",
 				releaseItArgs,
 			]
 				.filter(Boolean)
