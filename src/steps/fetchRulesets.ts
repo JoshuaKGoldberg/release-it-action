@@ -2,7 +2,6 @@ import type { Endpoints } from "@octokit/types";
 
 import * as core from "@actions/core";
 
-import { tryCatchInfoAction } from "../tryCatchInfoAction.js";
 import { ExistingRuleset, Octokit } from "../types.js";
 
 export interface FetchRulesetsOptions {
@@ -13,9 +12,9 @@ export interface FetchRulesetsOptions {
 export async function fetchRulesets({
 	octokit,
 	requestData,
-}: FetchRulesetsOptions): Promise<ExistingRuleset[] | undefined> {
-	const rules = await tryCatchInfoAction(
-		`fetching existing branch rules for ${requestData.branch}`,
+}: FetchRulesetsOptions): Promise<ExistingRuleset[]> {
+	const rules = await fetchLogged(
+		`existing branch rules for ${requestData.branch}`,
 		async () =>
 			await octokit.paginate(
 				"GET /repos/{owner}/{repo}/rules/branches/{branch}",
@@ -25,10 +24,6 @@ export async function fetchRulesets({
 				},
 			),
 	);
-
-	if (!rules) {
-		return undefined;
-	}
 
 	const rulesetIds = new Set<number>();
 
@@ -50,8 +45,8 @@ export async function fetchRulesets({
 	const rulesets: ExistingRuleset[] = [];
 
 	for (const rulesetId of rulesetIds) {
-		const ruleset = await tryCatchInfoAction(
-			`fetching existing ruleset ${rulesetId.toString()}`,
+		const ruleset = await fetchLogged(
+			`existing ruleset ${rulesetId.toString()}`,
 			async () =>
 				(
 					await octokit.request(
@@ -64,10 +59,28 @@ export async function fetchRulesets({
 				).data,
 		);
 
-		if (ruleset) {
-			rulesets.push(ruleset);
-		}
+		rulesets.push(ruleset);
 	}
 
 	return rulesets;
+}
+
+async function fetchLogged<T>(description: string, fetch: () => Promise<T>) {
+	core.info(`Start: fetching ${description}`);
+
+	let result: T;
+
+	try {
+		result = await fetch();
+	} catch (error) {
+		throw new Error(`Could not fetch ${description}: ${String(error)}`, {
+			cause: error,
+		});
+	}
+
+	core.info(
+		`Result from fetching ${description}: ${JSON.stringify(result, null, 4)}`,
+	);
+
+	return result;
 }

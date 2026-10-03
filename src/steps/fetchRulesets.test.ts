@@ -11,16 +11,6 @@ vi.mock("@actions/core", () => ({
 	},
 }));
 
-vi.mock("../tryCatchInfoAction.js", () => ({
-	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
-		try {
-			return await action();
-		} catch {
-			return undefined;
-		}
-	},
-}));
-
 const branch = "test-branch";
 const mockPaginate = vi.fn();
 const mockRequest = vi.fn();
@@ -35,12 +25,14 @@ describe("fetchRulesets", () => {
 		vi.clearAllMocks();
 	});
 
-	it("returns undefined when fetching branch rules fails", async () => {
+	it("throws when fetching branch rules fails", async () => {
 		mockPaginate.mockRejectedValueOnce(new Error("Oh no!"));
 
-		const actual = await fetchRulesets({ octokit: mockOctokit, requestData });
-
-		expect(actual).toBeUndefined();
+		await expect(
+			fetchRulesets({ octokit: mockOctokit, requestData }),
+		).rejects.toThrowErrorMatchingInlineSnapshot(
+			`[Error: Could not fetch existing branch rules for test-branch: Error: Oh no!]`,
+		);
 		expect(mockPaginate).toHaveBeenCalledTimes(1);
 		expect(mockRequest).not.toHaveBeenCalled();
 	});
@@ -116,18 +108,12 @@ describe("fetchRulesets", () => {
 			  ],
 			]
 		`);
-		expect(mockInfo.mock.calls).toMatchInlineSnapshot(`
-			[
-			  [
-			    "Skipping Organization ruleset 3 (test-owner): only repository rulesets can be bypassed.",
-			  ],
-			]
-		`);
+		expect(mockInfo).toHaveBeenCalledWith(
+			"Skipping Organization ruleset 3 (test-owner): only repository rulesets can be bypassed.",
+		);
 	});
 
-	it("omits rulesets that fail to be fetched", async () => {
-		const rulesetB = { enforcement: "active", id: 2, name: "B" };
-
+	it("throws when a ruleset fails to be fetched", async () => {
 		mockPaginate.mockResolvedValueOnce([
 			{
 				ruleset_id: 1,
@@ -140,12 +126,13 @@ describe("fetchRulesets", () => {
 				type: "deletion",
 			},
 		]);
-		mockRequest
-			.mockRejectedValueOnce(new Error("Oh no!"))
-			.mockResolvedValueOnce({ data: rulesetB });
+		mockRequest.mockRejectedValueOnce(new Error("Oh no!"));
 
-		const actual = await fetchRulesets({ octokit: mockOctokit, requestData });
-
-		expect(actual).toEqual([rulesetB]);
+		await expect(
+			fetchRulesets({ octokit: mockOctokit, requestData }),
+		).rejects.toThrowErrorMatchingInlineSnapshot(
+			`[Error: Could not fetch existing ruleset 1: Error: Oh no!]`,
+		);
+		expect(mockRequest).toHaveBeenCalledTimes(1);
 	});
 });
