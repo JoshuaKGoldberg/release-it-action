@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.1](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.6.0...v0.6.1) (2026-10-03)
+
+### Performance Improvements
+
+- check npm more often while waiting for a recent version ([#1003](https://github.com/JoshuaKGoldberg/release-it-action/issues/1003)) ([63666ee](https://github.com/JoshuaKGoldberg/release-it-action/commit/63666ee32d88b838a70a80f094af1de72f0f2f4b)), closes [#1002](https://github.com/JoshuaKGoldberg/release-it-action/issues/1002)
+
 # [0.6.0](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.33...v0.6.0) (2026-10-03)
 
 ### Features
