@@ -115,7 +115,7 @@ Skip this if you set `skip-npm-publish`, since the hook would still publish.
 | `git-user-email`            | `string`  | `${<git-user-name>}@users.noreply.github.com` | `git config user.email` value for Git commits.                 |
 | `git-user-name`             | `string`  | `${github.context.actor}`                     | `git config user.name` value for Git commits.                  |
 | `github-token`              | `string`  | `${GITHUB_TOKEN}`                             | GitHub token (PAT) with _repo_ and _workflow_ permissions.     |
-| `npm-token`                 | `string`  | `${NPM_TOKEN}`                                | npm access token (not needed with Trusted Publishing)          |
+| `npm-token`                 | `string`  | `${NPM_TOKEN}`                                | npm access token (not needed with Trusted Publishing).         |
 | `release-it-args`           | `string`  | `""`                                          | Any arbitrary arguments to pass to `npx release-it --verbose`. |
 | `skip-npm-publish`          | `boolean` | `false`                                       | Whether to skip publishing to npm.                             |
 
