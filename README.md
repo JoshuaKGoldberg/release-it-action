@@ -92,15 +92,14 @@ It also lets step 3 finish any release that fails to publish.
 		"after:git:release": "npm publish${isPreRelease ? ' --tag ' + (preReleaseId || 'next') : ''}"
 	},
 	"npm": {
-		"publish": false,
-		"skipChecks": true
+		"publish": false
 	}
 }
 ```
 
 Prereleases publish under their own dist-tag, such as `beta` for `1.2.0-beta.0` or `next` for `1.2.0-0`, since newer versions of npm require a `--tag` for them.
 Stable releases leave out `--tag` so that newer versions of npm can refuse to move `latest` back to an older version.
-`skipChecks` lets step 3 republish a stranded version even without an npm token, such as with Trusted Publishing.
+Step 3 skips release-it's npm authentication checks itself, so it can republish a stranded version even without an npm token, such as with Trusted Publishing.
 
 > Tip: releasing from a maintenance branch?
 > Set `"tag"` under `"npm"` to that branch's dist-tag, which step 3 also uses, and change the hook to `npm publish --tag ${npm.tag}`.
