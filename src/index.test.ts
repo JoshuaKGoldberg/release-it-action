@@ -238,7 +238,7 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt.mock.calls).toEqual([
 			[
 				`--no-increment --no-git --no-npm.publish ${mockReleaseItArgs}`,
-				{ skipSupersededCheck: true },
+				{ allowPublishConflict: true, skipSupersededCheck: true },
 			],
 		]);
 	});
@@ -252,7 +252,7 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt.mock.calls).toEqual([
 			[
 				`--no-increment --no-git --no-npm.publish ${mockReleaseItArgs}`,
-				{ skipSupersededCheck: true },
+				{ allowPublishConflict: true, skipSupersededCheck: true },
 			],
 		]);
 	});

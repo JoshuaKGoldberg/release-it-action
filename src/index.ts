@@ -8,7 +8,7 @@ import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
 import { getHeadTagMissingGitHubRelease } from "./steps/getHeadTagMissingGitHubRelease.js";
 import { getUnpublishedVersion } from "./steps/getUnpublishedVersion.js";
 import { hasGitHubRelease } from "./steps/hasGitHubRelease.js";
-import { runReleaseIt } from "./steps/runReleaseIt.js";
+import { runReleaseIt, RunReleaseItOptions } from "./steps/runReleaseIt.js";
 import { tryCatchInfoAction } from "./tryCatchInfoAction.js";
 
 export interface ReleaseItActionOptions {
@@ -54,12 +54,15 @@ export async function releaseItAction(options: ReleaseItActionOptions) {
 	}
 }
 
-async function createGitHubRelease(releaseItArgs: string | undefined) {
+async function createGitHubRelease(
+	releaseItArgs: string | undefined,
+	options: RunReleaseItOptions = {},
+) {
 	await runReleaseIt(
 		["--no-increment --no-git --no-npm.publish", releaseItArgs]
 			.filter(Boolean)
 			.join(" "),
-		{ skipSupersededCheck: true },
+		{ ...options, skipSupersededCheck: true },
 	);
 }
 
@@ -137,7 +140,8 @@ async function runRelease({
 		core.info(
 			`Tag ${tagMissingRelease} was pushed but its GitHub release was never created. Creating it now.`,
 		);
-		await createGitHubRelease(releaseItArgs);
+		// Hooks such as after:release can try to publish the version npm already has.
+		await createGitHubRelease(releaseItArgs, { allowPublishConflict: true });
 		return;
 	}
 
