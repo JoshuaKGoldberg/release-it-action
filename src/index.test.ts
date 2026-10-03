@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { releaseItAction, ReleaseItActionOptions } from "./index.js";
 
-const mock$$ = vi.fn();
+const mock$$ = vi.fn().mockResolvedValue({ exitCode: 0, stdout: "" });
 
 vi.mock("./execa.js", () => ({
 	get $$() {
@@ -79,10 +79,14 @@ vi.mock("./steps/runReleaseIt.js", () => ({
 	},
 }));
 
+const mockTryCatchInfoAction = vi.fn(
+	async (_: string, action: () => Promise<unknown>) => await action(),
+);
+
 vi.mock("./tryCatchInfoAction.js", async (importOriginal) => ({
 	...(await importOriginal<typeof import("./tryCatchInfoAction.js")>()),
-	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
-		return await action();
+	get tryCatchInfoAction() {
+		return mockTryCatchInfoAction;
 	},
 }));
 
@@ -110,6 +114,23 @@ const mockOptions = {
 describe("releaseItAction", () => {
 	afterEach(() => {
 		vi.unstubAllEnvs();
+	});
+
+	it("fails without doing anything else when releaseItArgs can't be parsed", async () => {
+		await releaseItAction({
+			...mockOptions,
+			bypassBranchProtections: "example-branch",
+			releaseItArgs: '--github.releaseName="oops',
+		});
+
+		expect(mockCore.setFailed).toHaveBeenCalledWith(
+			'Invalid release-it-args: Could not parse arguments (Got EOF while in a quoted string): --github.releaseName="oops',
+		);
+		expect(mock$$).not.toHaveBeenCalled();
+		expect(mockGetUnpublishedVersion).not.toHaveBeenCalled();
+		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
+		expect(mockRunBypassingBranchProtections).not.toHaveBeenCalled();
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
 	it("provides githubToken as GITHUB_TOKEN when the environment variable is not set", async () => {
@@ -232,6 +253,20 @@ describe("releaseItAction", () => {
 		);
 		expect(inspect(error)).not.toContain(mockOptions.npmToken);
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
+	});
+
+	it("does not hand the npm token cleanup's command result to the logger", async () => {
+		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		const cleanupIndex = mockTryCatchInfoAction.mock.calls.findIndex(
+			([label]) => label === "removing the npm token from the npmrc",
+		);
+		expect(cleanupIndex).not.toBe(-1);
+		expect(
+			await mockTryCatchInfoAction.mock.results[cleanupIndex].value,
+		).toBeUndefined();
 	});
 
 	it("publishes a version tagged at HEAD that was never published, without recreating its GitHub release", async () => {
