@@ -1,6 +1,5 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { shouldSemanticRelease } from "should-semantic-release";
 
 import { $$ } from "./execa.js";
 import { runBypassingBranchProtections } from "./runBypassingBranchProtections.js";
@@ -8,6 +7,7 @@ import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
 import { getUnpublishedVersion } from "./steps/getUnpublishedVersion.js";
 import { hasGitHubRelease } from "./steps/hasGitHubRelease.js";
 import { runReleaseIt } from "./steps/runReleaseIt.js";
+import { shouldSemanticRelease } from "./steps/shouldSemanticRelease.js";
 import { tryCatchInfoAction } from "./tryCatchInfoAction.js";
 
 export interface ReleaseItActionOptions {
@@ -120,7 +120,7 @@ async function runRelease({
 	if (
 		(await tryCatchInfoAction(
 			"should-semantic-release",
-			async () => await shouldSemanticRelease({ verbose: true }),
+			shouldSemanticRelease,
 		)) === false
 	) {
 		return;

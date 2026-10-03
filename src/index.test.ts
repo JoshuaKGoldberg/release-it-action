@@ -13,7 +13,7 @@ vi.mock("./execa.js", () => ({
 
 const mockShouldSemanticRelease = vi.fn();
 
-vi.mock("should-semantic-release", () => ({
+vi.mock("./steps/shouldSemanticRelease.js", () => ({
 	get shouldSemanticRelease() {
 		return mockShouldSemanticRelease;
 	},
