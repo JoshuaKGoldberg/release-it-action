@@ -1,4 +1,5 @@
 import * as core from "@actions/core";
+import { inspect } from "node:util";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { releaseItAction, ReleaseItActionOptions } from "./index.js";
@@ -32,6 +33,25 @@ const mockRunBypassingBranchRulesets = vi.fn();
 vi.mock("./runBypassingBranchRulesets.js", () => ({
 	get runBypassingBranchRulesets() {
 		return mockRunBypassingBranchRulesets;
+	},
+}));
+
+const mockRestoreNpmUserConfig = vi.fn();
+const mockSnapshotNpmUserConfig = vi
+	.fn()
+	.mockResolvedValue(mockRestoreNpmUserConfig);
+
+vi.mock("./snapshotNpmUserConfig.js", () => ({
+	get snapshotNpmUserConfig() {
+		return mockSnapshotNpmUserConfig;
+	},
+}));
+
+const mockGetHeadTagMissingGitHubRelease = vi.fn();
+
+vi.mock("./steps/getHeadTagMissingGitHubRelease.js", () => ({
+	get getHeadTagMissingGitHubRelease() {
+		return mockGetHeadTagMissingGitHubRelease;
 	},
 }));
 
@@ -76,6 +96,9 @@ vi.mock("@actions/core", () => ({
 const mockCore = vi.mocked(core);
 
 const mockReleaseItArgs = "--debug";
+
+const retryArgs =
+	"--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
 
 const mockOptions = {
 	githubToken: "mock-githubToken",
@@ -133,7 +156,7 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
-	it("removes the npm token even when the run fails early", async () => {
+	it("restores the npm user config even when the run fails early", async () => {
 		mockGetUnpublishedVersion.mockResolvedValueOnce({
 			headTag: undefined,
 			version: "1.2.3",
@@ -141,9 +164,66 @@ describe("releaseItAction", () => {
 
 		await releaseItAction(mockOptions);
 
-		expect(mock$$.mock.calls.at(-1)).toEqual([
-			["npm config delete //registry.npmjs.org/:_authToken"],
+		expect(mockRestoreNpmUserConfig).toHaveBeenCalledOnce();
+	});
+
+	it("restores the npm user config even when setting the npm token fails", async () => {
+		mock$$
+			.mockResolvedValueOnce(undefined)
+			.mockResolvedValueOnce(undefined)
+			.mockRejectedValueOnce(new Error("Oh no!"));
+
+		await expect(releaseItAction(mockOptions)).rejects.toThrow();
+
+		expect(mockRestoreNpmUserConfig).toHaveBeenCalledOnce();
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
+	});
+
+	it("deletes the npm token from the npmrc when the npm user config could not be snapshotted", async () => {
+		mockSnapshotNpmUserConfig.mockResolvedValueOnce(undefined);
+		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		expect(mock$$.mock.calls.slice(2)).toEqual([
+			[
+				["npm config set //registry.npmjs.org/:_authToken ", ""],
+				"mock-npmToken",
+			],
+			[["npm config delete //registry.npmjs.org/:_authToken"]],
 		]);
+		expect(mockRestoreNpmUserConfig).not.toHaveBeenCalled();
+	});
+
+	it("snapshots the npm user config before setting the npm token", async () => {
+		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		expect(mockSnapshotNpmUserConfig.mock.invocationCallOrder[0]).toBeLessThan(
+			mock$$.mock.invocationCallOrder[2],
+		);
+	});
+
+	it("does not expose the npm token when setting it fails", async () => {
+		mock$$
+			.mockResolvedValueOnce(undefined)
+			.mockResolvedValueOnce(undefined)
+			.mockRejectedValueOnce(
+				new Error(
+					`Command failed with exit code 1: npm config set //registry.npmjs.org/:_authToken ${mockOptions.npmToken}`,
+				),
+			);
+
+		const error = await releaseItAction(mockOptions).catch(
+			(caught: unknown) => caught,
+		);
+
+		expect(error).toEqual(
+			new Error("Could not set the npm token in the npmrc."),
+		);
+		expect(inspect(error)).not.toContain(mockOptions.npmToken);
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
 	it("does not hand the npm token cleanup's command result to the logger", async () => {
@@ -179,7 +259,7 @@ describe("releaseItAction", () => {
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).toHaveBeenCalledTimes(1);
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			`--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
+			`${retryArgs} --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
 			{ allowPublishConflict: true, skipSupersededCheck: true },
 		);
 	});
@@ -195,11 +275,11 @@ describe("releaseItAction", () => {
 
 		expect(mockRunReleaseIt.mock.calls).toEqual([
 			[
-				`--no-increment --no-git --no-npm.publish ${mockReleaseItArgs}`,
+				`${retryArgs} --no-npm.publish ${mockReleaseItArgs}`,
 				{ skipSupersededCheck: true },
 			],
 			[
-				`--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
+				`${retryArgs} --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
 				{ allowPublishConflict: true, skipSupersededCheck: true },
 			],
 		]);
@@ -215,9 +295,66 @@ describe("releaseItAction", () => {
 		await releaseItAction({ ...mockOptions, releaseItArgs: undefined });
 
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
-			"--no-increment --no-git --npm.publish --npm.skipChecks --no-github.release",
+			`${retryArgs} --npm.publish --npm.skipChecks --no-github.release`,
 			{ allowPublishConflict: true, skipSupersededCheck: true },
 		);
+	});
+
+	it("does not check for a missing GitHub release when the version was never published", async () => {
+		mockGetUnpublishedVersion.mockResolvedValueOnce({
+			headTag: "v1.2.3",
+			version: "1.2.3",
+		});
+		mockHasGitHubRelease.mockResolvedValueOnce(true);
+
+		await releaseItAction(mockOptions);
+
+		expect(mockGetHeadTagMissingGitHubRelease).not.toHaveBeenCalled();
+	});
+
+	it("creates a missing GitHub release for a version tagged at HEAD that was already published", async () => {
+		mockGetHeadTagMissingGitHubRelease.mockResolvedValueOnce("v1.2.3");
+
+		await releaseItAction(mockOptions);
+
+		expect(mockGetHeadTagMissingGitHubRelease).toHaveBeenCalledWith(
+			expect.objectContaining({
+				owner: "mock-owner",
+				releaseItArgs: mockReleaseItArgs,
+				repo: "mock-repo",
+			}),
+		);
+		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
+		expect(mockRunReleaseIt.mock.calls).toEqual([
+			[
+				`${retryArgs} --no-npm.publish ${mockReleaseItArgs}`,
+				{ allowPublishConflict: true, skipSupersededCheck: true },
+			],
+		]);
+	});
+
+	it("creates a missing GitHub release for a version tagged at HEAD when skipNpmPublish is true", async () => {
+		mockGetHeadTagMissingGitHubRelease.mockResolvedValueOnce("v1.2.3");
+
+		await releaseItAction({ ...mockOptions, skipNpmPublish: true });
+
+		expect(mockGetUnpublishedVersion).not.toHaveBeenCalled();
+		expect(mockRunReleaseIt.mock.calls).toEqual([
+			[
+				`${retryArgs} --no-npm.publish ${mockReleaseItArgs}`,
+				{ allowPublishConflict: true, skipSupersededCheck: true },
+			],
+		]);
+	});
+
+	it("checks should-semantic-release when no GitHub release is missing", async () => {
+		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		expect(mockGetHeadTagMissingGitHubRelease).toHaveBeenCalled();
+		expect(mockShouldSemanticRelease).toHaveBeenCalled();
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
 	it("does not check for an unpublished version when skipNpmPublish is true", async () => {
@@ -256,11 +393,6 @@ describe("releaseItAction", () => {
 			    ],
 			    "mock-npmToken",
 			  ],
-			  [
-			    [
-			      "npm config delete //registry.npmjs.org/:_authToken",
-			    ],
-			  ],
 			]
 		`);
 		expect(mockRunBypassingBranchProtections).not.toHaveBeenCalled();
@@ -298,11 +430,6 @@ describe("releaseItAction", () => {
 			      "",
 			    ],
 			    "mock-npmToken",
-			  ],
-			  [
-			    [
-			      "npm config delete //registry.npmjs.org/:_authToken",
-			    ],
 			  ],
 			]
 		`);
@@ -389,6 +516,7 @@ describe("releaseItAction", () => {
 		expect(mockCore.info).toHaveBeenCalledWith(
 			"skipNpmPublish is true. Skipping npm publish.",
 		);
+		expect(mockSnapshotNpmUserConfig).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
 			`--no-npm.publish ${mockReleaseItArgs}`,
 		);
@@ -420,5 +548,6 @@ describe("releaseItAction", () => {
 		expect(mockCore.info).toHaveBeenCalledWith(
 			"No npm token provided. This is required unless you're using Trusted Publishing.",
 		);
+		expect(mockSnapshotNpmUserConfig).not.toHaveBeenCalled();
 	});
 });
