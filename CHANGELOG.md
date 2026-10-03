@@ -1,5 +1,11 @@
 # Changelog
 
+# [0.6.0](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.33...v0.6.0) (2026-10-03)
+
+### Features
+
+- remove the npm-token input in favor of Trusted Publishing ([#993](https://github.com/JoshuaKGoldberg/release-it-action/issues/993)) ([ed523d2](https://github.com/JoshuaKGoldberg/release-it-action/commit/ed523d2c288136b25bc6c631a215f31cfc3687c6)), closes [#992](https://github.com/JoshuaKGoldberg/release-it-action/issues/992)
+
 ## [0.5.33](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.32...v0.5.33) (2026-10-03)
 
 ### Bug Fixes
