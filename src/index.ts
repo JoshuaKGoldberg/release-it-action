@@ -79,7 +79,7 @@ async function runRelease({
 
 		if (!headTag) {
 			core.setFailed(
-				`Version ${version} was tagged as ${tag} but never published to npm, and newer commits have landed since. Publish it by re-running your release workflow from ${tag}, such as with a workflow_dispatch that checks out that tag, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.`,
+				`Version ${version} was tagged as ${tag} but never published to npm, and that tag isn't on the checked-out commit. Publish it by dispatching your release workflow with ${tag} checked out, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private. See https://github.com/JoshuaKGoldberg/release-it-action#what-happens-when-a-release-gets-pushed-but-not-published for details.`,
 			);
 			return;
 		}

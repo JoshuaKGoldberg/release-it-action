@@ -124,7 +124,7 @@ describe("releaseItAction", () => {
 		await releaseItAction(mockOptions);
 
 		expect(mockCore.setFailed).toHaveBeenCalledWith(
-			"Version 1.2.3 was tagged as v1.2.3 but never published to npm, and newer commits have landed since. Publish it by re-running your release workflow from v1.2.3, such as with a workflow_dispatch that checks out that tag, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.",
+			"Version 1.2.3 was tagged as v1.2.3 but never published to npm, and that tag isn't on the checked-out commit. Publish it by dispatching your release workflow with v1.2.3 checked out, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private. See https://github.com/JoshuaKGoldberg/release-it-action#what-happens-when-a-release-gets-pushed-but-not-published for details.",
 		);
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();

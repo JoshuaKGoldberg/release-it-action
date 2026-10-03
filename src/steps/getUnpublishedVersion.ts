@@ -15,6 +15,10 @@ export interface UnpublishedVersion {
 	 * The version's Git tag if it points at HEAD, meaning HEAD is its release commit.
 	 */
 	headTag: string | undefined;
+
+	/**
+	 * The version's most recently created Git tag.
+	 */
 	tag: string;
 	version: string;
 }
@@ -67,7 +71,9 @@ export async function getUnpublishedVersion(): Promise<
 	}
 
 	const tagNames = [version, `v${version}`];
-	const existingTags = (await $quiet`git tag --list ${tagNames}`).stdout
+	const existingTags = (
+		await $quiet`git tag --list --sort=-creatordate ${tagNames}`
+	).stdout
 		.split("\n")
 		.filter(Boolean);
 

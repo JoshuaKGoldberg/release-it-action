@@ -165,7 +165,7 @@ describe("getUnpublishedVersion", () => {
 	it("returns the version without a headTag when it was tagged on an older commit", async () => {
 		mockPackageJson(packageData);
 		mockCommands({
-			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+			"git tag --list --sort=-creatordate 1.2.3 v1.2.3": { stdout: "v1.2.3" },
 			"git tag --points-at HEAD": { stdout: "" },
 			"npm view test-package@1.2.3 version --json": notFound,
 		});
@@ -180,7 +180,7 @@ describe("getUnpublishedVersion", () => {
 	it("returns the version with its headTag when it was tagged at HEAD", async () => {
 		mockPackageJson(packageData);
 		mockCommands({
-			"git tag --list 1.2.3 v1.2.3": { stdout: "1.2.3" },
+			"git tag --list --sort=-creatordate 1.2.3 v1.2.3": { stdout: "1.2.3" },
 			"git tag --points-at HEAD": { stdout: "other\n1.2.3" },
 			"npm view test-package@1.2.3 version --json": notFound,
 		});
@@ -192,12 +192,29 @@ describe("getUnpublishedVersion", () => {
 		});
 	});
 
+	it("returns the most recently created tag when the version has both tag styles", async () => {
+		mockPackageJson(packageData);
+		mockCommands({
+			"git tag --list --sort=-creatordate 1.2.3 v1.2.3": {
+				stdout: "v1.2.3\n1.2.3",
+			},
+			"git tag --points-at HEAD": { stdout: "" },
+			"npm view test-package@1.2.3 version --json": notFound,
+		});
+
+		expect(await getUnpublishedVersion()).toEqual({
+			headTag: undefined,
+			tag: "v1.2.3",
+			version: "1.2.3",
+		});
+	});
+
 	it("returns undefined when a recently tagged version shows up on npm after rechecking", async () => {
 		const npmResults = [notFound, notFound, {}];
 		mockPackageJson(packageData);
 		mockCommands({
 			"git log -1 --format=%ct v1.2.3": recentTagTime,
-			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+			"git tag --list --sort=-creatordate 1.2.3 v1.2.3": { stdout: "v1.2.3" },
 			"npm view test-package@1.2.3 version --json": () =>
 				npmResults.shift() ?? {},
 		});
@@ -210,7 +227,7 @@ describe("getUnpublishedVersion", () => {
 		mockPackageJson(packageData);
 		mockCommands({
 			"git log -1 --format=%ct v1.2.3": recentTagTime,
-			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+			"git tag --list --sort=-creatordate 1.2.3 v1.2.3": { stdout: "v1.2.3" },
 			"git tag --points-at HEAD": { stdout: "v1.2.3" },
 			"npm view test-package@1.2.3 version --json": notFound,
 		});
@@ -227,7 +244,7 @@ describe("getUnpublishedVersion", () => {
 		mockPackageJson(packageData);
 		mockCommands({
 			"git log -1 --format=%ct v1.2.3": { stdout: "1000000000" },
-			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+			"git tag --list --sort=-creatordate 1.2.3 v1.2.3": { stdout: "v1.2.3" },
 			"npm view test-package@1.2.3 version --json": notFound,
 		});
 
