@@ -23,10 +23,11 @@ vi.mock("@actions/core", () => ({
 }));
 
 const mock$$ = vi.fn();
+const mock$$captured = vi.fn(() => mock$$);
 
 vi.mock("../execa.js", () => ({
 	get $$captured() {
-		return mock$$;
+		return mock$$captured;
 	},
 }));
 
@@ -42,6 +43,8 @@ vi.mock("./checkSuperseded.js", () => ({
 	},
 }));
 
+const mockOptions = { githubToken: "mock-github-token" };
+
 const commandFailure = Object.assign(
 	new Error(
 		"Command failed with exit code 1: npx release-it --verbose\n\noutput",
@@ -53,7 +56,7 @@ describe("runReleaseIt", () => {
 	it("does not log an error if running release-it succeeds with stderr output", async () => {
 		mock$$.mockResolvedValue({ exitCode: 0, stderr: "npm notice" });
 
-		await runReleaseIt();
+		await runReleaseIt("", mockOptions);
 
 		expect(mockError).not.toHaveBeenCalled();
 		expect(mockSetFailed).not.toHaveBeenCalled();
@@ -62,7 +65,7 @@ describe("runReleaseIt", () => {
 	it("logs an error if running release-it crashes altogether", async () => {
 		mock$$.mockRejectedValue(new Error("Oh no!"));
 
-		await runReleaseIt();
+		await runReleaseIt("", mockOptions);
 
 		expect(mockError).not.toHaveBeenCalled();
 		expect(mockSetFailed.mock.calls).toMatchInlineSnapshot(`
@@ -77,7 +80,7 @@ describe("runReleaseIt", () => {
 	it("logs only the short message of a release-it command failure", async () => {
 		mock$$.mockRejectedValue(commandFailure);
 
-		await runReleaseIt();
+		await runReleaseIt("", mockOptions);
 
 		expect(mockSetFailed).toHaveBeenCalledWith(
 			"Error running release-it: Command failed with exit code 1: npx release-it --verbose",
@@ -89,9 +92,12 @@ describe("runReleaseIt", () => {
 		mockGetHeadSha.mockResolvedValue("start-sha");
 		mockCheckSuperseded.mockResolvedValue(true);
 
-		await runReleaseIt();
+		await runReleaseIt("", mockOptions);
 
-		expect(mockCheckSuperseded).toHaveBeenCalledWith("start-sha");
+		expect(mockCheckSuperseded).toHaveBeenCalledWith(
+			"start-sha",
+			"mock-github-token",
+		);
 		expect(mockWarning.mock.calls).toMatchInlineSnapshot(`
 			[
 			  [
@@ -108,7 +114,7 @@ describe("runReleaseIt", () => {
 		mockGetHeadSha.mockResolvedValue("start-sha");
 		mockCheckSuperseded.mockResolvedValue(true);
 
-		await runReleaseIt("", { skipSupersededCheck: true });
+		await runReleaseIt("", { ...mockOptions, skipSupersededCheck: true });
 
 		expect(mockCheckSuperseded).not.toHaveBeenCalled();
 		expect(mockWarning).not.toHaveBeenCalled();
@@ -122,7 +128,7 @@ describe("runReleaseIt", () => {
 		mockGetHeadSha.mockResolvedValue("start-sha");
 		mockCheckSuperseded.mockResolvedValue(false);
 
-		await runReleaseIt();
+		await runReleaseIt("", mockOptions);
 
 		expect(mockError).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalled();
@@ -138,7 +144,7 @@ describe("runReleaseIt", () => {
 			mockGetHeadSha.mockResolvedValue("start-sha");
 			mockCheckSuperseded.mockResolvedValue(false);
 
-			await runReleaseIt("", { allowPublishConflict: true });
+			await runReleaseIt("", { ...mockOptions, allowPublishConflict: true });
 
 			expect(mockInfo).toHaveBeenCalledWith(
 				"release-it failed because npm already has this version. A previous release run must have published it: Error: Oh no!",
@@ -157,7 +163,7 @@ describe("runReleaseIt", () => {
 		mockGetHeadSha.mockResolvedValue("start-sha");
 		mockCheckSuperseded.mockResolvedValue(false);
 
-		await runReleaseIt("");
+		await runReleaseIt("", mockOptions);
 
 		expect(mockError).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalled();
@@ -170,7 +176,7 @@ describe("runReleaseIt", () => {
 		mockGetHeadSha.mockResolvedValue("start-sha");
 		mockCheckSuperseded.mockResolvedValue(false);
 
-		await runReleaseIt("", { allowPublishConflict: true });
+		await runReleaseIt("", { ...mockOptions, allowPublishConflict: true });
 
 		expect(mockError).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalled();
@@ -181,7 +187,7 @@ describe("runReleaseIt", () => {
 		mockGetHeadSha.mockResolvedValueOnce("start-sha");
 		mockCheckSuperseded.mockResolvedValueOnce(false);
 
-		await runReleaseIt("", { allowPublishConflict: true });
+		await runReleaseIt("", { ...mockOptions, allowPublishConflict: true });
 
 		expect(mockInfo).not.toHaveBeenCalledWith(
 			expect.stringContaining("npm already has this version"),
@@ -193,7 +199,7 @@ describe("runReleaseIt", () => {
 		mock$$.mockRejectedValue(commandFailure);
 		mockGetHeadSha.mockResolvedValue(undefined);
 
-		await runReleaseIt();
+		await runReleaseIt("", mockOptions);
 
 		expect(mockCheckSuperseded).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalled();
@@ -205,13 +211,13 @@ describe("runReleaseIt", () => {
 		mockGetHeadSha.mockResolvedValueOnce("start-sha");
 		mockCheckSuperseded.mockRejectedValueOnce(error);
 
-		await expect(runReleaseIt()).rejects.toBe(error);
+		await expect(runReleaseIt("", mockOptions)).rejects.toBe(error);
 	});
 
 	it("returns true when release-it succeeds", async () => {
 		mock$$.mockResolvedValueOnce({ exitCode: 0 });
 
-		expect(await runReleaseIt()).toBe(true);
+		expect(await runReleaseIt("", mockOptions)).toBe(true);
 	});
 
 	it("returns false when release-it fails and the run is failed", async () => {
@@ -219,7 +225,7 @@ describe("runReleaseIt", () => {
 		mockGetHeadSha.mockResolvedValueOnce("start-sha");
 		mockCheckSuperseded.mockResolvedValueOnce(false);
 
-		expect(await runReleaseIt()).toBe(false);
+		expect(await runReleaseIt("", mockOptions)).toBe(false);
 		expect(mockSetFailed).toHaveBeenCalled();
 	});
 
@@ -228,7 +234,7 @@ describe("runReleaseIt", () => {
 		mockGetHeadSha.mockResolvedValueOnce("start-sha");
 		mockCheckSuperseded.mockResolvedValueOnce(true);
 
-		expect(await runReleaseIt()).toBe(false);
+		expect(await runReleaseIt("", mockOptions)).toBe(false);
 		expect(mockWarning).toHaveBeenCalled();
 		expect(mockSetFailed).not.toHaveBeenCalled();
 	});
@@ -236,16 +242,26 @@ describe("runReleaseIt", () => {
 	it("does not log an error if running release-it runs smoothly", async () => {
 		mock$$.mockResolvedValue({ exitCode: 0 });
 
-		await runReleaseIt();
+		await runReleaseIt("", mockOptions);
 
 		expect(mockError).not.toHaveBeenCalled();
 		expect(mockSetFailed).not.toHaveBeenCalled();
 	});
 
+	it("passes githubToken to release-it as GITHUB_TOKEN", async () => {
+		mock$$.mockResolvedValue({ exitCode: 0 });
+
+		await runReleaseIt("", mockOptions);
+
+		expect(mock$$captured).toHaveBeenCalledWith({
+			env: { GITHUB_TOKEN: "mock-github-token" },
+		});
+	});
+
 	it("does not include releaseItArgs when provided as an empty string", async () => {
 		mock$$.mockResolvedValue({ exitCode: 0 });
 
-		await runReleaseIt("");
+		await runReleaseIt("", mockOptions);
 
 		expect(mock$$).toHaveBeenCalledWith(["npx release-it --verbose ", ""], []);
 		expect(mockError).not.toHaveBeenCalled();
@@ -255,7 +271,7 @@ describe("runReleaseIt", () => {
 	it("includes releaseItArgs when provided as a non-empty string", async () => {
 		mock$$.mockResolvedValue({ exitCode: 0 });
 
-		await runReleaseIt("major --preRelease=beta");
+		await runReleaseIt("major --preRelease=beta", mockOptions);
 
 		expect(mock$$).toHaveBeenCalledWith(
 			["npx release-it --verbose ", ""],
@@ -268,7 +284,7 @@ describe("runReleaseIt", () => {
 	it("keeps a quoted releaseItArgs value with spaces as a single argument", async () => {
 		mock$$.mockResolvedValue({ exitCode: 0 });
 
-		await runReleaseIt('--github.releaseName="Release v1"');
+		await runReleaseIt('--github.releaseName="Release v1"', mockOptions);
 
 		expect(mock$$).toHaveBeenCalledWith(
 			["npx release-it --verbose ", ""],
@@ -282,7 +298,7 @@ describe("runReleaseIt", () => {
 		mockGetHeadSha.mockResolvedValue("start-sha");
 		mockCheckSuperseded.mockResolvedValue(false);
 
-		await runReleaseIt('--github.releaseName="oops');
+		await runReleaseIt('--github.releaseName="oops', mockOptions);
 
 		expect(mock$$).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalledWith(

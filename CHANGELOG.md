@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.30](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.29...v0.5.30) (2026-10-03)
+
+### Bug Fixes
+
+- fail the run when should-semantic-release errors ([#947](https://github.com/JoshuaKGoldberg/release-it-action/issues/947)) ([056e554](https://github.com/JoshuaKGoldberg/release-it-action/commit/056e5542da3f2374820bf0d08464dbfa3b401ba5)), closes [#898](https://github.com/JoshuaKGoldberg/release-it-action/issues/898) [#967](https://github.com/JoshuaKGoldberg/release-it-action/issues/967)
+
 ## [0.5.29](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.28...v0.5.29) (2026-10-03)
 
 ### Bug Fixes

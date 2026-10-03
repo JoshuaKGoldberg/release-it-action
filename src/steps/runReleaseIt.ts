@@ -6,6 +6,7 @@ import { checkSuperseded, getHeadSha } from "./checkSuperseded.js";
 
 export interface RunReleaseItOptions {
 	allowPublishConflict?: boolean;
+	githubToken: string;
 	skipSupersededCheck?: boolean;
 }
 
@@ -13,20 +14,30 @@ const publishConflict =
 	/cannot publish over (?:the )?previously (?:published|staged) version/i;
 
 export async function runReleaseIt(
-	releaseItArgs?: string,
-	{ allowPublishConflict, skipSupersededCheck }: RunReleaseItOptions = {},
+	releaseItArgs: string,
+	{
+		allowPublishConflict,
+		githubToken,
+		skipSupersededCheck,
+	}: RunReleaseItOptions,
 ): Promise<boolean> {
 	core.info("Start: running release-it");
 
 	const startSha = await getHeadSha();
 
 	try {
-		const args = parseArgsString(releaseItArgs ?? "");
-		await $$captured`npx release-it --verbose ${args}`;
+		const args = parseArgsString(releaseItArgs);
+		await $$captured({
+			env: { GITHUB_TOKEN: githubToken },
+		})`npx release-it --verbose ${args}`;
 
 		return true;
 	} catch (error) {
-		if (!skipSupersededCheck && startSha && (await checkSuperseded(startSha))) {
+		if (
+			!skipSupersededCheck &&
+			startSha &&
+			(await checkSuperseded(startSha, githubToken))
+		) {
 			core.warning(
 				`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`,
 			);

@@ -83,7 +83,8 @@ const mockTryCatchInfoAction = vi.fn(
 	async (_: string, action: () => Promise<unknown>) => await action(),
 );
 
-vi.mock("./tryCatchInfoAction.js", () => ({
+vi.mock("./tryCatchInfoAction.js", async (importOriginal) => ({
+	...(await importOriginal<typeof import("./tryCatchInfoAction.js")>()),
 	get tryCatchInfoAction() {
 		return mockTryCatchInfoAction;
 	},
@@ -132,22 +133,30 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
-	it("provides githubToken as GITHUB_TOKEN when the environment variable is not set", async () => {
+	it("passes githubToken to release-it without setting a GITHUB_TOKEN environment variable", async () => {
 		vi.stubEnv("GITHUB_TOKEN", undefined);
-		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+		mockShouldSemanticRelease.mockResolvedValueOnce(true);
 
 		await releaseItAction(mockOptions);
 
-		expect(process.env.GITHUB_TOKEN).toBe("mock-githubToken");
+		expect(process.env.GITHUB_TOKEN).toBeUndefined();
+		expect(mockGetUnpublishedVersion).toHaveBeenCalledWith("mock-githubToken");
+		expect(mockRunReleaseIt).toHaveBeenCalledWith(mockReleaseItArgs, {
+			githubToken: "mock-githubToken",
+		});
 	});
 
-	it("does not overwrite an existing GITHUB_TOKEN environment variable", async () => {
+	it("passes githubToken to release-it without changing an existing GITHUB_TOKEN environment variable", async () => {
 		vi.stubEnv("GITHUB_TOKEN", "mock-environment-token");
-		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+		mockShouldSemanticRelease.mockResolvedValueOnce(true);
 
 		await releaseItAction(mockOptions);
 
 		expect(process.env.GITHUB_TOKEN).toBe("mock-environment-token");
+		expect(mockGetUnpublishedVersion).toHaveBeenCalledWith("mock-githubToken");
+		expect(mockRunReleaseIt).toHaveBeenCalledWith(mockReleaseItArgs, {
+			githubToken: "mock-githubToken",
+		});
 	});
 
 	it("does not run release-it when shouldSemanticRelease returns false", async () => {
@@ -155,6 +164,17 @@ describe("releaseItAction", () => {
 
 		await releaseItAction(mockOptions);
 
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
+	});
+
+	it("fails the run and does not run release-it when shouldSemanticRelease throws", async () => {
+		mockShouldSemanticRelease.mockRejectedValueOnce(new Error("Oh no!"));
+
+		await releaseItAction(mockOptions);
+
+		expect(mockCore.setFailed).toHaveBeenCalledWith(
+			"Error should-semantic-release: Error: Oh no!",
+		);
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
@@ -277,7 +297,11 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt).toHaveBeenCalledTimes(1);
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
 			`${retryArgs} --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
-			{ allowPublishConflict: true, skipSupersededCheck: true },
+			{
+				allowPublishConflict: true,
+				githubToken: "mock-githubToken",
+				skipSupersededCheck: true,
+			},
 		);
 	});
 
@@ -294,11 +318,15 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt.mock.calls).toEqual([
 			[
 				`${retryArgs} --no-npm.publish ${mockReleaseItArgs}`,
-				{ skipSupersededCheck: true },
+				{ githubToken: "mock-githubToken", skipSupersededCheck: true },
 			],
 			[
 				`${retryArgs} --npm.publish --npm.skipChecks --no-github.release ${mockReleaseItArgs}`,
-				{ allowPublishConflict: true, skipSupersededCheck: true },
+				{
+					allowPublishConflict: true,
+					githubToken: "mock-githubToken",
+					skipSupersededCheck: true,
+				},
 			],
 		]);
 	});
@@ -316,7 +344,7 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt.mock.calls).toEqual([
 			[
 				`${retryArgs} --no-npm.publish ${mockReleaseItArgs}`,
-				{ skipSupersededCheck: true },
+				{ githubToken: "mock-githubToken", skipSupersededCheck: true },
 			],
 		]);
 		expect(mockCore.setFailed).toHaveBeenCalledWith(
@@ -350,7 +378,11 @@ describe("releaseItAction", () => {
 
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
 			`${retryArgs} --npm.publish --npm.skipChecks --no-github.release`,
-			{ allowPublishConflict: true, skipSupersededCheck: true },
+			{
+				allowPublishConflict: true,
+				githubToken: "mock-githubToken",
+				skipSupersededCheck: true,
+			},
 		);
 	});
 
@@ -382,7 +414,11 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt.mock.calls).toEqual([
 			[
 				`${retryArgs} --no-npm.publish ${mockReleaseItArgs}`,
-				{ allowPublishConflict: true, skipSupersededCheck: true },
+				{
+					allowPublishConflict: true,
+					githubToken: "mock-githubToken",
+					skipSupersededCheck: true,
+				},
 			],
 		]);
 	});
@@ -396,7 +432,11 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt.mock.calls).toEqual([
 			[
 				`${retryArgs} --no-npm.publish ${mockReleaseItArgs}`,
-				{ allowPublishConflict: true, skipSupersededCheck: true },
+				{
+					allowPublishConflict: true,
+					githubToken: "mock-githubToken",
+					skipSupersededCheck: true,
+				},
 			],
 		]);
 	});
@@ -451,7 +491,9 @@ describe("releaseItAction", () => {
 		`);
 		expect(mockRunBypassingBranchProtections).not.toHaveBeenCalled();
 		expect(mockRunBypassingBranchRulesets).not.toHaveBeenCalled();
-		expect(mockRunReleaseIt).toHaveBeenCalledWith(mockReleaseItArgs);
+		expect(mockRunReleaseIt).toHaveBeenCalledWith(mockReleaseItArgs, {
+			githubToken: "mock-githubToken",
+		});
 	});
 
 	it("runs bypassing branch protections when shouldSemanticRelease returns true and bypassBranchProtections is a string", async () => {
@@ -509,7 +551,9 @@ describe("releaseItAction", () => {
 			expect.anything(),
 			expect.any(Function),
 		);
-		expect(mockRunReleaseIt).toHaveBeenCalledWith(mockReleaseItArgs);
+		expect(mockRunReleaseIt).toHaveBeenCalledWith(mockReleaseItArgs, {
+			githubToken: "mock-githubToken",
+		});
 	});
 
 	it("runs bypassing branch rulesets inside bypassing branch protections when both are strings", async () => {
@@ -541,7 +585,9 @@ describe("releaseItAction", () => {
 			expect.anything(),
 			expect.any(Function),
 		);
-		expect(mockRunReleaseIt).toHaveBeenCalledWith(mockReleaseItArgs);
+		expect(mockRunReleaseIt).toHaveBeenCalledWith(mockReleaseItArgs, {
+			githubToken: "mock-githubToken",
+		});
 	});
 
 	it("logs an info message, does not set authToken, and passes --no-npm.publish when skipNpmPublish is true", async () => {
@@ -573,6 +619,7 @@ describe("releaseItAction", () => {
 		expect(mockSnapshotNpmUserConfig).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(
 			`--no-npm.publish ${mockReleaseItArgs}`,
+			{ githubToken: "mock-githubToken" },
 		);
 	});
 
