@@ -12,7 +12,7 @@ inputs:
   github-token:
     description: GitHub token (PAT) with repo and workflow permissions.
   npm-token:
-    description: npm access token (not needed with Trusted Publishing).
+    description: npm access token with the automation role (not needed with Trusted Publishing).
   release-it-args:
     description: Any arbitrary arguments to pass to `npx release-it --verbose`.
   skip-npm-publish:
