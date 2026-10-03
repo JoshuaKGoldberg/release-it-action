@@ -30292,7 +30292,7 @@ module.exports = {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8830);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(5883);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(1466);
 
 
 
@@ -30308,7 +30308,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 5883:
+/***/ 1466:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -30324,18 +30324,12 @@ const external_node_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(i
 ;// CONCATENATED MODULE: ./src/getTokenInput.ts
 
 
-function getOptionalTokenInput(name, backup) {
+function getTokenInput(name, backup) {
     const token = core/* getInput */.V4(name) || external_node_process_namespaceObject.env[backup];
-    if (token) {
-        core/* setSecret */.Pq(token);
-    }
-    return token;
-}
-function getRequiredTokenInput(name, backup) {
-    const token = getOptionalTokenInput(name, backup);
     if (!token) {
         throw new Error(`No ${name} input or ${backup} environment variable defined.`);
     }
+    core/* setSecret */.Pq(token);
     return token;
 }
 
@@ -41623,40 +41617,6 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
     }
 }
 
-;// CONCATENATED MODULE: ./src/snapshotNpmUserConfig.ts
-
-
-
-async function snapshotNpmUserConfig() {
-    try {
-        const { stdout: userConfig } = await $ `npm config get userconfig`;
-        const contents = await readFileIfExists(userConfig);
-        return async () => {
-            if (contents) {
-                await external_node_fs_promises_namespaceObject.writeFile(userConfig, contents);
-            }
-            else {
-                await external_node_fs_promises_namespaceObject.rm(userConfig, { force: true });
-            }
-        };
-    }
-    catch (error) {
-        core/* warning */.$e(`Could not snapshot the npmrc, so the npm token will be deleted from it after the run instead: ${error}`);
-        return undefined;
-    }
-}
-async function readFileIfExists(filePath) {
-    try {
-        return await external_node_fs_promises_namespaceObject.readFile(filePath);
-    }
-    catch (error) {
-        if (error.code === "ENOENT") {
-            return undefined;
-        }
-        throw error;
-    }
-}
-
 ;// CONCATENATED MODULE: ./src/steps/hasGitHubRelease.ts
 async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
     try {
@@ -41872,9 +41832,8 @@ function describeError(error) {
 
 
 
-
 async function releaseItAction(options) {
-    const { gitUserEmail, gitUserName, npmToken, releaseItArgs, skipNpmPublish } = options;
+    const { gitUserEmail, gitUserName, releaseItArgs, skipNpmPublish } = options;
     try {
         parseArgsString(releaseItArgs ?? "");
     }
@@ -41887,29 +41846,7 @@ async function releaseItAction(options) {
     if (skipNpmPublish) {
         core/* info */.pq("skipNpmPublish is true. Skipping npm publish.");
     }
-    else if (!npmToken) {
-        core/* info */.pq("No npm token provided. This is required unless you're using Trusted Publishing.");
-    }
-    if (skipNpmPublish || !npmToken) {
-        await runRelease(options);
-        return;
-    }
-    const restoreNpmUserConfig = await snapshotNpmUserConfig();
-    try {
-        try {
-            await $$ `npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
-        }
-        catch {
-            throw new Error("Could not set the npm token in the npmrc.");
-        }
-        await runRelease(options);
-    }
-    finally {
-        await tryCatchInfoAction("removing the npm token from the npmrc", restoreNpmUserConfig ??
-            (async () => {
-                await $$ `npm config delete //registry.npmjs.org/:_authToken`;
-            }));
-    }
+    await runRelease(options);
 }
 const retryArgs = "--no-increment --no-git.commit --no-git.tag --no-git.push --no-git.requireCleanWorkingDir --no-git.requireCommits --no-git.requireUpstream";
 async function createGitHubRelease(releaseItArgs, options) {
@@ -41995,16 +41932,19 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
 
 
 
+
 async function runReleaseItAction(context) {
     const gitUserName = core/* getInput */.V4("git-user-name") || context.actor;
+    if (external_node_process_namespaceObject.env.NPM_TOKEN) {
+        core/* warning */.$e("release-it-action no longer uses NPM_TOKEN. Publish to npm with Trusted Publishing instead: https://docs.npmjs.com/trusted-publishers");
+    }
     await releaseItAction({
         bypassBranchProtections: core/* getInput */.V4("bypass-branch-protections"),
         bypassBranchRulesets: core/* getInput */.V4("bypass-branch-rulesets"),
-        githubToken: getRequiredTokenInput("github-token", "GITHUB_TOKEN"),
+        githubToken: getTokenInput("github-token", "GITHUB_TOKEN"),
         gitUserEmail: core/* getInput */.V4("git-user-email") ||
             `${gitUserName}@users.noreply.github.com`,
         gitUserName,
-        npmToken: getOptionalTokenInput("npm-token", "NPM_TOKEN"),
         owner: context.repo.owner,
         releaseItArgs: core/* getInput */.V4("release-it-args"),
         repo: context.repo.repo,
