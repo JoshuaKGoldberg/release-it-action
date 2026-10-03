@@ -41328,17 +41328,52 @@ function createCommonRequestData(commonData) {
     };
 }
 
+;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
+
+async function tryCatchInfoAction(label, action) {
+    return await tryCatchAction(label, action, core/* info */.pq);
+}
+async function tryCatchSetFailedAction(label, action) {
+    return await tryCatchAction(label, action, core/* setFailed */.C1);
+}
+async function tryCatchThrowAction(label, action, failure) {
+    core/* info */.pq(`Start: ${label}`);
+    let result;
+    try {
+        result = await action();
+    }
+    catch (error) {
+        throw new Error(`${failure}: ${String(error)}`, { cause: error });
+    }
+    tryCatchInfoAction_logResult(label, result);
+    return result;
+}
+function tryCatchInfoAction_logResult(label, result) {
+    if (result !== undefined) {
+        core/* info */.pq(`Result from ${label}: ${JSON.stringify(result, null, 4)}`);
+    }
+}
+async function tryCatchAction(label, action, logError) {
+    core/* info */.pq(`Start: ${label}`);
+    try {
+        const result = await action();
+        tryCatchInfoAction_logResult(label, result);
+        return result;
+    }
+    catch (error) {
+        logError(`Error ${label}: ${error}`);
+        return undefined;
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/steps/deleteProtections.ts
+
 
 async function deleteProtections({ existingProtections, octokit, requestData, }) {
     if (existingProtections) {
-        core/* info */.pq(`Start: deleting existing protections for ${requestData.branch}`);
-        try {
+        await tryCatchThrowAction(`deleting existing protections for ${requestData.branch}`, async () => {
             await octokit.request(`DELETE /repos/{owner}/{repo}/branches/{branch}/protection`, requestData);
-        }
-        catch (error) {
-            throw new Error(`Could not delete existing branch protections for ${requestData.branch}: ${String(error)}`, { cause: error });
-        }
+        }, `Could not delete existing branch protections for ${requestData.branch}`);
     }
     else {
         core/* info */.pq(`No existing branch protections found for ${requestData.branch}.`);
@@ -41359,52 +41394,28 @@ function isPlanUpgradeRequired(error) {
 ;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
 
 
+
 async function fetchProtections({ octokit, requestData, }) {
-    const label = `fetching existing branch protections for ${requestData.branch}`;
-    core/* info */.pq(`Start: ${label}`);
-    try {
-        const { data } = await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData);
-        core/* info */.pq(`Result from ${label}: ${JSON.stringify(data, null, 4)}`);
-        return data;
-    }
-    catch (error) {
-        const { message, status } = getRequestErrorDetails(error);
-        if (status === 404 && message === "Branch not protected") {
-            return undefined;
+    return await tryCatchThrowAction(`fetching existing branch protections for ${requestData.branch}`, async () => {
+        try {
+            return (await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData)).data;
         }
-        if (status === 404 && message === "Branch not found") {
-            core/* warning */.$e(`Branch ${requestData.branch} doesn't exist, so it has no branch protections to bypass.`);
-            return undefined;
+        catch (error) {
+            const { message, status } = getRequestErrorDetails(error);
+            if (status === 404 && message === "Branch not protected") {
+                return undefined;
+            }
+            if (status === 404 && message === "Branch not found") {
+                core/* warning */.$e(`Branch ${requestData.branch} doesn't exist, so it has no branch protections to bypass.`);
+                return undefined;
+            }
+            if (isPlanUpgradeRequired(error)) {
+                core/* warning */.$e(`Branch protections aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
+                return undefined;
+            }
+            throw error;
         }
-        if (isPlanUpgradeRequired(error)) {
-            core/* warning */.$e(`Branch protections aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
-            return undefined;
-        }
-        throw new Error(`Could not fetch existing branch protections for ${requestData.branch}: ${String(error)}`, { cause: error });
-    }
-}
-
-;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
-
-async function tryCatchInfoAction(label, action) {
-    return await tryCatchAction(label, action, core/* info */.pq);
-}
-async function tryCatchSetFailedAction(label, action) {
-    return await tryCatchAction(label, action, core/* setFailed */.C1);
-}
-async function tryCatchAction(label, action, logError) {
-    core/* info */.pq(`Start: ${label}`);
-    try {
-        const result = await action();
-        if (result !== undefined) {
-            core/* info */.pq(`Result from ${label}: ${JSON.stringify(result, null, 4)}`);
-        }
-        return result;
-    }
-    catch (error) {
-        logError(`Error ${label}: ${error}`);
-        return undefined;
-    }
+    }, `Could not fetch existing branch protections for ${requestData.branch}`);
 }
 
 ;// CONCATENATED MODULE: ./src/steps/recreateProtections.ts
@@ -41514,8 +41525,9 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
 ;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
 
 
+
 async function fetchRulesets({ octokit, requestData, }) {
-    const rules = await fetchLogged(`existing branch rules for ${requestData.branch}`, async () => {
+    const rules = await tryCatchThrowAction(`fetching existing branch rules for ${requestData.branch}`, async () => {
         try {
             return await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
                 ...requestData,
@@ -41529,7 +41541,7 @@ async function fetchRulesets({ octokit, requestData, }) {
             }
             throw error;
         }
-    });
+    }, `Could not fetch existing branch rules for ${requestData.branch}`);
     const rulesetIds = new Set();
     for (const rule of rules) {
         if (rule.ruleset_id === undefined) {
@@ -41545,27 +41557,13 @@ async function fetchRulesets({ octokit, requestData, }) {
     }
     const rulesets = [];
     for (const rulesetId of rulesetIds) {
-        const ruleset = await fetchLogged(`existing ruleset ${rulesetId.toString()}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+        const ruleset = await tryCatchThrowAction(`fetching existing ruleset ${rulesetId.toString()}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
             ...requestData,
             ruleset_id: rulesetId,
-        })).data);
+        })).data, `Could not fetch existing ruleset ${rulesetId.toString()}`);
         rulesets.push(ruleset);
     }
     return rulesets;
-}
-async function fetchLogged(description, fetch) {
-    core/* info */.pq(`Start: fetching ${description}`);
-    let result;
-    try {
-        result = await fetch();
-    }
-    catch (error) {
-        throw new Error(`Could not fetch ${description}: ${String(error)}`, {
-            cause: error,
-        });
-    }
-    core/* info */.pq(`Result from fetching ${description}: ${JSON.stringify(result, null, 4)}`);
-    return result;
 }
 
 ;// CONCATENATED MODULE: ./src/steps/updateRulesetsEnforcement.ts
@@ -41588,16 +41586,9 @@ async function updateRulesetsEnforcement({ commonRequestData, enforcement, exist
         };
         if (setFailedOnError) {
             await tryCatchSetFailedAction(`setting ${description}`, update);
-            continue;
         }
-        core/* info */.pq(`Start: setting ${description}`);
-        try {
-            await update();
-        }
-        catch (error) {
-            throw new Error(`Could not set ${description}: ${String(error)}`, {
-                cause: error,
-            });
+        else {
+            await tryCatchThrowAction(`setting ${description}`, update, `Could not set ${description}`);
         }
     }
 }
