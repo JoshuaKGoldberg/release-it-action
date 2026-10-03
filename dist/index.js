@@ -43959,6 +43959,7 @@ async function deleteProtections({ existingProtections, octokit, requestData, })
 
 ;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
 
+const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
 async function fetchProtections({ octokit, requestData, }) {
     const label = `fetching existing branch protections for ${requestData.branch}`;
     info(`Start: ${label}`);
@@ -43969,7 +43970,16 @@ async function fetchProtections({ octokit, requestData, }) {
     }
     catch (error) {
         const { response, status } = error;
-        if (status === 404 && response?.data?.message === "Branch not protected") {
+        const message = response?.data?.message ?? "";
+        if (status === 404 && message === "Branch not protected") {
+            return undefined;
+        }
+        if (status === 404 && message === "Branch not found") {
+            warning(`Branch ${requestData.branch} doesn't exist, so it has no branch protections to bypass.`);
+            return undefined;
+        }
+        if (status === 403 && planUpgradeRequired.test(message)) {
+            warning(`Branch protections aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
             return undefined;
         }
         throw new Error(`Could not fetch existing branch protections for ${requestData.branch}: ${String(error)}`, { cause: error });
