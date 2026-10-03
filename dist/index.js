@@ -41912,20 +41912,17 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
     const runReleaseItWithArgs = async () => {
         await runReleaseIt(args, { githubToken });
     };
-    if (!bypassBranchProtections && !bypassBranchRulesets) {
-        await runReleaseItWithArgs();
-        return;
-    }
-    const run = bypassBranchRulesets
+    const runWithinRulesets = bypassBranchRulesets
         ? async () => {
             await runBypassingBranchRulesets({ branch: bypassBranchRulesets, owner, repo }, octokit, runReleaseItWithArgs);
         }
         : runReleaseItWithArgs;
-    if (!bypassBranchProtections) {
-        await run();
-        return;
-    }
-    await runBypassingBranchProtections({ branch: bypassBranchProtections, owner, repo }, octokit, run);
+    const runWithinProtections = bypassBranchProtections
+        ? async () => {
+            await runBypassingBranchProtections({ branch: bypassBranchProtections, owner, repo }, octokit, runWithinRulesets);
+        }
+        : runWithinRulesets;
+    await runWithinProtections();
 }
 
 ;// CONCATENATED MODULE: ./src/action/runReleaseItAction.ts

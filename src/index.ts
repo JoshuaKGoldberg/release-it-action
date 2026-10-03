@@ -173,12 +173,7 @@ async function runRelease({
 		await runReleaseIt(args, { githubToken });
 	};
 
-	if (!bypassBranchProtections && !bypassBranchRulesets) {
-		await runReleaseItWithArgs();
-		return;
-	}
-
-	const run = bypassBranchRulesets
+	const runWithinRulesets = bypassBranchRulesets
 		? async () => {
 				await runBypassingBranchRulesets(
 					{ branch: bypassBranchRulesets, owner, repo },
@@ -188,14 +183,15 @@ async function runRelease({
 			}
 		: runReleaseItWithArgs;
 
-	if (!bypassBranchProtections) {
-		await run();
-		return;
-	}
+	const runWithinProtections = bypassBranchProtections
+		? async () => {
+				await runBypassingBranchProtections(
+					{ branch: bypassBranchProtections, owner, repo },
+					octokit,
+					runWithinRulesets,
+				);
+			}
+		: runWithinRulesets;
 
-	await runBypassingBranchProtections(
-		{ branch: bypassBranchProtections, owner, repo },
-		octokit,
-		run,
-	);
+	await runWithinProtections();
 }
