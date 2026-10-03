@@ -41333,6 +41333,52 @@ function createCommonRequestData(commonData) {
     };
 }
 
+;// CONCATENATED MODULE: ./src/steps/deleteProtections.ts
+
+async function deleteProtections({ existingProtections, octokit, requestData, }) {
+    if (existingProtections) {
+        core/* info */.pq(`Start: deleting existing protections for ${requestData.branch}`);
+        try {
+            await octokit.request(`DELETE /repos/{owner}/{repo}/branches/{branch}/protection`, requestData);
+        }
+        catch (error) {
+            throw new Error(`Could not delete existing branch protections for ${requestData.branch}: ${String(error)}`, { cause: error });
+        }
+    }
+    else {
+        core/* info */.pq(`No existing branch protections found for ${requestData.branch}.`);
+    }
+}
+
+;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
+
+const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
+async function fetchProtections({ octokit, requestData, }) {
+    const label = `fetching existing branch protections for ${requestData.branch}`;
+    core/* info */.pq(`Start: ${label}`);
+    try {
+        const { data } = await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData);
+        core/* info */.pq(`Result from ${label}: ${JSON.stringify(data, null, 4)}`);
+        return data;
+    }
+    catch (error) {
+        const { response, status } = error;
+        const message = response?.data?.message ?? "";
+        if (status === 404 && message === "Branch not protected") {
+            return undefined;
+        }
+        if (status === 404 && message === "Branch not found") {
+            core/* warning */.$e(`Branch ${requestData.branch} doesn't exist, so it has no branch protections to bypass.`);
+            return undefined;
+        }
+        if (status === 403 && planUpgradeRequired.test(message)) {
+            core/* warning */.$e(`Branch protections aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
+            return undefined;
+        }
+        throw new Error(`Could not fetch existing branch protections for ${requestData.branch}: ${String(error)}`, { cause: error });
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
 
 async function tryCatchInfoAction(label, action) {
@@ -41354,24 +41400,6 @@ async function tryCatchAction(label, action, logError) {
         logError(`Error ${label}: ${error}`);
         return undefined;
     }
-}
-
-;// CONCATENATED MODULE: ./src/steps/deleteProtections.ts
-
-
-async function deleteProtections({ existingProtections, octokit, requestData, }) {
-    if (existingProtections) {
-        await tryCatchInfoAction(`deleting existing protections for ${requestData.branch}`, async () => await octokit.request(`DELETE /repos/{owner}/{repo}/branches/{branch}/protection`, requestData));
-    }
-    else {
-        core/* info */.pq(`No existing branch protections found for ${requestData.branch}.`);
-    }
-}
-
-;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
-
-async function fetchProtections({ octokit, requestData, }) {
-    return await tryCatchInfoAction(`fetching existing branch protections for ${requestData.branch}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData)).data);
 }
 
 ;// CONCATENATED MODULE: ./src/steps/recreateProtections.ts
@@ -41457,12 +41485,12 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
         octokit,
         requestData: commonRequestData,
     });
-    await deleteProtections({
-        existingProtections,
-        octokit,
-        requestData: commonRequestData,
-    });
     try {
+        await deleteProtections({
+            existingProtections,
+            octokit,
+            requestData: commonRequestData,
+        });
         await run();
     }
     finally {
@@ -41476,7 +41504,7 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
 
 ;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
 
-const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
+const fetchRulesets_planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
 async function fetchRulesets({ octokit, requestData, }) {
     const rules = await fetchLogged(`existing branch rules for ${requestData.branch}`, async () => {
         try {
@@ -41488,7 +41516,7 @@ async function fetchRulesets({ octokit, requestData, }) {
         catch (error) {
             const { response, status } = error;
             if (status === 403 &&
-                planUpgradeRequired.test(response?.data?.message ?? "")) {
+                fetchRulesets_planUpgradeRequired.test(response?.data?.message ?? "")) {
                 core/* warning */.$e(`Repository rulesets aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
                 return [];
             }

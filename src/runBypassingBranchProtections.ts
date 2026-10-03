@@ -16,13 +16,12 @@ export async function runBypassingBranchProtections(
 		requestData: commonRequestData,
 	});
 
-	await deleteProtections({
-		existingProtections,
-		octokit,
-		requestData: commonRequestData,
-	});
-
 	try {
+		await deleteProtections({
+			existingProtections,
+			octokit,
+			requestData: commonRequestData,
+		});
 		await run();
 	} finally {
 		await recreateProtections({
