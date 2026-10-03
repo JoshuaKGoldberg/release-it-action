@@ -44623,7 +44623,7 @@ async function runReleaseIt(releaseItArgs, { allowPublishConflict, skipSupersede
                 startSha &&
                 (await checkSuperseded(startSha))) {
                 warning(`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`);
-                return true;
+                return false;
             }
             if (allowPublishConflict &&
                 publishConflict.test(error.all ?? "")) {
@@ -44690,7 +44690,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
         }
         const hasRelease = await tryCatchInfoAction(`checking for a GitHub release for ${headTag}`, async () => await hasGitHubRelease({ octokit, owner, repo, tag: headTag }));
         if (hasRelease === undefined) {
-            setFailed(`Could not check whether ${headTag} has a GitHub release, so ${version} was not published to npm.`);
+            setFailed(`Could not check whether ${headTag} has a GitHub release, so ${version} was not published to npm. Fix the error logged above (for example, a github-token that can't read releases), then re-run the release from the commit tagged ${headTag}.`);
             return;
         }
         info(`Version ${version} was pushed but never published to npm. Publishing it now.`);
@@ -44699,6 +44699,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
             !(await runReleaseIt(["--no-increment --no-git --no-npm.publish", releaseItArgs]
                 .filter(Boolean)
                 .join(" "), { skipSupersededCheck: true }))) {
+            setFailed(`Skipped publishing ${version} to npm because creating the GitHub release for ${headTag} failed. Re-run the release from the commit tagged ${headTag} to retry both.`);
             return;
         }
         // ...and only if that succeeded, do the immutable npm publish
