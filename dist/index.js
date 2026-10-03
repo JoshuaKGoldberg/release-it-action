@@ -43940,6 +43940,42 @@ const $$captured = $({
     stdout: ["inherit", "pipe"],
 });
 
+;// CONCATENATED MODULE: ./src/steps/deleteProtections.ts
+
+async function deleteProtections({ existingProtections, octokit, requestData, }) {
+    if (existingProtections) {
+        info(`Start: deleting existing protections for ${requestData.branch}`);
+        try {
+            await octokit.request(`DELETE /repos/{owner}/{repo}/branches/{branch}/protection`, requestData);
+        }
+        catch (error) {
+            throw new Error(`Could not delete existing branch protections for ${requestData.branch}: ${String(error)}`, { cause: error });
+        }
+    }
+    else {
+        info(`No existing branch protections found for ${requestData.branch}.`);
+    }
+}
+
+;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
+
+async function fetchProtections({ octokit, requestData, }) {
+    const label = `fetching existing branch protections for ${requestData.branch}`;
+    info(`Start: ${label}`);
+    try {
+        const { data } = await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData);
+        info(`Result from ${label}: ${JSON.stringify(data, null, 4)}`);
+        return data;
+    }
+    catch (error) {
+        const { response, status } = error;
+        if (status === 404 && response?.data?.message === "Branch not protected") {
+            return undefined;
+        }
+        throw new Error(`Could not fetch existing branch protections for ${requestData.branch}: ${String(error)}`, { cause: error });
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
 
 async function tryCatchInfoAction(label, action) {
@@ -43961,24 +43997,6 @@ async function tryCatchAction(label, action, logError) {
         logError(`Error ${label}: ${error}`);
         return undefined;
     }
-}
-
-;// CONCATENATED MODULE: ./src/steps/deleteProtections.ts
-
-
-async function deleteProtections({ existingProtections, octokit, requestData, }) {
-    if (existingProtections) {
-        await tryCatchInfoAction(`deleting existing protections for ${requestData.branch}`, async () => await octokit.request(`DELETE /repos/{owner}/{repo}/branches/{branch}/protection`, requestData));
-    }
-    else {
-        info(`No existing branch protections found for ${requestData.branch}.`);
-    }
-}
-
-;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
-
-async function fetchProtections({ octokit, requestData, }) {
-    return await tryCatchInfoAction(`fetching existing branch protections for ${requestData.branch}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData)).data);
 }
 
 ;// CONCATENATED MODULE: ./src/steps/recreateProtections.ts
@@ -44068,12 +44086,12 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
         octokit,
         requestData: commonRequestData,
     });
-    await deleteProtections({
-        existingProtections,
-        octokit,
-        requestData: commonRequestData,
-    });
     try {
+        await deleteProtections({
+            existingProtections,
+            octokit,
+            requestData: commonRequestData,
+        });
         await run();
     }
     finally {
