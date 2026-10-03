@@ -43940,321 +43940,6 @@ const $$captured = $({
     stdout: ["inherit", "pipe"],
 });
 
-;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
-
-async function tryCatchInfoAction(label, action) {
-    return await tryCatchAction(label, action, info);
-}
-async function tryCatchSetFailedAction(label, action) {
-    return await tryCatchAction(label, action, setFailed);
-}
-async function tryCatchAction(label, action, logError) {
-    info(`Start: ${label}`);
-    try {
-        const result = await action();
-        if (result !== undefined) {
-            info(`Result from ${label}: ${JSON.stringify(result, null, 4)}`);
-        }
-        return result;
-    }
-    catch (error) {
-        logError(`Error ${label}: ${error}`);
-        return undefined;
-    }
-}
-
-;// CONCATENATED MODULE: ./src/steps/deleteProtections.ts
-
-
-async function deleteProtections({ existingProtections, octokit, requestData, }) {
-    if (existingProtections) {
-        await tryCatchInfoAction(`deleting existing protections for ${requestData.branch}`, async () => await octokit.request(`DELETE /repos/{owner}/{repo}/branches/{branch}/protection`, requestData));
-    }
-    else {
-        info(`No existing branch protections found for ${requestData.branch}.`);
-    }
-}
-
-;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
-
-async function fetchProtections({ octokit, requestData, }) {
-    return await tryCatchInfoAction(`fetching existing branch protections for ${requestData.branch}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData)).data);
-}
-
-;// CONCATENATED MODULE: ./src/steps/recreateProtections.ts
-
-async function recreateProtections({ commonRequestData, existingProtections, octokit, }) {
-    if (!existingProtections) {
-        return;
-    }
-    await tryCatchSetFailedAction("re-creating branch protections", async () => await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
-        ...commonRequestData,
-        allow_deletions: !!existingProtections.allow_deletions?.enabled,
-        allow_force_pushes: !!existingProtections.allow_force_pushes?.enabled,
-        allow_fork_syncing: !!existingProtections.allow_fork_syncing?.enabled,
-        block_creations: !!existingProtections.block_creations?.enabled,
-        enforce_admins: !!existingProtections.enforce_admins?.enabled,
-        lock_branch: !!existingProtections.lock_branch?.enabled,
-        required_conversation_resolution: !!existingProtections.required_conversation_resolution?.enabled,
-        required_linear_history: !!existingProtections.required_linear_history?.enabled,
-        required_pull_request_reviews: existingProtections.required_pull_request_reviews
-            ? {
-                bypass_pull_request_allowances: mapReviewRestrictions(existingProtections.required_pull_request_reviews
-                    .bypass_pull_request_allowances),
-                dismiss_stale_reviews: existingProtections.required_pull_request_reviews
-                    .dismiss_stale_reviews,
-                dismissal_restrictions: mapReviewRestrictions(existingProtections.required_pull_request_reviews
-                    .dismissal_restrictions),
-                require_code_owner_reviews: existingProtections.required_pull_request_reviews
-                    .require_code_owner_reviews,
-                require_last_push_approval: existingProtections.required_pull_request_reviews
-                    .require_last_push_approval,
-                required_approving_review_count: existingProtections.required_pull_request_reviews
-                    .required_approving_review_count,
-            }
-            : null,
-        restrictions: existingProtections.restrictions
-            ? {
-                apps: existingProtections.restrictions.apps.map(
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                (app) => app.slug),
-                teams: existingProtections.restrictions.teams.map((team) => team.slug),
-                users: existingProtections.restrictions.users.map(
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                (user) => user.login),
-            }
-            : null,
-        // @ts-expect-error -- The left types use 'null', while the right are 'undefined'...
-        required_status_checks: existingProtections.required_status_checks
-            ? {
-                checks: existingProtections.required_status_checks.checks.map((check) => ({
-                    app_id: check.app_id ?? undefined,
-                    context: check.context,
-                })),
-                strict: existingProtections.required_status_checks.strict,
-            }
-            : null,
-    }));
-    // The update protection endpoint doesn't accept required_signatures.
-    if (existingProtections.required_signatures?.enabled) {
-        await tryCatchSetFailedAction("re-enabling required signatures", async () => await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, commonRequestData));
-    }
-}
-function mapReviewRestrictions(restrictions) {
-    if (!restrictions) {
-        return undefined;
-    }
-    return {
-        apps: restrictions.apps
-            ?.map((app) => app?.slug)
-            .filter((slug) => slug !== undefined),
-        teams: restrictions.teams?.map((team) => team.slug),
-        users: restrictions.users?.map((user) => user.login),
-    };
-}
-
-;// CONCATENATED MODULE: ./src/runBypassingBranchProtections.ts
-
-
-
-async function runBypassingBranchProtections(commonData, octokit, run) {
-    const commonRequestData = {
-        ...commonData,
-        headers: {
-            "X-GitHub-Api-Version": "2022-11-28",
-        },
-    };
-    const existingProtections = await fetchProtections({
-        octokit,
-        requestData: commonRequestData,
-    });
-    await deleteProtections({
-        existingProtections,
-        octokit,
-        requestData: commonRequestData,
-    });
-    try {
-        await run();
-    }
-    finally {
-        await recreateProtections({
-            commonRequestData,
-            existingProtections,
-            octokit,
-        });
-    }
-}
-
-;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
-
-
-async function fetchRulesets({ octokit, requestData, }) {
-    const rules = await tryCatchInfoAction(`fetching existing branch rules for ${requestData.branch}`, async () => await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
-        ...requestData,
-        per_page: 100,
-    }));
-    if (!rules) {
-        return undefined;
-    }
-    const rulesetIds = new Set();
-    for (const rule of rules) {
-        if (rule.ruleset_id === undefined) {
-            continue;
-        }
-        // Only repository rulesets can be updated with a repository-scoped token.
-        if (rule.ruleset_source_type === "Repository") {
-            rulesetIds.add(rule.ruleset_id);
-        }
-        else {
-            info(`Skipping ${rule.ruleset_source_type ?? "unknown"} ruleset ${rule.ruleset_id.toString()} (${rule.ruleset_source ?? "unknown source"}): only repository rulesets can be bypassed.`);
-        }
-    }
-    const rulesets = [];
-    for (const rulesetId of rulesetIds) {
-        const ruleset = await tryCatchInfoAction(`fetching existing ruleset ${rulesetId.toString()}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
-            ...requestData,
-            ruleset_id: rulesetId,
-        })).data);
-        if (ruleset) {
-            rulesets.push(ruleset);
-        }
-    }
-    return rulesets;
-}
-
-;// CONCATENATED MODULE: ./src/steps/updateRulesetsEnforcement.ts
-
-
-async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, setFailedOnError, }) {
-    if (!existingRulesets?.length) {
-        info("No existing repository rulesets found to update.");
-        return;
-    }
-    const tryCatchAction = setFailedOnError
-        ? tryCatchSetFailedAction
-        : tryCatchInfoAction;
-    for (const existingRuleset of existingRulesets) {
-        const nextEnforcement = enforcement(existingRuleset);
-        await tryCatchAction(`setting ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`, async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
-            ...commonRequestData,
-            enforcement: nextEnforcement,
-            ruleset_id: existingRuleset.id,
-        }));
-    }
-}
-
-;// CONCATENATED MODULE: ./src/runBypassingBranchRulesets.ts
-
-
-async function runBypassingBranchRulesets(commonData, octokit, run) {
-    const commonRequestData = {
-        ...commonData,
-        headers: {
-            "X-GitHub-Api-Version": "2022-11-28",
-        },
-    };
-    const existingRulesets = await fetchRulesets({
-        octokit,
-        requestData: commonRequestData,
-    });
-    await updateRulesetsEnforcement({
-        commonRequestData,
-        enforcement: () => "disabled",
-        existingRulesets,
-        octokit,
-    });
-    try {
-        await run();
-    }
-    finally {
-        await updateRulesetsEnforcement({
-            commonRequestData,
-            enforcement: (ruleset) => ruleset.enforcement,
-            existingRulesets,
-            octokit,
-            setFailedOnError: true,
-        });
-    }
-}
-
-;// CONCATENATED MODULE: ./src/steps/getUnpublishedVersion.ts
-
-
-
-
-const $quiet = $({ reject: false });
-// npm can take a few minutes after a publish before it shows the new version.
-const recentTagSeconds = 10 * 60;
-const recheckAttempts = 12;
-const recheckDelayMs = 15_000;
-async function getUnpublishedVersion() {
-    const { name, private: isPrivate, publishConfig, version, } = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
-    if (isPrivate || !name || !version) {
-        return undefined;
-    }
-    const scopedRegistry = name.startsWith("@")
-        ? publishConfig?.[`${name.split("/")[0]}:registry`]
-        : undefined;
-    const registry = typeof scopedRegistry === "string" && scopedRegistry
-        ? scopedRegistry
-        : publishConfig?.registry;
-    const registryArgs = registry ? ["--registry", registry] : [];
-    const isOnNpm = async () => {
-        const view = await $quiet `npm view ${name}@${version} version --json ${registryArgs}`;
-        if (!view.exitCode) {
-            return true;
-        }
-        if (!view.stdout.includes('"E404"')) {
-            throw new Error(`Could not check npm for ${name}@${version}.`);
-        }
-        return false;
-    };
-    if (await isOnNpm()) {
-        return undefined;
-    }
-    const tagNames = [version, `v${version}`];
-    const existingTags = (await $quiet `git tag --list ${tagNames}`).stdout
-        .split("\n")
-        .filter(Boolean);
-    // A version that was never tagged was never released, e.g. a new package.
-    if (!existingTags.length) {
-        return undefined;
-    }
-    const tagSeconds = Number((await $quiet `git log -1 --format=%ct ${existingTags[0]}`).stdout);
-    if (Date.now() / 1000 - tagSeconds < recentTagSeconds) {
-        info(`Version ${version} was tagged recently but isn't on npm yet. Waiting for npm to show it.`);
-        for (let attempt = 0; attempt < recheckAttempts; attempt += 1) {
-            await (0,promises_namespaceObject.setTimeout)(recheckDelayMs);
-            if (await isOnNpm()) {
-                return undefined;
-            }
-        }
-    }
-    const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
-    return {
-        headTag: existingTags.find((tag) => headTags.includes(tag)),
-        version,
-    };
-}
-
-;// CONCATENATED MODULE: ./src/steps/hasGitHubRelease.ts
-async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
-    try {
-        await octokit.request("GET /repos/{owner}/{repo}/releases/tags/{tag}", {
-            owner,
-            repo,
-            tag,
-        });
-        return true;
-    }
-    catch (error) {
-        if (error.status === 404) {
-            return false;
-        }
-        throw error;
-    }
-}
-
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/shlex@3.0.0/node_modules/shlex/shlex.js
 
 
@@ -44571,6 +44256,321 @@ function parseArgsString(input) {
     }
 }
 
+;// CONCATENATED MODULE: ./src/tryCatchInfoAction.ts
+
+async function tryCatchInfoAction(label, action) {
+    return await tryCatchAction(label, action, info);
+}
+async function tryCatchSetFailedAction(label, action) {
+    return await tryCatchAction(label, action, setFailed);
+}
+async function tryCatchAction(label, action, logError) {
+    info(`Start: ${label}`);
+    try {
+        const result = await action();
+        if (result !== undefined) {
+            info(`Result from ${label}: ${JSON.stringify(result, null, 4)}`);
+        }
+        return result;
+    }
+    catch (error) {
+        logError(`Error ${label}: ${error}`);
+        return undefined;
+    }
+}
+
+;// CONCATENATED MODULE: ./src/steps/deleteProtections.ts
+
+
+async function deleteProtections({ existingProtections, octokit, requestData, }) {
+    if (existingProtections) {
+        await tryCatchInfoAction(`deleting existing protections for ${requestData.branch}`, async () => await octokit.request(`DELETE /repos/{owner}/{repo}/branches/{branch}/protection`, requestData));
+    }
+    else {
+        info(`No existing branch protections found for ${requestData.branch}.`);
+    }
+}
+
+;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
+
+async function fetchProtections({ octokit, requestData, }) {
+    return await tryCatchInfoAction(`fetching existing branch protections for ${requestData.branch}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", requestData)).data);
+}
+
+;// CONCATENATED MODULE: ./src/steps/recreateProtections.ts
+
+async function recreateProtections({ commonRequestData, existingProtections, octokit, }) {
+    if (!existingProtections) {
+        return;
+    }
+    await tryCatchSetFailedAction("re-creating branch protections", async () => await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
+        ...commonRequestData,
+        allow_deletions: !!existingProtections.allow_deletions?.enabled,
+        allow_force_pushes: !!existingProtections.allow_force_pushes?.enabled,
+        allow_fork_syncing: !!existingProtections.allow_fork_syncing?.enabled,
+        block_creations: !!existingProtections.block_creations?.enabled,
+        enforce_admins: !!existingProtections.enforce_admins?.enabled,
+        lock_branch: !!existingProtections.lock_branch?.enabled,
+        required_conversation_resolution: !!existingProtections.required_conversation_resolution?.enabled,
+        required_linear_history: !!existingProtections.required_linear_history?.enabled,
+        required_pull_request_reviews: existingProtections.required_pull_request_reviews
+            ? {
+                bypass_pull_request_allowances: mapReviewRestrictions(existingProtections.required_pull_request_reviews
+                    .bypass_pull_request_allowances),
+                dismiss_stale_reviews: existingProtections.required_pull_request_reviews
+                    .dismiss_stale_reviews,
+                dismissal_restrictions: mapReviewRestrictions(existingProtections.required_pull_request_reviews
+                    .dismissal_restrictions),
+                require_code_owner_reviews: existingProtections.required_pull_request_reviews
+                    .require_code_owner_reviews,
+                require_last_push_approval: existingProtections.required_pull_request_reviews
+                    .require_last_push_approval,
+                required_approving_review_count: existingProtections.required_pull_request_reviews
+                    .required_approving_review_count,
+            }
+            : null,
+        restrictions: existingProtections.restrictions
+            ? {
+                apps: existingProtections.restrictions.apps.map(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                (app) => app.slug),
+                teams: existingProtections.restrictions.teams.map((team) => team.slug),
+                users: existingProtections.restrictions.users.map(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                (user) => user.login),
+            }
+            : null,
+        // @ts-expect-error -- The left types use 'null', while the right are 'undefined'...
+        required_status_checks: existingProtections.required_status_checks
+            ? {
+                checks: existingProtections.required_status_checks.checks.map((check) => ({
+                    app_id: check.app_id ?? undefined,
+                    context: check.context,
+                })),
+                strict: existingProtections.required_status_checks.strict,
+            }
+            : null,
+    }));
+    // The update protection endpoint doesn't accept required_signatures.
+    if (existingProtections.required_signatures?.enabled) {
+        await tryCatchSetFailedAction("re-enabling required signatures", async () => await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, commonRequestData));
+    }
+}
+function mapReviewRestrictions(restrictions) {
+    if (!restrictions) {
+        return undefined;
+    }
+    return {
+        apps: restrictions.apps
+            ?.map((app) => app?.slug)
+            .filter((slug) => slug !== undefined),
+        teams: restrictions.teams?.map((team) => team.slug),
+        users: restrictions.users?.map((user) => user.login),
+    };
+}
+
+;// CONCATENATED MODULE: ./src/runBypassingBranchProtections.ts
+
+
+
+async function runBypassingBranchProtections(commonData, octokit, run) {
+    const commonRequestData = {
+        ...commonData,
+        headers: {
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    };
+    const existingProtections = await fetchProtections({
+        octokit,
+        requestData: commonRequestData,
+    });
+    await deleteProtections({
+        existingProtections,
+        octokit,
+        requestData: commonRequestData,
+    });
+    try {
+        await run();
+    }
+    finally {
+        await recreateProtections({
+            commonRequestData,
+            existingProtections,
+            octokit,
+        });
+    }
+}
+
+;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
+
+
+async function fetchRulesets({ octokit, requestData, }) {
+    const rules = await tryCatchInfoAction(`fetching existing branch rules for ${requestData.branch}`, async () => await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
+        ...requestData,
+        per_page: 100,
+    }));
+    if (!rules) {
+        return undefined;
+    }
+    const rulesetIds = new Set();
+    for (const rule of rules) {
+        if (rule.ruleset_id === undefined) {
+            continue;
+        }
+        // Only repository rulesets can be updated with a repository-scoped token.
+        if (rule.ruleset_source_type === "Repository") {
+            rulesetIds.add(rule.ruleset_id);
+        }
+        else {
+            info(`Skipping ${rule.ruleset_source_type ?? "unknown"} ruleset ${rule.ruleset_id.toString()} (${rule.ruleset_source ?? "unknown source"}): only repository rulesets can be bypassed.`);
+        }
+    }
+    const rulesets = [];
+    for (const rulesetId of rulesetIds) {
+        const ruleset = await tryCatchInfoAction(`fetching existing ruleset ${rulesetId.toString()}`, async () => (await octokit.request("GET /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+            ...requestData,
+            ruleset_id: rulesetId,
+        })).data);
+        if (ruleset) {
+            rulesets.push(ruleset);
+        }
+    }
+    return rulesets;
+}
+
+;// CONCATENATED MODULE: ./src/steps/updateRulesetsEnforcement.ts
+
+
+async function updateRulesetsEnforcement({ commonRequestData, enforcement, existingRulesets, octokit, setFailedOnError, }) {
+    if (!existingRulesets?.length) {
+        info("No existing repository rulesets found to update.");
+        return;
+    }
+    const tryCatchAction = setFailedOnError
+        ? tryCatchSetFailedAction
+        : tryCatchInfoAction;
+    for (const existingRuleset of existingRulesets) {
+        const nextEnforcement = enforcement(existingRuleset);
+        await tryCatchAction(`setting ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`, async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+            ...commonRequestData,
+            enforcement: nextEnforcement,
+            ruleset_id: existingRuleset.id,
+        }));
+    }
+}
+
+;// CONCATENATED MODULE: ./src/runBypassingBranchRulesets.ts
+
+
+async function runBypassingBranchRulesets(commonData, octokit, run) {
+    const commonRequestData = {
+        ...commonData,
+        headers: {
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    };
+    const existingRulesets = await fetchRulesets({
+        octokit,
+        requestData: commonRequestData,
+    });
+    await updateRulesetsEnforcement({
+        commonRequestData,
+        enforcement: () => "disabled",
+        existingRulesets,
+        octokit,
+    });
+    try {
+        await run();
+    }
+    finally {
+        await updateRulesetsEnforcement({
+            commonRequestData,
+            enforcement: (ruleset) => ruleset.enforcement,
+            existingRulesets,
+            octokit,
+            setFailedOnError: true,
+        });
+    }
+}
+
+;// CONCATENATED MODULE: ./src/steps/getUnpublishedVersion.ts
+
+
+
+
+const $quiet = $({ reject: false });
+// npm can take a few minutes after a publish before it shows the new version.
+const recentTagSeconds = 10 * 60;
+const recheckAttempts = 12;
+const recheckDelayMs = 15_000;
+async function getUnpublishedVersion() {
+    const { name, private: isPrivate, publishConfig, version, } = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    if (isPrivate || !name || !version) {
+        return undefined;
+    }
+    const scopedRegistry = name.startsWith("@")
+        ? publishConfig?.[`${name.split("/")[0]}:registry`]
+        : undefined;
+    const registry = typeof scopedRegistry === "string" && scopedRegistry
+        ? scopedRegistry
+        : publishConfig?.registry;
+    const registryArgs = registry ? ["--registry", registry] : [];
+    const isOnNpm = async () => {
+        const view = await $quiet `npm view ${name}@${version} version --json ${registryArgs}`;
+        if (!view.exitCode) {
+            return true;
+        }
+        if (!view.stdout.includes('"E404"')) {
+            throw new Error(`Could not check npm for ${name}@${version}.`);
+        }
+        return false;
+    };
+    if (await isOnNpm()) {
+        return undefined;
+    }
+    const tagNames = [version, `v${version}`];
+    const existingTags = (await $quiet `git tag --list ${tagNames}`).stdout
+        .split("\n")
+        .filter(Boolean);
+    // A version that was never tagged was never released, e.g. a new package.
+    if (!existingTags.length) {
+        return undefined;
+    }
+    const tagSeconds = Number((await $quiet `git log -1 --format=%ct ${existingTags[0]}`).stdout);
+    if (Date.now() / 1000 - tagSeconds < recentTagSeconds) {
+        info(`Version ${version} was tagged recently but isn't on npm yet. Waiting for npm to show it.`);
+        for (let attempt = 0; attempt < recheckAttempts; attempt += 1) {
+            await (0,promises_namespaceObject.setTimeout)(recheckDelayMs);
+            if (await isOnNpm()) {
+                return undefined;
+            }
+        }
+    }
+    const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
+    return {
+        headTag: existingTags.find((tag) => headTags.includes(tag)),
+        version,
+    };
+}
+
+;// CONCATENATED MODULE: ./src/steps/hasGitHubRelease.ts
+async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
+    try {
+        await octokit.request("GET /repos/{owner}/{repo}/releases/tags/{tag}", {
+            owner,
+            repo,
+            tag,
+        });
+        return true;
+    }
+    catch (error) {
+        if (error.status === 404) {
+            return false;
+        }
+        throw error;
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/steps/checkSuperseded.ts
 
 const checkSuperseded_$quiet = $({ reject: false });
@@ -44609,16 +44609,9 @@ async function getHeadSha() {
 const publishConflict = /cannot publish over (?:the )?previously (?:published|staged) version/i;
 async function runReleaseIt(releaseItArgs, { allowPublishConflict, skipSupersededCheck } = {}) {
     await tryCatchInfoAction("running release-it", async () => {
-        let args;
-        try {
-            args = parseArgsString(releaseItArgs ?? "");
-        }
-        catch (error) {
-            setFailed(`Error running release-it: ${describeError(error)}`);
-            return;
-        }
         const startSha = await getHeadSha();
         try {
+            const args = parseArgsString(releaseItArgs ?? "");
             const { exitCode } = await $$captured `npx release-it --verbose ${args}`;
             if (exitCode) {
                 throw new Error(`Exit code ${exitCode.toString()}.`);
@@ -44655,8 +44648,16 @@ function describeError(error) {
 
 
 
+
 async function releaseItAction(options) {
-    const { gitUserEmail, gitUserName, npmToken, skipNpmPublish } = options;
+    const { gitUserEmail, gitUserName, npmToken, releaseItArgs, skipNpmPublish } = options;
+    try {
+        parseArgsString(releaseItArgs ?? "");
+    }
+    catch (error) {
+        setFailed(`Invalid release-it-args: ${error.message}`);
+        return;
+    }
     await $$ `git config user.email ${gitUserEmail}`;
     await $$ `git config user.name ${gitUserName}`;
     if (skipNpmPublish) {
