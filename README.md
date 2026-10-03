@@ -141,7 +141,9 @@ await releaseItAction({
 });
 ```
 
-The Node API doesn't read action inputs or environment variables.
+The Node API doesn't read action inputs or change `process.env`.
+It passes `githubToken` to `release-it` as the `GITHUB_TOKEN` environment variable.
+Other environment variables still apply, such as `GITHUB_API_URL` for its GitHub API requests.
 
 ## FAQs
 
