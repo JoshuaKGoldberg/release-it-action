@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.5.26](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.25...v0.5.26) (2026-10-03)
+
+### Bug Fixes
+
+- keep Git config when retrying an unpublished version ([#965](https://github.com/JoshuaKGoldberg/release-it-action/issues/965)) ([aa7af72](https://github.com/JoshuaKGoldberg/release-it-action/commit/aa7af72918bf9a366b1e7cf1d3908ca1f50c4f4a)), closes [#964](https://github.com/JoshuaKGoldberg/release-it-action/issues/964)
+- restore the npmrc after the run instead of deleting its auth token ([#959](https://github.com/JoshuaKGoldberg/release-it-action/issues/959)) ([da19195](https://github.com/JoshuaKGoldberg/release-it-action/commit/da191950db19ce499f4594543081fc06ef2685ac)), closes [#958](https://github.com/JoshuaKGoldberg/release-it-action/issues/958)
+
+## [0.5.25](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.24...v0.5.25) (2026-10-03)
+
+### Bug Fixes
+
+- fail when rulesets can't be fetched or disabled ([#979](https://github.com/JoshuaKGoldberg/release-it-action/issues/979)) ([0098553](https://github.com/JoshuaKGoldberg/release-it-action/commit/009855301a66a9abc5e1c9a63db7b2dda5e88b50)), closes [#978](https://github.com/JoshuaKGoldberg/release-it-action/issues/978)
+
+## [0.5.24](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.23...v0.5.24) (2026-10-03)
+
+### Bug Fixes
+
+- create a missing GitHub release even when the version is already on npm ([#961](https://github.com/JoshuaKGoldberg/release-it-action/issues/961)) ([05d7972](https://github.com/JoshuaKGoldberg/release-it-action/commit/05d79727280ce995f560c846e76f5f4eecb32737)), closes [#960](https://github.com/JoshuaKGoldberg/release-it-action/issues/960)
+
+## [0.5.23](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.22...v0.5.23) (2026-10-03)
+
+### Bug Fixes
+
+- mask token inputs and keep the npm token out of npm config set errors ([#957](https://github.com/JoshuaKGoldberg/release-it-action/issues/957)) ([4408794](https://github.com/JoshuaKGoldberg/release-it-action/commit/44087943caa8ca7cc44a6adafadf6dcd1a4a9cd9)), closes [#956](https://github.com/JoshuaKGoldberg/release-it-action/issues/956)
+
+## [0.5.22](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.21...v0.5.22) (2026-10-03)
+
+### Bug Fixes
+
+- keep "any source" required checks when recreating branch protections ([#989](https://github.com/JoshuaKGoldberg/release-it-action/issues/989)) ([e1c8c93](https://github.com/JoshuaKGoldberg/release-it-action/commit/e1c8c93f47a2f3d59987d4a261cbeb4430f7c67e)), closes [#988](https://github.com/JoshuaKGoldberg/release-it-action/issues/988)
+
+## [0.5.21](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.20...v0.5.21) (2026-10-03)
+
+### Bug Fixes
+
+- drop @types/node from runtime dependencies ([#936](https://github.com/JoshuaKGoldberg/release-it-action/issues/936)) ([10a3c5c](https://github.com/JoshuaKGoldberg/release-it-action/commit/10a3c5c1c0732121dba35f4bb3251f886df9e5e9)), closes [#908](https://github.com/JoshuaKGoldberg/release-it-action/issues/908)
+
 ## [0.5.20](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.19...v0.5.20) (2026-10-02)
 
 ### Bug Fixes

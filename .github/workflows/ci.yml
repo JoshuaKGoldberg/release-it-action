@@ -1,4 +1,19 @@
 jobs:
+  action:
+    name: Action
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/prepare
+      - uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          release-it-args: --dry-run --no-git.push --no-git.requireUpstream
+          skip-npm-publish: true
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -13,6 +28,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: ./.github/actions/prepare
       - run: pnpm build:release
+      - name: Verify dist is up to date
+        run: |
+          changes=$(git status --porcelain -- dist ':!*.d.ts' ':!*.d.ts.map')
+          if [ -n "$changes" ]; then
+            echo "$changes"
+            echo "::error::dist/ is out of date. Run 'pnpm build:release', then commit all changes under dist/ (git add dist)."
+            exit 1
+          fi
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -63,7 +86,7 @@ jobs:
       - uses: ./.github/actions/prepare
       - run: pnpm run test --coverage
       - if: always()
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
   type_check:
     name: Type Check
     runs-on: ubuntu-latest
