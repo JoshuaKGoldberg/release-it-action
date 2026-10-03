@@ -12,6 +12,12 @@
 	"ignoreDeps": ["codecov/codecov-action"],
 	"labels": ["dependencies"],
 	"minimumReleaseAge": "7 days",
+	"packageRules": [
+		{
+			"allowedVersions": "<7",
+			"matchPackageNames": ["typescript"]
+		}
+	],
 	"patch": { "enabled": false },
 	"postUpdateOptions": ["pnpmDedupe"]
 }
