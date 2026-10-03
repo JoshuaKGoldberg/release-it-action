@@ -34,7 +34,7 @@ Each time it runs, the action:
 
 1. Sets up the Git user for release commits
 2. Sets up your npm token, if you gave one
-3. Finishes any [earlier release that didn't make it to npm](#what-happens-when-a-release-gets-pushed-but-not-published), then stops
+3. Finishes any [earlier release that didn't make it to npm or GitHub releases](#what-happens-when-a-release-gets-pushed-but-not-published), then stops
 4. Stops if [`should-semantic-release`](https://github.com/JoshuaKGoldberg/should-semantic-release) says there's nothing to release
 5. Runs `npx release-it --verbose`
 
@@ -169,6 +169,10 @@ Otherwise the action fails until you publish that version yourself, or bump the 
 The check assumes your package belongs on npm.
 If it doesn't, set `skip-npm-publish` or mark the package as `"private": true`.
 Otherwise every push fails as an unpublished version.
+
+A release can also get pushed without its GitHub release, such as when creating the release fails after the npm publish.
+If that version's Git tag is on the latest commit, the next run creates the missing GitHub release.
+This only happens when `github.release` is `true` in your `.release-it.json` or `package.json`'s `"release-it"`.
 
 ### What happens when a newer commit lands during a release?
 
