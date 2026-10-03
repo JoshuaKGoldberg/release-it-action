@@ -4,10 +4,14 @@ import { Octokit } from "../types.js";
 import { fetchRulesets } from "./fetchRulesets.js";
 
 const mockInfo = vi.fn();
+const mockWarning = vi.fn();
 
 vi.mock("@actions/core", () => ({
 	get info() {
 		return mockInfo;
+	},
+	get warning() {
+		return mockWarning;
 	},
 }));
 
@@ -19,6 +23,14 @@ const mockOctokit = {
 	request: mockRequest,
 } as unknown as Octokit;
 const requestData = { branch, owner: "test-owner", repo: "test-repo" };
+
+function createRequestError(status: number, message: string) {
+	return Object.assign(new Error(message), {
+		name: "HttpError",
+		response: { data: { message } },
+		status,
+	});
+}
 
 describe("fetchRulesets", () => {
 	beforeEach(() => {
@@ -35,6 +47,40 @@ describe("fetchRulesets", () => {
 		);
 		expect(mockPaginate).toHaveBeenCalledTimes(1);
 		expect(mockRequest).not.toHaveBeenCalled();
+	});
+
+	it("throws when fetching branch rules is forbidden", async () => {
+		mockPaginate.mockRejectedValueOnce(
+			createRequestError(403, "Resource not accessible by integration"),
+		);
+
+		await expect(
+			fetchRulesets({ octokit: mockOctokit, requestData }),
+		).rejects.toThrowErrorMatchingInlineSnapshot(
+			`[Error: Could not fetch existing branch rules for test-branch: HttpError: Resource not accessible by integration]`,
+		);
+		expect(mockWarning).not.toHaveBeenCalled();
+	});
+
+	it("returns an empty array with a warning when rulesets aren't available on the repository's plan", async () => {
+		mockPaginate.mockRejectedValueOnce(
+			createRequestError(
+				403,
+				"Upgrade to GitHub Pro or make this repository public to enable this feature.",
+			),
+		);
+
+		const actual = await fetchRulesets({ octokit: mockOctokit, requestData });
+
+		expect(actual).toEqual([]);
+		expect(mockRequest).not.toHaveBeenCalled();
+		expect(mockWarning.mock.calls).toMatchInlineSnapshot(`
+			[
+			  [
+			    "Repository rulesets aren't available on this repository's GitHub plan, so test-branch has none to bypass.",
+			  ],
+			]
+		`);
 	});
 
 	it("returns an empty array when no rules apply to the branch", async () => {

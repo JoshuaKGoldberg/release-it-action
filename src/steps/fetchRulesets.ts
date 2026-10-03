@@ -4,6 +4,8 @@ import * as core from "@actions/core";
 
 import { ExistingRuleset, Octokit } from "../types.js";
 
+const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
+
 export interface FetchRulesetsOptions {
 	octokit: Octokit;
 	requestData: Endpoints["GET /repos/{owner}/{repo}/rules/branches/{branch}"]["parameters"];
@@ -15,14 +17,34 @@ export async function fetchRulesets({
 }: FetchRulesetsOptions): Promise<ExistingRuleset[]> {
 	const rules = await fetchLogged(
 		`existing branch rules for ${requestData.branch}`,
-		async () =>
-			await octokit.paginate(
-				"GET /repos/{owner}/{repo}/rules/branches/{branch}",
-				{
-					...requestData,
-					per_page: 100,
-				},
-			),
+		async () => {
+			try {
+				return await octokit.paginate(
+					"GET /repos/{owner}/{repo}/rules/branches/{branch}",
+					{
+						...requestData,
+						per_page: 100,
+					},
+				);
+			} catch (error) {
+				const { response, status } = error as {
+					response?: { data?: { message?: string } };
+					status?: number;
+				};
+
+				if (
+					status === 403 &&
+					planUpgradeRequired.test(response?.data?.message ?? "")
+				) {
+					core.warning(
+						`Repository rulesets aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`,
+					);
+					return [];
+				}
+
+				throw error;
+			}
+		},
 	);
 
 	const rulesetIds = new Set<number>();
