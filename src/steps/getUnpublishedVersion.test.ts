@@ -256,7 +256,8 @@ describe("getUnpublishedVersion", () => {
 			headTag: "v1.2.3",
 			version: "1.2.3",
 		});
-		expect(mockSetTimeout).toHaveBeenCalledTimes(12);
+		expect(mockSetTimeout).toHaveBeenCalledTimes(36);
+		expect(mockSetTimeout).toHaveBeenCalledWith(5_000);
 	});
 
 	it("does not recheck npm when the version was tagged long ago", async () => {

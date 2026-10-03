@@ -41678,8 +41678,8 @@ async function readReleaseItJson() {
 const getUnpublishedVersion_$quiet = $({ reject: false });
 // npm can take a few minutes after a publish before it shows the new version.
 const recentTagSeconds = 10 * 60;
-const recheckAttempts = 12;
-const recheckDelayMs = 15_000;
+const recheckAttempts = 36;
+const recheckDelayMs = 5_000;
 async function getUnpublishedVersion(githubToken) {
     const { name, private: isPrivate, publishConfig, version, } = (await readPackageData()) ?? {};
     if (isPrivate || !name || !version) {
