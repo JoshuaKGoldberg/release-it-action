@@ -34,7 +34,7 @@ Each time it runs, the action:
 
 1. Sets up the Git user for release commits
 2. Sets up your npm token, if you gave one
-3. Finishes any [earlier release that didn't make it to npm](#what-happens-when-a-release-gets-pushed-but-not-published), then stops
+3. Finishes any [earlier release that didn't make it to npm or GitHub releases](#what-happens-when-a-release-gets-pushed-but-not-published), then stops
 4. Stops if [`should-semantic-release`](https://github.com/JoshuaKGoldberg/should-semantic-release) says there's nothing to release
 5. Runs `npx release-it --verbose`
 
@@ -61,7 +61,7 @@ jobs:
       - env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        uses: JoshuaKGoldberg/release-it-action@v0.5.20
+        uses: JoshuaKGoldberg/release-it-action@v0.5.26
 
 name: Release
 
@@ -89,20 +89,20 @@ It also lets step 3 finish any release that fails to publish.
 		"pushArgs": ["--follow-tags", "--atomic"]
 	},
 	"hooks": {
-		"after:git:release": "npm publish --tag ${preReleaseId || 'latest'}"
+		"after:git:release": "npm publish${isPreRelease ? ' --tag ' + (preReleaseId || 'next') : ''}"
 	},
 	"npm": {
-		"publish": false,
-		"skipChecks": true
+		"publish": false
 	}
 }
 ```
 
-The explicit `--tag` publishes prereleases under their own dist-tag, which newer versions of npm require.
-`skipChecks` lets step 3 republish a stranded version even without an npm token, such as with Trusted Publishing.
+Prereleases publish under their own dist-tag, such as `beta` for `1.2.0-beta.0` or `next` for `1.2.0-0`, since newer versions of npm require a `--tag` for them.
+Stable releases leave out `--tag` so that newer versions of npm can refuse to move `latest` back to an older version.
+Step 3 skips release-it's npm authentication checks itself, so it can republish a stranded version even without an npm token, such as with Trusted Publishing.
 
 > Tip: releasing from a maintenance branch?
-> Replace the tag expression with that branch's dist-tag.
+> Set `"tag"` under `"npm"` to that branch's dist-tag, which step 3 also uses, and change the hook to `npm publish --tag ${npm.tag}`.
 
 Skip this if you set `skip-npm-publish`, since the hook would still publish.
 
@@ -141,7 +141,9 @@ await releaseItAction({
 });
 ```
 
-The Node API doesn't read action inputs or environment variables.
+The Node API doesn't read action inputs or change `process.env`.
+It passes `githubToken` to `release-it` as the `GITHUB_TOKEN` environment variable.
+Other environment variables still apply, such as `GITHUB_API_URL` for its GitHub API requests.
 
 ## FAQs
 
@@ -169,6 +171,10 @@ Otherwise the action fails until you publish that version yourself, or bump the 
 The check assumes your package belongs on npm.
 If it doesn't, set `skip-npm-publish` or mark the package as `"private": true`.
 Otherwise every push fails as an unpublished version.
+
+A release can also get pushed without its GitHub release, such as when creating the release fails after the npm publish.
+If that version's Git tag is on the latest commit, the next run creates the missing GitHub release.
+This only happens when `github.release` is `true` in your `.release-it.json` or `package.json`'s `"release-it"`.
 
 ### What happens when a newer commit lands during a release?
 
