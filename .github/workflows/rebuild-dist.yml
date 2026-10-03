@@ -20,7 +20,7 @@ jobs:
       - id: check
         name: Check for dist changes
         run: |
-          changes=$(git status --porcelain -- dist ':!*.d.ts' ':!*.d.ts.map')
+          changes=$(git status --porcelain -- dist)
           if [ -n "$changes" ]; then
             echo "$changes"
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -51,7 +51,7 @@ jobs:
           BRANCH: ${{ github.ref_name }}
         name: Commit and push dist changes
         run: |
-          git add --all -- dist ':!*.d.ts' ':!*.d.ts.map'
+          git add --all -- dist
           git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit --no-verify --message "chore: rebuild dist"
           if ! git push --no-verify origin "HEAD:refs/heads/$BRANCH"; then
             if [ "$(git ls-remote origin "refs/heads/$BRANCH" | cut -f1)" != "$GITHUB_SHA" ]; then
