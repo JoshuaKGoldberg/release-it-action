@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.23](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.22...v0.5.23) (2026-10-03)
+
+### Bug Fixes
+
+- mask token inputs and keep the npm token out of npm config set errors ([#957](https://github.com/JoshuaKGoldberg/release-it-action/issues/957)) ([4408794](https://github.com/JoshuaKGoldberg/release-it-action/commit/44087943caa8ca7cc44a6adafadf6dcd1a4a9cd9)), closes [#956](https://github.com/JoshuaKGoldberg/release-it-action/issues/956)
+
 ## [0.5.22](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.21...v0.5.22) (2026-10-03)
 
 ### Bug Fixes
