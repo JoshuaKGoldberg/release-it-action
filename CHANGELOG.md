@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.4](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.6.3...v0.6.4) (2026-10-03)
+
+### Bug Fixes
+
+- stop publishing source maps and the action entry to npm ([#1017](https://github.com/JoshuaKGoldberg/release-it-action/issues/1017)) ([94cc743](https://github.com/JoshuaKGoldberg/release-it-action/commit/94cc7431af5fbba6a3d83ab684f6da6a6c2f8c9d)), closes [#1016](https://github.com/JoshuaKGoldberg/release-it-action/issues/1016)
+
 ## [0.6.3](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.6.2...v0.6.3) (2026-10-03)
 
 ### Bug Fixes
