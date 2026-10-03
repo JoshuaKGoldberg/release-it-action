@@ -25,9 +25,9 @@ interface PackageData {
 	version?: string;
 }
 
-export async function getUnpublishedVersion(): Promise<
-	undefined | UnpublishedVersion
-> {
+export async function getUnpublishedVersion(
+	githubToken: string,
+): Promise<undefined | UnpublishedVersion> {
 	const {
 		name,
 		private: isPrivate,
@@ -48,8 +48,9 @@ export async function getUnpublishedVersion(): Promise<
 			: publishConfig?.registry;
 	const registryArgs = registry ? ["--registry", registry] : [];
 	const isOnNpm = async () => {
-		const view =
-			await $quiet`npm view ${name}@${version} version --json ${registryArgs}`;
+		const view = await $quiet({
+			env: { GITHUB_TOKEN: githubToken },
+		})`npm view ${name}@${version} version --json ${registryArgs}`;
 		if (!view.exitCode) {
 			return true;
 		}

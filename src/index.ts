@@ -81,7 +81,7 @@ const retryArgs =
 
 async function createGitHubRelease(
 	releaseItArgs: string | undefined,
-	options: RunReleaseItOptions = {},
+	options: RunReleaseItOptions,
 ) {
 	await runReleaseIt(
 		[retryArgs, "--no-npm.publish", releaseItArgs].filter(Boolean).join(" "),
@@ -98,16 +98,13 @@ async function runRelease({
 	repo,
 	skipNpmPublish = false,
 }: ReleaseItActionOptions) {
-	// release-it reads the token from the environment, not from this process.
-	process.env.GITHUB_TOKEN ??= githubToken;
-
 	const octokit = github.getOctokit(githubToken);
 
 	const unpublishedVersion = skipNpmPublish
 		? false
 		: await tryCatchSetFailedAction(
 				"checking for a version that was pushed but not published",
-				async () => (await getUnpublishedVersion()) ?? false,
+				async () => (await getUnpublishedVersion(githubToken)) ?? false,
 			);
 
 	if (unpublishedVersion === undefined) {
@@ -136,7 +133,7 @@ async function runRelease({
 
 		// First try to create a GitHub release, since they're mutable...
 		if (hasRelease === false) {
-			await createGitHubRelease(releaseItArgs);
+			await createGitHubRelease(releaseItArgs, { githubToken });
 		}
 
 		// ...and then if that succeeded (didn't throw), do the immutable npm publish
@@ -148,7 +145,7 @@ async function runRelease({
 			]
 				.filter(Boolean)
 				.join(" "),
-			{ allowPublishConflict: true, skipSupersededCheck: true },
+			{ allowPublishConflict: true, githubToken, skipSupersededCheck: true },
 		);
 		return;
 	}
@@ -169,7 +166,10 @@ async function runRelease({
 			`Tag ${tagMissingRelease} was pushed but its GitHub release was never created. Creating it now.`,
 		);
 		// Hooks such as after:release can try to publish the version npm already has.
-		await createGitHubRelease(releaseItArgs, { allowPublishConflict: true });
+		await createGitHubRelease(releaseItArgs, {
+			allowPublishConflict: true,
+			githubToken,
+		});
 		return;
 	}
 
@@ -187,7 +187,7 @@ async function runRelease({
 		.join(" ");
 
 	const runReleaseItWithArgs = async () => {
-		await runReleaseIt(args);
+		await runReleaseIt(args, { githubToken });
 	};
 
 	if (!bypassBranchProtections && !bypassBranchRulesets) {
