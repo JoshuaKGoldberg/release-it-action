@@ -4,10 +4,14 @@ import { Octokit } from "../types.js";
 import { fetchProtections } from "./fetchProtections.js";
 
 const mockInfo = vi.fn();
+const mockWarning = vi.fn();
 
 vi.mock("@actions/core", () => ({
 	get info() {
 		return mockInfo;
+	},
+	get warning() {
+		return mockWarning;
 	},
 }));
 
@@ -62,6 +66,50 @@ describe("fetchProtections", () => {
 		});
 
 		expect(actual).toBeUndefined();
+		expect(mockWarning).not.toHaveBeenCalled();
+	});
+
+	it("returns undefined with a warning when the branch doesn't exist", async () => {
+		mockRequest.mockRejectedValueOnce(
+			createRequestError(404, "Branch not found"),
+		);
+
+		const actual = await fetchProtections({
+			octokit: mockOctokit,
+			requestData,
+		});
+
+		expect(actual).toBeUndefined();
+		expect(mockWarning.mock.calls).toMatchInlineSnapshot(`
+			[
+			  [
+			    "Branch test-branch doesn't exist, so it has no branch protections to bypass.",
+			  ],
+			]
+		`);
+	});
+
+	it("returns undefined with a warning when branch protections aren't available on the repository's plan", async () => {
+		mockRequest.mockRejectedValueOnce(
+			createRequestError(
+				403,
+				"Upgrade to GitHub Pro or make this repository public to enable this feature.",
+			),
+		);
+
+		const actual = await fetchProtections({
+			octokit: mockOctokit,
+			requestData,
+		});
+
+		expect(actual).toBeUndefined();
+		expect(mockWarning.mock.calls).toMatchInlineSnapshot(`
+			[
+			  [
+			    "Branch protections aren't available on this repository's GitHub plan, so test-branch has none to bypass.",
+			  ],
+			]
+		`);
 	});
 
 	it("throws when the token can't see the branch's protections", async () => {
@@ -71,6 +119,16 @@ describe("fetchProtections", () => {
 			fetchProtections({ octokit: mockOctokit, requestData }),
 		).rejects.toThrowErrorMatchingInlineSnapshot(
 			`[Error: Could not fetch existing branch protections for test-branch: HttpError: Not Found]`,
+		);
+	});
+
+	it("throws when GitHub responds with a server error", async () => {
+		mockRequest.mockRejectedValueOnce(createRequestError(502, "Server Error"));
+
+		await expect(
+			fetchProtections({ octokit: mockOctokit, requestData }),
+		).rejects.toThrowErrorMatchingInlineSnapshot(
+			`[Error: Could not fetch existing branch protections for test-branch: HttpError: Server Error]`,
 		);
 	});
 
