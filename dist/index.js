@@ -43941,23 +43941,57 @@ const $$captured = $({
 });
 
 ;// CONCATENATED MODULE: ./src/getPublishRegistry.ts
-function getPublishRegistry({ name, publishConfig, }) {
-    const scopedRegistry = name?.startsWith("@")
-        ? publishConfig?.[`${name.split("/")[0]}:registry`]
-        : undefined;
-    return typeof scopedRegistry === "string" && scopedRegistry
-        ? scopedRegistry
-        : publishConfig?.registry;
+
+const $quiet = $({ reject: false });
+const defaultRegistry = "https://registry.npmjs.org/";
+async function getPublishRegistry({ name, publishConfig, }) {
+    const scopedRegistryKey = getScopedRegistryKey(name);
+    const keys = scopedRegistryKey
+        ? [scopedRegistryKey, "registry"]
+        : ["registry"];
+    // This matches npm's order: publishConfig, then npm config, for each key.
+    for (const key of keys) {
+        const registry = getRegistryValue(publishConfig?.[key]) ??
+            (await getNpmConfigRegistry(key));
+        if (registry) {
+            return registry;
+        }
+    }
+    return defaultRegistry;
+}
+function getScopedRegistryKey(name) {
+    return name?.startsWith("@") ? `${name.split("/")[0]}:registry` : undefined;
+}
+async function getNpmConfigRegistry(key) {
+    const { exitCode, stdout } = await $quiet `npm config get ${key}`;
+    const value = stdout.trim();
+    return exitCode || value === "undefined"
+        ? undefined
+        : getRegistryValue(value);
+}
+function getRegistryValue(value) {
+    return typeof value === "string" && value ? value : undefined;
 }
 
 ;// CONCATENATED MODULE: ./src/getNpmAuthTokenKey.ts
 
 
-const defaultRegistry = "https://registry.npmjs.org/";
+
 async function getNpmAuthTokenKey() {
-    const registry = getPublishRegistry(await readPackageData()) ?? defaultRegistry;
-    const { host, pathname } = new URL(registry);
-    return `//${host}${pathname.endsWith("/") ? pathname : `${pathname}/`}:_authToken`;
+    const registry = await getPublishRegistry(await readPackageData());
+    try {
+        return `${getNerfDart(registry)}:_authToken`;
+    }
+    catch {
+        warning(`Could not parse npm registry "${registry}" as a URL. Setting the npm token for ${defaultRegistry} instead.`);
+        return `${getNerfDart(defaultRegistry)}:_authToken`;
+    }
+}
+// This matches npm's nerf-dart, which drops the last path segment of a registry URL.
+function getNerfDart(registry) {
+    const { host, pathname, protocol } = new URL(registry);
+    const parent = new URL(".", `${protocol}//${host}${pathname}`);
+    return `//${parent.host}${parent.pathname}`;
 }
 async function readPackageData() {
     try {
@@ -44211,7 +44245,7 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
 
 
 
-const $quiet = $({ reject: false });
+const getUnpublishedVersion_$quiet = $({ reject: false });
 // npm can take a few minutes after a publish before it shows the new version.
 const recentTagSeconds = 10 * 60;
 const recheckAttempts = 12;
@@ -44222,10 +44256,11 @@ async function getUnpublishedVersion() {
     if (isPrivate || !name || !version) {
         return undefined;
     }
-    const registry = getPublishRegistry(packageData);
-    const registryArgs = registry ? ["--registry", registry] : [];
+    const registry = await getPublishRegistry(packageData);
+    // npm view prefers a scope's registry config over --registry.
+    const registryArg = `--${getScopedRegistryKey(name) ?? "registry"}=${registry}`;
     const isOnNpm = async () => {
-        const view = await $quiet `npm view ${name}@${version} version --json ${registryArgs}`;
+        const view = await getUnpublishedVersion_$quiet `npm view ${name}@${version} version --json ${registryArg}`;
         if (!view.exitCode) {
             return true;
         }
@@ -44238,14 +44273,14 @@ async function getUnpublishedVersion() {
         return undefined;
     }
     const tagNames = [version, `v${version}`];
-    const existingTags = (await $quiet `git tag --list ${tagNames}`).stdout
+    const existingTags = (await getUnpublishedVersion_$quiet `git tag --list ${tagNames}`).stdout
         .split("\n")
         .filter(Boolean);
     // A version that was never tagged was never released, e.g. a new package.
     if (!existingTags.length) {
         return undefined;
     }
-    const tagSeconds = Number((await $quiet `git log -1 --format=%ct ${existingTags[0]}`).stdout);
+    const tagSeconds = Number((await getUnpublishedVersion_$quiet `git log -1 --format=%ct ${existingTags[0]}`).stdout);
     if (Date.now() / 1000 - tagSeconds < recentTagSeconds) {
         info(`Version ${version} was tagged recently but isn't on npm yet. Waiting for npm to show it.`);
         for (let attempt = 0; attempt < recheckAttempts; attempt += 1) {
@@ -44255,7 +44290,7 @@ async function getUnpublishedVersion() {
             }
         }
     }
-    const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
+    const headTags = (await getUnpublishedVersion_$quiet `git tag --points-at HEAD`).stdout.split("\n");
     return {
         headTag: existingTags.find((tag) => headTags.includes(tag)),
         version,
