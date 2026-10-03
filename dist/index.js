@@ -41000,6 +41000,7 @@ const $$captured = $({
     stdin: "inherit",
     stdout: ["inherit", "pipe"],
 });
+const $quiet = $({ reject: false });
 
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/shlex@3.0.0/node_modules/shlex/shlex.js
 
@@ -41646,7 +41647,6 @@ async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
 
 
 
-const $quiet = $({ reject: false });
 const configOverride = /^(?:-c|--config|--(?:no-)?github(?:\.(?:draft|release|web))?)(?:=|$)/;
 async function getHeadTagMissingGitHubRelease({ octokit, owner, releaseItArgs, repo, }) {
     const packageData = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
@@ -41681,7 +41681,6 @@ async function readReleaseItJson() {
 
 
 
-const getUnpublishedVersion_$quiet = $({ reject: false });
 // npm can take a few minutes after a publish before it shows the new version.
 const recentTagSeconds = 10 * 60;
 const recheckAttempts = 36;
@@ -41699,7 +41698,7 @@ async function getUnpublishedVersion(githubToken) {
         : publishConfig?.registry;
     const registryArgs = registry ? ["--registry", registry] : [];
     const isOnNpm = async () => {
-        const view = await getUnpublishedVersion_$quiet({
+        const view = await $quiet({
             env: { GITHUB_TOKEN: githubToken },
         }) `npm view ${name}@${version} version --json ${registryArgs}`;
         if (!view.exitCode) {
@@ -41714,14 +41713,14 @@ async function getUnpublishedVersion(githubToken) {
         return undefined;
     }
     const tagNames = [version, `v${version}`];
-    const existingTags = (await getUnpublishedVersion_$quiet `git tag --list ${tagNames}`).stdout
+    const existingTags = (await $quiet `git tag --list ${tagNames}`).stdout
         .split("\n")
         .filter(Boolean);
     // A version that was never tagged was never released, e.g. a new package.
     if (!existingTags.length) {
         return undefined;
     }
-    const tagSeconds = Number((await getUnpublishedVersion_$quiet `git log -1 --format=%ct ${existingTags[0]}`).stdout);
+    const tagSeconds = Number((await $quiet `git log -1 --format=%ct ${existingTags[0]}`).stdout);
     if (Date.now() / 1000 - tagSeconds < recentTagSeconds) {
         core/* info */.pq(`Version ${version} was tagged recently but isn't on npm yet. Waiting for npm to show it.`);
         for (let attempt = 0; attempt < recheckAttempts; attempt += 1) {
@@ -41731,7 +41730,7 @@ async function getUnpublishedVersion(githubToken) {
             }
         }
     }
-    const headTags = (await getUnpublishedVersion_$quiet `git tag --points-at HEAD`).stdout.split("\n");
+    const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
     return {
         headTag: existingTags.find((tag) => headTags.includes(tag)),
         version,
@@ -41760,19 +41759,18 @@ async function readPackageData() {
 
 ;// CONCATENATED MODULE: ./src/steps/checkSuperseded.ts
 
-const checkSuperseded_$quiet = $({ reject: false });
 async function checkSuperseded(startSha, githubToken) {
-    const branch = await checkSuperseded_$quiet `git rev-parse --abbrev-ref HEAD`;
+    const branch = await $quiet `git rev-parse --abbrev-ref HEAD`;
     if (branch.exitCode || branch.stdout === "HEAD") {
         return false;
     }
-    const fetch = await checkSuperseded_$quiet({
+    const fetch = await $quiet({
         env: { GITHUB_TOKEN: githubToken },
     }) `git fetch origin ${branch.stdout}`;
     if (fetch.exitCode) {
         return false;
     }
-    const remoteSha = (await checkSuperseded_$quiet `git rev-parse FETCH_HEAD`).stdout;
+    const remoteSha = (await $quiet `git rev-parse FETCH_HEAD`).stdout;
     if (!remoteSha || remoteSha === startSha) {
         return false;
     }
@@ -41781,11 +41779,11 @@ async function checkSuperseded(startSha, githubToken) {
     if (!localSha || localSha === startSha) {
         return true;
     }
-    const isAncestor = await checkSuperseded_$quiet `git merge-base --is-ancestor ${localSha} ${remoteSha}`;
+    const isAncestor = await $quiet `git merge-base --is-ancestor ${localSha} ${remoteSha}`;
     return isAncestor.exitCode === 1;
 }
 async function getHeadSha() {
-    const { exitCode, stdout } = await checkSuperseded_$quiet `git rev-parse HEAD`;
+    const { exitCode, stdout } = await $quiet `git rev-parse HEAD`;
     return exitCode ? undefined : stdout;
 }
 
