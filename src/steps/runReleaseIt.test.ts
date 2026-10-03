@@ -42,16 +42,6 @@ vi.mock("./checkSuperseded.js", () => ({
 	},
 }));
 
-const mockTryCatchInfoAction = vi.fn(
-	async (_: string, action: () => Promise<unknown>) => await action(),
-);
-
-vi.mock("../tryCatchInfoAction.js", () => ({
-	get tryCatchInfoAction() {
-		return mockTryCatchInfoAction;
-	},
-}));
-
 const commandFailure = Object.assign(
 	new Error(
 		"Command failed with exit code 1: npx release-it --verbose\n\noutput",
@@ -199,21 +189,6 @@ describe("runReleaseIt", () => {
 		expect(mockSetFailed).toHaveBeenCalled();
 	});
 
-	it("returns false and logs the error when running release-it throws unexpectedly", async () => {
-		const { tryCatchInfoAction } = await vi.importActual<
-			typeof import("../tryCatchInfoAction.js")
-		>("../tryCatchInfoAction.js");
-		mockTryCatchInfoAction.mockImplementationOnce(tryCatchInfoAction);
-		mock$$.mockRejectedValueOnce(new Error("Command failed"));
-		mockGetHeadSha.mockResolvedValueOnce("start-sha");
-		mockCheckSuperseded.mockRejectedValueOnce(new Error("Oh no!"));
-
-		expect(await runReleaseIt()).toBe(false);
-		expect(mockInfo).toHaveBeenCalledWith(
-			"Error running release-it: Error: Oh no!",
-		);
-	});
-
 	it("logs an error without checking for superseding if the starting sha is unknown", async () => {
 		mock$$.mockRejectedValue(commandFailure);
 		mockGetHeadSha.mockResolvedValue(undefined);
@@ -222,6 +197,15 @@ describe("runReleaseIt", () => {
 
 		expect(mockCheckSuperseded).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalled();
+	});
+
+	it("rejects instead of passing when checking for superseding throws unexpectedly", async () => {
+		const error = new Error("Oh no!");
+		mock$$.mockRejectedValueOnce(new Error("Command failed"));
+		mockGetHeadSha.mockResolvedValueOnce("start-sha");
+		mockCheckSuperseded.mockRejectedValueOnce(error);
+
+		await expect(runReleaseIt()).rejects.toBe(error);
 	});
 
 	it("returns true when release-it succeeds", async () => {

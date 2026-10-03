@@ -2,7 +2,6 @@ import * as core from "@actions/core";
 
 import { $$captured } from "../execa.js";
 import { parseArgsString } from "../parseArgsString.js";
-import { tryCatchInfoAction } from "../tryCatchInfoAction.js";
 import { checkSuperseded, getHeadSha } from "./checkSuperseded.js";
 
 export interface RunReleaseItOptions {
@@ -17,42 +16,36 @@ export async function runReleaseIt(
 	releaseItArgs?: string,
 	{ allowPublishConflict, skipSupersededCheck }: RunReleaseItOptions = {},
 ): Promise<boolean> {
-	const succeeded = await tryCatchInfoAction("running release-it", async () => {
-		const startSha = await getHeadSha();
+	core.info("Start: running release-it");
 
-		try {
-			const args = parseArgsString(releaseItArgs ?? "");
-			await $$captured`npx release-it --verbose ${args}`;
+	const startSha = await getHeadSha();
 
-			return true;
-		} catch (error) {
-			if (
-				!skipSupersededCheck &&
-				startSha &&
-				(await checkSuperseded(startSha))
-			) {
-				core.warning(
-					`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`,
-				);
-				return false;
-			}
+	try {
+		const args = parseArgsString(releaseItArgs ?? "");
+		await $$captured`npx release-it --verbose ${args}`;
 
-			if (
-				allowPublishConflict &&
-				publishConflict.test((error as { all?: string }).all ?? "")
-			) {
-				core.info(
-					`release-it failed because npm already has this version. A previous release run must have published it: ${describeError(error)}`,
-				);
-				return true;
-			}
-
-			core.setFailed(`Error running release-it: ${describeError(error)}`);
+		return true;
+	} catch (error) {
+		if (!skipSupersededCheck && startSha && (await checkSuperseded(startSha))) {
+			core.warning(
+				`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`,
+			);
 			return false;
 		}
-	});
 
-	return succeeded ?? false;
+		if (
+			allowPublishConflict &&
+			publishConflict.test((error as { all?: string }).all ?? "")
+		) {
+			core.info(
+				`release-it failed because npm already has this version. A previous release run must have published it: ${describeError(error)}`,
+			);
+			return true;
+		}
+
+		core.setFailed(`Error running release-it: ${describeError(error)}`);
+		return false;
+	}
 }
 
 function describeError(error: unknown) {
