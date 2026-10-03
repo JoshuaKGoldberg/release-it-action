@@ -3,6 +3,7 @@ export declare const $$: import("execa").ExecaScriptMethod<{
 }>;
 export declare const $$captured: import("execa").ExecaScriptMethod<{
     all: true;
+    cancelSignal: AbortSignal;
     stderr: ("pipe" | "inherit")[];
     stdin: "inherit";
     stdout: ("pipe" | "inherit")[];
