@@ -16,6 +16,7 @@
 	"files": [
 		"lib/",
 		"!lib/**/*.test.*",
+		"!lib/action/",
 		"!lib/tests/"
 	],
 	"scripts": {
