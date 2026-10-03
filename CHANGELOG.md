@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.27](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.26...v0.5.27) (2026-10-03)
+
+### Bug Fixes
+
+- always fail on unparseable release-it-args ([#945](https://github.com/JoshuaKGoldberg/release-it-action/issues/945)) ([23f9790](https://github.com/JoshuaKGoldberg/release-it-action/commit/23f9790978b62ea0e7906adf9576cde6748210f3)), closes [#896](https://github.com/JoshuaKGoldberg/release-it-action/issues/896)
+- stop logging the npm token cleanup's command result ([#941](https://github.com/JoshuaKGoldberg/release-it-action/issues/941)) ([e4111e1](https://github.com/JoshuaKGoldberg/release-it-action/commit/e4111e11d59a81d1c04198422194796534c13664)), closes [#903](https://github.com/JoshuaKGoldberg/release-it-action/issues/903)
+
 ## [0.5.26](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.25...v0.5.26) (2026-10-03)
 
 ### Bug Fixes
