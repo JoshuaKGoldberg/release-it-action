@@ -31,7 +31,11 @@ export async function releaseItAction(options: ReleaseItActionOptions) {
 	if (skipNpmPublish) {
 		core.info("skipNpmPublish is true. Skipping npm publish.");
 	} else if (npmToken) {
-		await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
+		try {
+			await $$`npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
+		} catch {
+			throw new Error("Could not set the npm token in the npmrc.");
+		}
 	} else {
 		core.info(
 			"No npm token provided. This is required unless you're using Trusted Publishing.",

@@ -33015,7 +33015,7 @@ function exportVariable(name, val) {
  * ```
  */
 function core_setSecret(secret) {
-    issueCommand('add-mask', {}, secret);
+    command_issueCommand('add-mask', {}, secret);
 }
 /**
  * Prepends inputPath to the PATH (for this action and future actions)
@@ -33262,6 +33262,9 @@ const external_node_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(i
 
 function getOptionalTokenInput(name, backup) {
     const token = getInput(name) || external_node_process_namespaceObject.env[backup];
+    if (token) {
+        core_setSecret(token);
+    }
     return token;
 }
 function getRequiredTokenInput(name, backup) {
@@ -44656,7 +44659,12 @@ async function releaseItAction(options) {
         info("skipNpmPublish is true. Skipping npm publish.");
     }
     else if (npmToken) {
-        await $$ `npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
+        try {
+            await $$ `npm config set //registry.npmjs.org/:_authToken ${npmToken}`;
+        }
+        catch {
+            throw new Error("Could not set the npm token in the npmrc.");
+        }
     }
     else {
         info("No npm token provided. This is required unless you're using Trusted Publishing.");
