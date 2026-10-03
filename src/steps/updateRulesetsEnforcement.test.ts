@@ -67,6 +67,22 @@ describe("updateRulesetsEnforcement", () => {
 		expect(mockRequest).toHaveBeenCalledTimes(2);
 	});
 
+	it("does not hand the API responses to the logger when setFailedOnError is true", async () => {
+		mockRequest.mockResolvedValue({ data: {}, headers: {}, status: 200 });
+
+		await updateRulesetsEnforcement({
+			enforcement: (ruleset) => ruleset.enforcement,
+			existingRulesets,
+			octokit: mockOctokit,
+			requestData,
+			setFailedOnError: true,
+		});
+
+		for (const { value } of mockTryCatchSetFailedAction.mock.results) {
+			expect(await value).toBeUndefined();
+		}
+	});
+
 	it("updates each ruleset with the computed enforcement", async () => {
 		await updateRulesetsEnforcement({
 			enforcement: (ruleset) => ruleset.enforcement,

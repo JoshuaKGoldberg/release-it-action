@@ -28,12 +28,13 @@ export async function updateRulesetsEnforcement({
 	for (const existingRuleset of existingRulesets) {
 		const nextEnforcement = enforcement(existingRuleset);
 		const description = `ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`;
-		const update = async () =>
+		const update = async () => {
 			await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
 				...requestData,
 				enforcement: nextEnforcement,
 				ruleset_id: existingRuleset.id,
 			});
+		};
 
 		if (setFailedOnError) {
 			await tryCatchSetFailedAction(`setting ${description}`, update);

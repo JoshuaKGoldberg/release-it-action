@@ -29,7 +29,7 @@ export default createConfig({
 			}),
 			blockKnip({
 				entry: ["src/action/index.ts"],
-				ignoreDependencies: ["create-typescript-app"],
+				project: ["src/**/*.ts"],
 			}),
 			blockREADME({
 				badges: [

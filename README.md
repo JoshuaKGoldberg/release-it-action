@@ -56,10 +56,11 @@ jobs:
           fetch-depth: 0
           ref: main
           token: ${{ secrets.ACCESS_TOKEN }}
+      - run: npm ci
       - run: npm run build
       - env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        uses: JoshuaKGoldberg/release-it-action@v0.6.0
+        uses: JoshuaKGoldberg/release-it-action@v0.6.2
 
 name: Release
 
@@ -69,7 +70,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
   id-token: write
 ```
 
@@ -102,7 +103,7 @@ Step 2 skips release-it's npm authentication checks itself, since they don't wor
 > Tip: releasing from a maintenance branch?
 > Set `"tag"` under `"npm"` to that branch's dist-tag, which step 2 also uses, and change the hook to `npm publish --tag ${npm.tag}`.
 
-Skip this if you set `skip-npm-publish`, since the hook would still publish.
+If you set `skip-npm-publish`, leave out this config's `after:git:release` hook, since it would still publish.
 
 ## Options
 
