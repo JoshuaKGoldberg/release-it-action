@@ -1,1 +1,0 @@
-{"version":3,"file":"runReleaseIt.d.ts","sourceRoot":"","sources":["file:///Users/josh/repos/release-it-action/src/steps/runReleaseIt.ts"],"names":[],"mappings":"AAMA,MAAM,WAAW,mBAAmB;IACnC,oBAAoB,CAAC,EAAE,OAAO,CAAC;IAC/B,mBAAmB,CAAC,EAAE,OAAO,CAAC;CAC9B;AAKD,wBAAsB,YAAY,CACjC,aAAa,CAAC,EAAE,MAAM,EACtB,EAAE,oBAAoB,EAAE,mBAAmB,EAAE,GAAE,mBAAwB,iBAgCvE"}

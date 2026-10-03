@@ -6,6 +6,10 @@ export function getOptionalTokenInput(
 	backup: string,
 ): string | undefined {
 	const token = core.getInput(name) || process.env[backup];
+	if (token) {
+		core.setSecret(token);
+	}
+
 	return token;
 }
 
