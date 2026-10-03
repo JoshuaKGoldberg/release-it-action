@@ -6,6 +6,7 @@ import {
 	getRequestErrorDetails,
 	isPlanUpgradeRequired,
 } from "../requestErrors.js";
+import { tryCatchThrowAction } from "../tryCatchInfoAction.js";
 import { ExistingProtections, Octokit } from "../types.js";
 
 export interface FetchProtectionsOptions {
@@ -17,41 +18,40 @@ export async function fetchProtections({
 	octokit,
 	requestData,
 }: FetchProtectionsOptions): Promise<ExistingProtections | undefined> {
-	const label = `fetching existing branch protections for ${requestData.branch}`;
+	return await tryCatchThrowAction(
+		`fetching existing branch protections for ${requestData.branch}`,
+		async () => {
+			try {
+				return (
+					await octokit.request(
+						"GET /repos/{owner}/{repo}/branches/{branch}/protection",
+						requestData,
+					)
+				).data;
+			} catch (error) {
+				const { message, status } = getRequestErrorDetails(error);
 
-	core.info(`Start: ${label}`);
+				if (status === 404 && message === "Branch not protected") {
+					return undefined;
+				}
 
-	try {
-		const { data } = await octokit.request(
-			"GET /repos/{owner}/{repo}/branches/{branch}/protection",
-			requestData,
-		);
-		core.info(`Result from ${label}: ${JSON.stringify(data, null, 4)}`);
-		return data;
-	} catch (error) {
-		const { message, status } = getRequestErrorDetails(error);
+				if (status === 404 && message === "Branch not found") {
+					core.warning(
+						`Branch ${requestData.branch} doesn't exist, so it has no branch protections to bypass.`,
+					);
+					return undefined;
+				}
 
-		if (status === 404 && message === "Branch not protected") {
-			return undefined;
-		}
+				if (isPlanUpgradeRequired(error)) {
+					core.warning(
+						`Branch protections aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`,
+					);
+					return undefined;
+				}
 
-		if (status === 404 && message === "Branch not found") {
-			core.warning(
-				`Branch ${requestData.branch} doesn't exist, so it has no branch protections to bypass.`,
-			);
-			return undefined;
-		}
-
-		if (isPlanUpgradeRequired(error)) {
-			core.warning(
-				`Branch protections aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`,
-			);
-			return undefined;
-		}
-
-		throw new Error(
-			`Could not fetch existing branch protections for ${requestData.branch}: ${String(error)}`,
-			{ cause: error },
-		);
-	}
+				throw error;
+			}
+		},
+		`Could not fetch existing branch protections for ${requestData.branch}`,
+	);
 }

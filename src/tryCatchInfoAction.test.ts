@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	tryCatchInfoAction,
 	tryCatchSetFailedAction,
+	tryCatchThrowAction,
 } from "./tryCatchInfoAction.js";
 
 const mockInfo = vi.fn();
@@ -89,5 +90,45 @@ describe("tryCatchSetFailedAction", () => {
 			  ],
 			]
 		`);
+	});
+});
+
+describe("tryCatchThrowAction", () => {
+	it("logs and returns the action's result when it resolves", async () => {
+		const actual = await tryCatchThrowAction(
+			"abc",
+			vi.fn().mockResolvedValue("abc"),
+			"Could not abc",
+		);
+
+		expect(actual).toBe("abc");
+		expect(mockInfo.mock.calls).toEqual([
+			["Start: abc"],
+			['Result from abc: "abc"'],
+		]);
+	});
+
+	it("does not log a result when the action resolves with undefined", async () => {
+		await tryCatchThrowAction(
+			"abc",
+			vi.fn().mockResolvedValue(undefined),
+			"Could not abc",
+		);
+
+		expect(mockInfo.mock.calls).toEqual([["Start: abc"]]);
+	});
+
+	it("throws the failure message with the original error as its cause when the action rejects", async () => {
+		const cause = new Error("Oh no!");
+
+		const error = await tryCatchThrowAction(
+			"abc",
+			vi.fn().mockRejectedValue(cause),
+			"Could not abc",
+		).catch((caught: unknown) => caught);
+
+		expect(error).toEqual(new Error("Could not abc: Error: Oh no!"));
+		expect((error as Error).cause).toBe(cause);
+		expect(mockSetFailed).not.toHaveBeenCalled();
 	});
 });
