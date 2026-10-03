@@ -65,6 +65,8 @@ function mockPackageJson(data: object) {
 }
 
 const packageData = { name: "test-package", version: "1.2.3" };
+const npmView =
+	"npm view test-package@1.2.3 version --json --registry=https://registry.npmjs.org/";
 const notFound = { exitCode: 1, stdout: '{"error":{"code":"E404"}}' };
 const recentTagTime = { stdout: String(Math.floor(Date.now() / 1000)) };
 
@@ -96,7 +98,7 @@ describe("getUnpublishedVersion", () => {
 			expect.anything(),
 			"test-package",
 			"1.2.3",
-			["--registry", "https://npm.pkg.github.com"],
+			"--registry=https://npm.pkg.github.com",
 		);
 	});
 
@@ -109,7 +111,11 @@ describe("getUnpublishedVersion", () => {
 			},
 			version: "1.2.3",
 		});
-		mockCommands({});
+		mockCommands({
+			"npm config get @scope:registry": {
+				stdout: "https://other.example.com/",
+			},
+		});
 
 		await getUnpublishedVersion();
 
@@ -117,7 +123,29 @@ describe("getUnpublishedVersion", () => {
 			expect.anything(),
 			"@scope/test-package",
 			"1.2.3",
-			["--registry", "https://npm.pkg.github.com"],
+			"--@scope:registry=https://npm.pkg.github.com",
+		);
+	});
+
+	it("checks the scoped npm config registry for a scoped package", async () => {
+		mockPackageJson({
+			name: "@scope/test-package",
+			publishConfig: { registry: "https://example.com" },
+			version: "1.2.3",
+		});
+		mockCommands({
+			"npm config get @scope:registry": {
+				stdout: "https://npm.pkg.github.com/",
+			},
+		});
+
+		await getUnpublishedVersion();
+
+		expect(mock$quiet).toHaveBeenCalledWith(
+			expect.anything(),
+			"@scope/test-package",
+			"1.2.3",
+			"--@scope:registry=https://npm.pkg.github.com/",
 		);
 	});
 
@@ -135,14 +163,14 @@ describe("getUnpublishedVersion", () => {
 			expect.anything(),
 			"@scope/test-package",
 			"1.2.3",
-			["--registry", "https://example.com"],
+			"--@scope:registry=https://example.com",
 		);
 	});
 
 	it("throws when npm fails for a reason other than a missing version", async () => {
 		mockPackageJson(packageData);
 		mockCommands({
-			"npm view test-package@1.2.3 version --json": {
+			[npmView]: {
 				exitCode: 1,
 				stdout: '{"error":{"code":"ECONNRESET"}}',
 			},
@@ -156,7 +184,7 @@ describe("getUnpublishedVersion", () => {
 	it("returns undefined when the version is not on npm and was never tagged", async () => {
 		mockPackageJson(packageData);
 		mockCommands({
-			"npm view test-package@1.2.3 version --json": notFound,
+			[npmView]: notFound,
 		});
 
 		expect(await getUnpublishedVersion()).toBeUndefined();
@@ -167,7 +195,7 @@ describe("getUnpublishedVersion", () => {
 		mockCommands({
 			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
 			"git tag --points-at HEAD": { stdout: "" },
-			"npm view test-package@1.2.3 version --json": notFound,
+			[npmView]: notFound,
 		});
 
 		expect(await getUnpublishedVersion()).toEqual({
@@ -181,7 +209,7 @@ describe("getUnpublishedVersion", () => {
 		mockCommands({
 			"git tag --list 1.2.3 v1.2.3": { stdout: "1.2.3" },
 			"git tag --points-at HEAD": { stdout: "other\n1.2.3" },
-			"npm view test-package@1.2.3 version --json": notFound,
+			[npmView]: notFound,
 		});
 
 		expect(await getUnpublishedVersion()).toEqual({
@@ -196,8 +224,7 @@ describe("getUnpublishedVersion", () => {
 		mockCommands({
 			"git log -1 --format=%ct v1.2.3": recentTagTime,
 			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
-			"npm view test-package@1.2.3 version --json": () =>
-				npmResults.shift() ?? {},
+			[npmView]: () => npmResults.shift() ?? {},
 		});
 
 		expect(await getUnpublishedVersion()).toBeUndefined();
@@ -210,7 +237,7 @@ describe("getUnpublishedVersion", () => {
 			"git log -1 --format=%ct v1.2.3": recentTagTime,
 			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
 			"git tag --points-at HEAD": { stdout: "v1.2.3" },
-			"npm view test-package@1.2.3 version --json": notFound,
+			[npmView]: notFound,
 		});
 
 		expect(await getUnpublishedVersion()).toEqual({
@@ -225,7 +252,7 @@ describe("getUnpublishedVersion", () => {
 		mockCommands({
 			"git log -1 --format=%ct v1.2.3": { stdout: "1000000000" },
 			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
-			"npm view test-package@1.2.3 version --json": notFound,
+			[npmView]: notFound,
 		});
 
 		expect(await getUnpublishedVersion()).toEqual({

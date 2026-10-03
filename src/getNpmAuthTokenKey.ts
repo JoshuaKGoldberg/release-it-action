@@ -5,11 +5,8 @@ import {
 	PublishRegistryData,
 } from "./getPublishRegistry.js";
 
-const defaultRegistry = "https://registry.npmjs.org/";
-
 export async function getNpmAuthTokenKey() {
-	const registry =
-		getPublishRegistry(await readPackageData()) ?? defaultRegistry;
+	const registry = await getPublishRegistry(await readPackageData());
 
 	return `${getNerfDart(registry)}:_authToken`;
 }

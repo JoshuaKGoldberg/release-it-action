@@ -5,6 +5,7 @@ import { setTimeout } from "node:timers/promises";
 
 import {
 	getPublishRegistry,
+	getScopedRegistryKey,
 	PublishRegistryData,
 } from "../getPublishRegistry.js";
 
@@ -40,11 +41,12 @@ export async function getUnpublishedVersion(): Promise<
 		return undefined;
 	}
 
-	const registry = getPublishRegistry(packageData);
-	const registryArgs = registry ? ["--registry", registry] : [];
+	const registry = await getPublishRegistry(packageData);
+	// npm view prefers a scope's registry config over --registry.
+	const registryArg = `--${getScopedRegistryKey(name) ?? "registry"}=${registry}`;
 	const isOnNpm = async () => {
 		const view =
-			await $quiet`npm view ${name}@${version} version --json ${registryArgs}`;
+			await $quiet`npm view ${name}@${version} version --json ${registryArg}`;
 		if (!view.exitCode) {
 			return true;
 		}
