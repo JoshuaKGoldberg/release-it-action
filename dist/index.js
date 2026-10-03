@@ -44702,7 +44702,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
             .join(" "), { allowPublishConflict: true, skipSupersededCheck: true });
         return;
     }
-    if (!(await tryCatchSetFailedAction("running should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true })))) {
+    if (!(await tryCatchSetFailedAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true })))) {
         return;
     }
     const args = [skipNpmPublish && "--no-npm.publish", releaseItArgs]
