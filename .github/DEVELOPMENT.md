@@ -34,7 +34,7 @@ pnpm build:release
 ```
 
 CI fails if the committed `dist/` doesn't match what `pnpm build:release` produces.
-Dependency update PRs that change the bundle, such as from Renovate, won't automerge until someone runs `pnpm build:release` on them and commits `dist/`.
+On Renovate branches, the [Rebuild Dist workflow](./workflows/rebuild-dist.yml) runs `pnpm build:release` and pushes any `dist/` changes as a `chore: rebuild dist` commit so dependency updates can still automerge.
 
 ## Formatting
 
