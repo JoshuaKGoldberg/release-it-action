@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.32](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.31...v0.5.32) (2026-10-03)
+
+### Bug Fixes
+
+- only republish to npm after the missing GitHub release is created ([#948](https://github.com/JoshuaKGoldberg/release-it-action/issues/948)) ([da0f818](https://github.com/JoshuaKGoldberg/release-it-action/commit/da0f818167c809978eb3871cad21eee3fc0bbcc0)), closes [#895](https://github.com/JoshuaKGoldberg/release-it-action/issues/895)
+
 ## [0.5.31](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.30...v0.5.31) (2026-10-03)
 
 ### Bug Fixes
