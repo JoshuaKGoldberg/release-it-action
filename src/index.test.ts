@@ -114,6 +114,23 @@ describe("releaseItAction", () => {
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
 	});
 
+	it("fails without doing anything else when releaseItArgs can't be parsed", async () => {
+		await releaseItAction({
+			...mockOptions,
+			bypassBranchProtections: "example-branch",
+			releaseItArgs: '--github.releaseName="oops',
+		});
+
+		expect(mockCore.setFailed).toHaveBeenCalledWith(
+			'Invalid release-it-args: Could not parse arguments (Got EOF while in a quoted string): --github.releaseName="oops',
+		);
+		expect(mock$$).not.toHaveBeenCalled();
+		expect(mockGetUnpublishedVersion).not.toHaveBeenCalled();
+		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
+		expect(mockRunBypassingBranchProtections).not.toHaveBeenCalled();
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
+	});
+
 	it("fails without releasing when an older tagged version was never published", async () => {
 		mockGetUnpublishedVersion.mockResolvedValueOnce({
 			headTag: undefined,

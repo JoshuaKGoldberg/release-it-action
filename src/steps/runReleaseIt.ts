@@ -18,17 +18,10 @@ export async function runReleaseIt(
 	{ allowPublishConflict, skipSupersededCheck }: RunReleaseItOptions = {},
 ) {
 	await tryCatchInfoAction("running release-it", async () => {
-		let args: string[];
-		try {
-			args = parseArgsString(releaseItArgs ?? "");
-		} catch (error) {
-			core.setFailed(`Error running release-it: ${describeError(error)}`);
-			return;
-		}
-
 		const startSha = await getHeadSha();
 
 		try {
+			const args = parseArgsString(releaseItArgs ?? "");
 			const { exitCode } = await $$captured`npx release-it --verbose ${args}`;
 			if (exitCode) {
 				throw new Error(`Exit code ${exitCode.toString()}.`);
