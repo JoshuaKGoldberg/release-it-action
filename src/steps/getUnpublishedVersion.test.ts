@@ -1,3 +1,4 @@
+import * as core from "@actions/core";
 import { describe, expect, it, vi } from "vitest";
 
 import { getUnpublishedVersion } from "./getUnpublishedVersion.js";
@@ -65,6 +66,7 @@ function mockPackageJson(data: object) {
 }
 
 const packageData = { name: "test-package", version: "1.2.3" };
+const scopedPackageData = { name: "@scope/test-package", version: "1.2.3" };
 const notFound = { exitCode: 1, stdout: '{"error":{"code":"E404"}}' };
 const recentTagTime = { stdout: String(Math.floor(Date.now() / 1000)) };
 
@@ -94,8 +96,7 @@ describe("getUnpublishedVersion", () => {
 
 		expect(mock$quiet).toHaveBeenCalledWith(
 			expect.anything(),
-			"test-package",
-			"1.2.3",
+			"test-package@1.2.3",
 			["--registry", "https://npm.pkg.github.com"],
 		);
 	});
@@ -115,8 +116,7 @@ describe("getUnpublishedVersion", () => {
 
 		expect(mock$quiet).toHaveBeenCalledWith(
 			expect.anything(),
-			"@scope/test-package",
-			"1.2.3",
+			"@scope/test-package@1.2.3",
 			["--registry", "https://npm.pkg.github.com"],
 		);
 	});
@@ -133,8 +133,7 @@ describe("getUnpublishedVersion", () => {
 
 		expect(mock$quiet).toHaveBeenCalledWith(
 			expect.anything(),
-			"@scope/test-package",
-			"1.2.3",
+			"@scope/test-package@1.2.3",
 			["--registry", "https://example.com"],
 		);
 	});
@@ -233,5 +232,114 @@ describe("getUnpublishedVersion", () => {
 			version: "1.2.3",
 		});
 		expect(mockSetTimeout).not.toHaveBeenCalled();
+	});
+
+	it("returns undefined with a warning when npm can't see a scoped package and isn't logged in", async () => {
+		mockPackageJson(scopedPackageData);
+		mockCommands({
+			"git log -1 --format=%ct v1.2.3": recentTagTime,
+			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+			"npm view @scope/test-package@1.2.3 version --json": notFound,
+			"npm view @scope/test-package version --json": notFound,
+			"npm whoami": { exitCode: 1 },
+		});
+
+		expect(await getUnpublishedVersion()).toBeUndefined();
+		expect(core.warning).toHaveBeenCalledWith(
+			"Skipping the check for whether @scope/test-package@1.2.3 was published to npm: npm can't see the package, which may be restricted, and isn't logged in to read it. To enable the check, give npm a read-only token, such as with the npm-token input or a NODE_AUTH_TOKEN for actions/setup-node's registry-url.",
+		);
+		expect(mockSetTimeout).not.toHaveBeenCalled();
+	});
+
+	it("uses the publishConfig registry to check whether npm can see a scoped package and is logged in", async () => {
+		mockPackageJson({
+			...scopedPackageData,
+			publishConfig: { registry: "https://example.com" },
+		});
+		mockCommands({
+			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+			"npm view @scope/test-package@1.2.3 version --json --registry https://example.com":
+				notFound,
+			"npm view @scope/test-package version --json --registry https://example.com":
+				notFound,
+			"npm whoami --registry https://example.com": { exitCode: 1 },
+		});
+
+		expect(await getUnpublishedVersion()).toBeUndefined();
+		expect(core.warning).toHaveBeenCalled();
+	});
+
+	it("returns the version when npm can see a scoped package but not the version", async () => {
+		mockPackageJson(scopedPackageData);
+		mockCommands({
+			"git log -1 --format=%ct v1.2.3": { stdout: "1000000000" },
+			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+			"npm view @scope/test-package@1.2.3 version --json": notFound,
+			"npm whoami": { exitCode: 1 },
+		});
+
+		expect(await getUnpublishedVersion()).toEqual({
+			headTag: undefined,
+			version: "1.2.3",
+		});
+		expect(core.warning).not.toHaveBeenCalled();
+	});
+
+	it("returns the version when npm can't see a scoped package but is logged in", async () => {
+		mockPackageJson(scopedPackageData);
+		mockCommands({
+			"git log -1 --format=%ct v1.2.3": { stdout: "1000000000" },
+			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+			"npm view @scope/test-package@1.2.3 version --json": notFound,
+			"npm view @scope/test-package version --json": notFound,
+		});
+
+		expect(await getUnpublishedVersion()).toEqual({
+			headTag: undefined,
+			version: "1.2.3",
+		});
+		expect(core.warning).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		["an unscoped package", packageData],
+		[
+			"a scoped package with public access",
+			{ ...scopedPackageData, publishConfig: { access: "public" } },
+		],
+	])(
+		"returns the version without checking whether npm can see %s",
+		async (_, data) => {
+			mockPackageJson(data);
+			mockCommands({
+				[`npm view ${data.name}@1.2.3 version --json`]: notFound,
+				[`npm view ${data.name} version --json`]: notFound,
+				"git log -1 --format=%ct v1.2.3": { stdout: "1000000000" },
+				"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+				"npm whoami": { exitCode: 1 },
+			});
+
+			expect(await getUnpublishedVersion()).toEqual({
+				headTag: undefined,
+				version: "1.2.3",
+			});
+			expect(core.warning).not.toHaveBeenCalled();
+		},
+	);
+
+	it("throws when npm fails to check a scoped package for a reason other than it missing", async () => {
+		mockPackageJson(scopedPackageData);
+		mockCommands({
+			"git tag --list 1.2.3 v1.2.3": { stdout: "v1.2.3" },
+			"npm view @scope/test-package@1.2.3 version --json": notFound,
+			"npm view @scope/test-package version --json": {
+				exitCode: 1,
+				stdout: '{"error":{"code":"ECONNRESET"}}',
+			},
+		});
+
+		await expect(getUnpublishedVersion()).rejects.toThrow(
+			"Could not check npm for @scope/test-package.",
+		);
 	});
 });

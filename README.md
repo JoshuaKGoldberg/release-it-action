@@ -76,6 +76,7 @@ permissions:
 ```
 
 You can leave out `NPM_TOKEN` if you use npm's [Trusted Publishing](https://docs.npmjs.com/trusted-publishers).
+Restricted packages still need [a read-only token](#what-happens-when-a-release-gets-pushed-but-not-published) for step 3.
 
 ### Recommended `release-it` Config
 
@@ -169,6 +170,10 @@ Otherwise the action fails until you publish that version yourself, or bump the 
 The check assumes your package belongs on npm.
 If it doesn't, set `skip-npm-publish` or mark the package as `"private": true`.
 Otherwise every push fails as an unpublished version.
+
+npm only shows restricted packages to users logged in to read them, and [Trusted Publishing doesn't log in for `npm view`](https://docs.npmjs.com/trusted-publishers#managing-dist-tags-with-trusted-publishing).
+If npm can't see your scoped package and isn't logged in, the action skips this check with a warning.
+To keep the check, give npm a [read-only token](https://docs.npmjs.com/trusted-publishers#handling-private-dependencies), such as with the `npm-token` input or a `NODE_AUTH_TOKEN` for `actions/setup-node`'s `registry-url`.
 
 ### What happens when a newer commit lands during a release?
 

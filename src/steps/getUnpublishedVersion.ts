@@ -47,15 +47,14 @@ export async function getUnpublishedVersion(): Promise<
 			? scopedRegistry
 			: publishConfig?.registry;
 	const registryArgs = registry ? ["--registry", registry] : [];
-	const isOnNpm = async () => {
-		const view =
-			await $quiet`npm view ${name}@${version} version --json ${registryArgs}`;
+	const isOnNpm = async (spec = `${name}@${version}`) => {
+		const view = await $quiet`npm view ${spec} version --json ${registryArgs}`;
 		if (!view.exitCode) {
 			return true;
 		}
 
 		if (!view.stdout.includes('"E404"')) {
-			throw new Error(`Could not check npm for ${name}@${version}.`);
+			throw new Error(`Could not check npm for ${spec}.`);
 		}
 
 		return false;
@@ -72,6 +71,19 @@ export async function getUnpublishedVersion(): Promise<
 
 	// A version that was never tagged was never released, e.g. a new package.
 	if (!existingTags.length) {
+		return undefined;
+	}
+
+	// npm hides restricted packages from anyone not logged in to read them.
+	if (
+		name.startsWith("@") &&
+		publishConfig?.access !== "public" &&
+		!(await isOnNpm(name)) &&
+		(await $quiet`npm whoami ${registryArgs}`).exitCode
+	) {
+		core.warning(
+			`Skipping the check for whether ${name}@${version} was published to npm: npm can't see the package, which may be restricted, and isn't logged in to read it. To enable the check, give npm a read-only token, such as with the npm-token input or a NODE_AUTH_TOKEN for actions/setup-node's registry-url.`,
+		);
 		return undefined;
 	}
 
