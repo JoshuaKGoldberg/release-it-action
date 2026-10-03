@@ -20,7 +20,7 @@ export async function runReleaseIt(
 		githubToken,
 		skipSupersededCheck,
 	}: RunReleaseItOptions,
-) {
+): Promise<boolean> {
 	core.info("Start: running release-it");
 
 	const startSha = await getHeadSha();
@@ -30,6 +30,8 @@ export async function runReleaseIt(
 		await $$captured({
 			env: { GITHUB_TOKEN: githubToken },
 		})`npx release-it --verbose ${args}`;
+
+		return true;
 	} catch (error) {
 		if (
 			!skipSupersededCheck &&
@@ -39,7 +41,7 @@ export async function runReleaseIt(
 			core.warning(
 				`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`,
 			);
-			return;
+			return false;
 		}
 
 		if (
@@ -49,10 +51,11 @@ export async function runReleaseIt(
 			core.info(
 				`release-it failed because npm already has this version. A previous release run must have published it: ${describeError(error)}`,
 			);
-			return;
+			return true;
 		}
 
 		core.setFailed(`Error running release-it: ${describeError(error)}`);
+		return false;
 	}
 }
 

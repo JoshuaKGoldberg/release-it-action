@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.32](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.31...v0.5.32) (2026-10-03)
+
+### Bug Fixes
+
+- only republish to npm after the missing GitHub release is created ([#948](https://github.com/JoshuaKGoldberg/release-it-action/issues/948)) ([da0f818](https://github.com/JoshuaKGoldberg/release-it-action/commit/da0f818167c809978eb3871cad21eee3fc0bbcc0)), closes [#895](https://github.com/JoshuaKGoldberg/release-it-action/issues/895)
+
+## [0.5.31](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.30...v0.5.31) (2026-10-03)
+
+### Bug Fixes
+
+- let the github-token input override an existing GITHUB_TOKEN ([#946](https://github.com/JoshuaKGoldberg/release-it-action/issues/946)) ([717b2aa](https://github.com/JoshuaKGoldberg/release-it-action/commit/717b2aabb8bb1918285e69f736e43c5d1f6005d8)), closes [#897](https://github.com/JoshuaKGoldberg/release-it-action/issues/897)
+
 ## [0.5.30](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.29...v0.5.30) (2026-10-03)
 
 ### Bug Fixes
