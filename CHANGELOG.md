@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.22](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.21...v0.5.22) (2026-10-03)
+
+### Bug Fixes
+
+- keep "any source" required checks when recreating branch protections ([#989](https://github.com/JoshuaKGoldberg/release-it-action/issues/989)) ([e1c8c93](https://github.com/JoshuaKGoldberg/release-it-action/commit/e1c8c93f47a2f3d59987d4a261cbeb4430f7c67e)), closes [#988](https://github.com/JoshuaKGoldberg/release-it-action/issues/988)
+
 ## [0.5.21](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.20...v0.5.21) (2026-10-03)
 
 ### Bug Fixes
