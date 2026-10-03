@@ -2,13 +2,15 @@ import { $ } from "execa";
 
 const $quiet = $({ reject: false });
 
-export async function checkSuperseded(startSha: string) {
+export async function checkSuperseded(startSha: string, githubToken: string) {
 	const branch = await $quiet`git rev-parse --abbrev-ref HEAD`;
 	if (branch.exitCode || branch.stdout === "HEAD") {
 		return false;
 	}
 
-	const fetch = await $quiet`git fetch origin ${branch.stdout}`;
+	const fetch = await $quiet({
+		env: { GITHUB_TOKEN: githubToken },
+	})`git fetch origin ${branch.stdout}`;
 	if (fetch.exitCode) {
 		return false;
 	}

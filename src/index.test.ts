@@ -95,6 +95,7 @@ describe("releaseItAction", () => {
 		await releaseItAction(mockOptions);
 
 		expect(process.env.GITHUB_TOKEN).toBeUndefined();
+		expect(mockGetUnpublishedVersion).toHaveBeenCalledWith("mock-githubToken");
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(mockReleaseItArgs, {
 			githubToken: "mock-githubToken",
 		});
@@ -107,6 +108,7 @@ describe("releaseItAction", () => {
 		await releaseItAction(mockOptions);
 
 		expect(process.env.GITHUB_TOKEN).toBe("mock-environment-token");
+		expect(mockGetUnpublishedVersion).toHaveBeenCalledWith("mock-githubToken");
 		expect(mockRunReleaseIt).toHaveBeenCalledWith(mockReleaseItArgs, {
 			githubToken: "mock-githubToken",
 		});

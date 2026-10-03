@@ -37,7 +37,7 @@ export async function runReleaseIt(
 			if (
 				!skipSupersededCheck &&
 				startSha &&
-				(await checkSuperseded(startSha))
+				(await checkSuperseded(startSha, githubToken))
 			) {
 				core.warning(
 					`release-it failed, but the branch has moved past ${startSha}. A newer release run will handle releasing: ${describeError(error)}`,

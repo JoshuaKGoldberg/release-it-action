@@ -3,12 +3,21 @@ import { describe, expect, it, vi } from "vitest";
 import { getUnpublishedVersion } from "./getUnpublishedVersion.js";
 
 const mock$quiet = vi.fn();
+const mock$quietOptions = vi.fn();
 
 vi.mock("execa", () => ({
-	$:
-		() =>
-		(strings: TemplateStringsArray, ...values: unknown[]) =>
-			mock$quiet(strings, ...values) as unknown,
+	$: () =>
+		function $quiet(
+			first: object | TemplateStringsArray,
+			...values: unknown[]
+		): unknown {
+			if (!Array.isArray(first)) {
+				mock$quietOptions(first);
+				return $quiet;
+			}
+
+			return mock$quiet(first, ...values);
+		},
 }));
 
 vi.mock("@actions/core");
@@ -64,6 +73,7 @@ function mockPackageJson(data: object) {
 	mockReadFile.mockResolvedValueOnce(JSON.stringify(data));
 }
 
+const githubToken = "mock-github-token";
 const packageData = { name: "test-package", version: "1.2.3" };
 const notFound = { exitCode: 1, stdout: '{"error":{"code":"E404"}}' };
 const recentTagTime = { stdout: String(Math.floor(Date.now() / 1000)) };
@@ -72,7 +82,7 @@ describe("getUnpublishedVersion", () => {
 	it("returns undefined when the package is private", async () => {
 		mockPackageJson({ ...packageData, private: true });
 
-		expect(await getUnpublishedVersion()).toBeUndefined();
+		expect(await getUnpublishedVersion(githubToken)).toBeUndefined();
 		expect(mock$quiet).not.toHaveBeenCalled();
 	});
 
@@ -80,7 +90,18 @@ describe("getUnpublishedVersion", () => {
 		mockPackageJson(packageData);
 		mockCommands({});
 
-		expect(await getUnpublishedVersion()).toBeUndefined();
+		expect(await getUnpublishedVersion(githubToken)).toBeUndefined();
+	});
+
+	it("passes githubToken to npm as GITHUB_TOKEN", async () => {
+		mockPackageJson(packageData);
+		mockCommands({});
+
+		await getUnpublishedVersion(githubToken);
+
+		expect(mock$quietOptions.mock.calls).toEqual([
+			[{ env: { GITHUB_TOKEN: githubToken } }],
+		]);
 	});
 
 	it("checks the publishConfig registry when one is set", async () => {
@@ -90,7 +111,7 @@ describe("getUnpublishedVersion", () => {
 		});
 		mockCommands({});
 
-		await getUnpublishedVersion();
+		await getUnpublishedVersion(githubToken);
 
 		expect(mock$quiet).toHaveBeenCalledWith(
 			expect.anything(),
@@ -111,7 +132,7 @@ describe("getUnpublishedVersion", () => {
 		});
 		mockCommands({});
 
-		await getUnpublishedVersion();
+		await getUnpublishedVersion(githubToken);
 
 		expect(mock$quiet).toHaveBeenCalledWith(
 			expect.anything(),
@@ -129,7 +150,7 @@ describe("getUnpublishedVersion", () => {
 		});
 		mockCommands({});
 
-		await getUnpublishedVersion();
+		await getUnpublishedVersion(githubToken);
 
 		expect(mock$quiet).toHaveBeenCalledWith(
 			expect.anything(),
@@ -148,7 +169,7 @@ describe("getUnpublishedVersion", () => {
 			},
 		});
 
-		await expect(getUnpublishedVersion()).rejects.toThrow(
+		await expect(getUnpublishedVersion(githubToken)).rejects.toThrow(
 			"Could not check npm for test-package@1.2.3.",
 		);
 	});
@@ -159,7 +180,7 @@ describe("getUnpublishedVersion", () => {
 			"npm view test-package@1.2.3 version --json": notFound,
 		});
 
-		expect(await getUnpublishedVersion()).toBeUndefined();
+		expect(await getUnpublishedVersion(githubToken)).toBeUndefined();
 	});
 
 	it("returns the version without a headTag when it was tagged on an older commit", async () => {
@@ -170,7 +191,7 @@ describe("getUnpublishedVersion", () => {
 			"npm view test-package@1.2.3 version --json": notFound,
 		});
 
-		expect(await getUnpublishedVersion()).toEqual({
+		expect(await getUnpublishedVersion(githubToken)).toEqual({
 			headTag: undefined,
 			version: "1.2.3",
 		});
@@ -184,7 +205,7 @@ describe("getUnpublishedVersion", () => {
 			"npm view test-package@1.2.3 version --json": notFound,
 		});
 
-		expect(await getUnpublishedVersion()).toEqual({
+		expect(await getUnpublishedVersion(githubToken)).toEqual({
 			headTag: "1.2.3",
 			version: "1.2.3",
 		});
@@ -200,7 +221,7 @@ describe("getUnpublishedVersion", () => {
 				npmResults.shift() ?? {},
 		});
 
-		expect(await getUnpublishedVersion()).toBeUndefined();
+		expect(await getUnpublishedVersion(githubToken)).toBeUndefined();
 		expect(mockSetTimeout).toHaveBeenCalledTimes(2);
 	});
 
@@ -213,7 +234,7 @@ describe("getUnpublishedVersion", () => {
 			"npm view test-package@1.2.3 version --json": notFound,
 		});
 
-		expect(await getUnpublishedVersion()).toEqual({
+		expect(await getUnpublishedVersion(githubToken)).toEqual({
 			headTag: "v1.2.3",
 			version: "1.2.3",
 		});
@@ -228,7 +249,7 @@ describe("getUnpublishedVersion", () => {
 			"npm view test-package@1.2.3 version --json": notFound,
 		});
 
-		expect(await getUnpublishedVersion()).toEqual({
+		expect(await getUnpublishedVersion(githubToken)).toEqual({
 			headTag: undefined,
 			version: "1.2.3",
 		});

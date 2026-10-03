@@ -3,12 +3,21 @@ import { describe, expect, it, vi } from "vitest";
 import { checkSuperseded, getHeadSha } from "./checkSuperseded.js";
 
 const mock$quiet = vi.fn();
+const mock$quietOptions = vi.fn();
 
 vi.mock("execa", () => ({
-	$:
-		() =>
-		(strings: TemplateStringsArray, ...values: unknown[]) =>
-			mock$quiet(strings, ...values) as unknown,
+	$: () =>
+		function $quiet(
+			first: object | TemplateStringsArray,
+			...values: unknown[]
+		): unknown {
+			if (!Array.isArray(first)) {
+				mock$quietOptions(first);
+				return $quiet;
+			}
+
+			return mock$quiet(first, ...values);
+		},
 }));
 
 interface MockResult {
@@ -29,6 +38,7 @@ function mockCommands(results: Record<string, MockResult>) {
 	);
 }
 
+const githubToken = "mock-github-token";
 const startSha = "start-sha";
 
 describe("getHeadSha", () => {
@@ -49,7 +59,7 @@ describe("checkSuperseded", () => {
 	it("returns false when HEAD is detached", async () => {
 		mockCommands({ "git rev-parse --abbrev-ref HEAD": { stdout: "HEAD" } });
 
-		expect(await checkSuperseded(startSha)).toBe(false);
+		expect(await checkSuperseded(startSha, githubToken)).toBe(false);
 	});
 
 	it("returns false when fetching the branch fails", async () => {
@@ -58,7 +68,20 @@ describe("checkSuperseded", () => {
 			"git rev-parse --abbrev-ref HEAD": { stdout: "main" },
 		});
 
-		expect(await checkSuperseded(startSha)).toBe(false);
+		expect(await checkSuperseded(startSha, githubToken)).toBe(false);
+	});
+
+	it("passes githubToken to git fetch as GITHUB_TOKEN", async () => {
+		mockCommands({
+			"git fetch origin main": { exitCode: 1 },
+			"git rev-parse --abbrev-ref HEAD": { stdout: "main" },
+		});
+
+		await checkSuperseded(startSha, githubToken);
+
+		expect(mock$quietOptions.mock.calls).toEqual([
+			[{ env: { GITHUB_TOKEN: githubToken } }],
+		]);
 	});
 
 	it("returns false when the remote branch has not moved", async () => {
@@ -67,7 +90,7 @@ describe("checkSuperseded", () => {
 			"git rev-parse FETCH_HEAD": { stdout: startSha },
 		});
 
-		expect(await checkSuperseded(startSha)).toBe(false);
+		expect(await checkSuperseded(startSha, githubToken)).toBe(false);
 	});
 
 	it("returns true when the remote branch moved and release-it rolled back", async () => {
@@ -77,7 +100,7 @@ describe("checkSuperseded", () => {
 			"git rev-parse HEAD": { stdout: startSha },
 		});
 
-		expect(await checkSuperseded(startSha)).toBe(true);
+		expect(await checkSuperseded(startSha, githubToken)).toBe(true);
 	});
 
 	it("returns true when the remote branch moved and does not include the local release commit", async () => {
@@ -88,7 +111,7 @@ describe("checkSuperseded", () => {
 			"git rev-parse HEAD": { stdout: "local-sha" },
 		});
 
-		expect(await checkSuperseded(startSha)).toBe(true);
+		expect(await checkSuperseded(startSha, githubToken)).toBe(true);
 	});
 
 	it("returns false when the remote branch includes the local release commit", async () => {
@@ -99,7 +122,7 @@ describe("checkSuperseded", () => {
 			"git rev-parse HEAD": { stdout: "local-sha" },
 		});
 
-		expect(await checkSuperseded(startSha)).toBe(false);
+		expect(await checkSuperseded(startSha, githubToken)).toBe(false);
 	});
 
 	it("returns false when checking for an ancestor fails altogether", async () => {
@@ -110,6 +133,6 @@ describe("checkSuperseded", () => {
 			"git rev-parse HEAD": { stdout: "local-sha" },
 		});
 
-		expect(await checkSuperseded(startSha)).toBe(false);
+		expect(await checkSuperseded(startSha, githubToken)).toBe(false);
 	});
 });

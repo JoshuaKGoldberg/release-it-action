@@ -113,7 +113,10 @@ describe("runReleaseIt", () => {
 
 		await runReleaseIt("", mockOptions);
 
-		expect(mockCheckSuperseded).toHaveBeenCalledWith("start-sha");
+		expect(mockCheckSuperseded).toHaveBeenCalledWith(
+			"start-sha",
+			"mock-github-token",
+		);
 		expect(mockWarning.mock.calls).toMatchInlineSnapshot(`
 			[
 			  [

@@ -68,7 +68,7 @@ async function runRelease({
 		? undefined
 		: await tryCatchInfoAction(
 				"checking for a version that was pushed but not published",
-				getUnpublishedVersion,
+				async () => await getUnpublishedVersion(githubToken),
 			);
 
 	if (unpublishedVersion) {
