@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.25](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.24...v0.5.25) (2026-10-03)
+
+### Bug Fixes
+
+- fail when rulesets can't be fetched or disabled ([#979](https://github.com/JoshuaKGoldberg/release-it-action/issues/979)) ([0098553](https://github.com/JoshuaKGoldberg/release-it-action/commit/009855301a66a9abc5e1c9a63db7b2dda5e88b50)), closes [#978](https://github.com/JoshuaKGoldberg/release-it-action/issues/978)
+
 ## [0.5.24](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.23...v0.5.24) (2026-10-03)
 
 ### Bug Fixes

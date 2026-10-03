@@ -26,6 +26,7 @@
 		"rulesets",
 		"shlex",
 		"tseslint",
-		"unstub"
+		"unstub",
+		"userconfig"
 	]
 }
