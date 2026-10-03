@@ -44607,12 +44607,14 @@ async function getHeadSha() {
 
 
 const publishConflict = /cannot publish over (?:the )?previously (?:published|staged) version/i;
-async function runReleaseIt(releaseItArgs, { allowPublishConflict, skipSupersededCheck } = {}) {
+async function runReleaseIt(releaseItArgs, { allowPublishConflict, githubToken, skipSupersededCheck, }) {
     await tryCatchInfoAction("running release-it", async () => {
         const startSha = await getHeadSha();
         try {
-            const args = parseArgsString(releaseItArgs ?? "");
-            const { exitCode } = await $$captured `npx release-it --verbose ${args}`;
+            const args = parseArgsString(releaseItArgs);
+            const { exitCode } = await $$captured({
+                env: { GITHUB_TOKEN: githubToken },
+            }) `npx release-it --verbose ${args}`;
             if (exitCode) {
                 throw new Error(`Exit code ${exitCode.toString()}.`);
             }
@@ -44673,8 +44675,6 @@ async function releaseItAction(options) {
     }
 }
 async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githubToken, owner, releaseItArgs, repo, skipNpmPublish = false, }) {
-    // release-it reads the token from the environment, not from this process.
-    process.env.GITHUB_TOKEN = githubToken;
     const octokit = github/* getOctokit */.Q(githubToken);
     const unpublishedVersion = skipNpmPublish
         ? undefined
@@ -44691,7 +44691,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
         if (hasRelease === false) {
             await runReleaseIt(["--no-increment --no-git --no-npm.publish", releaseItArgs]
                 .filter(Boolean)
-                .join(" "), { skipSupersededCheck: true });
+                .join(" "), { githubToken, skipSupersededCheck: true });
         }
         // ...and then if that succeeded (didn't throw), do the immutable npm publish
         await runReleaseIt([
@@ -44699,7 +44699,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
             releaseItArgs,
         ]
             .filter(Boolean)
-            .join(" "), { allowPublishConflict: true, skipSupersededCheck: true });
+            .join(" "), { allowPublishConflict: true, githubToken, skipSupersededCheck: true });
         return;
     }
     if ((await tryCatchInfoAction("should-semantic-release", async () => await shouldSemanticRelease_shouldSemanticRelease({ verbose: true }))) === false) {
@@ -44709,7 +44709,7 @@ async function runRelease({ bypassBranchProtections, bypassBranchRulesets, githu
         .filter(Boolean)
         .join(" ");
     const runReleaseItWithArgs = async () => {
-        await runReleaseIt(args);
+        await runReleaseIt(args, { githubToken });
     };
     if (!bypassBranchProtections && !bypassBranchRulesets) {
         await runReleaseItWithArgs();
