@@ -59,7 +59,8 @@ vi.mock("./steps/runReleaseIt.js", () => ({
 	},
 }));
 
-vi.mock("./tryCatchInfoAction.js", () => ({
+vi.mock("./tryCatchInfoAction.js", async (importOriginal) => ({
+	...(await importOriginal<typeof import("./tryCatchInfoAction.js")>()),
 	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
 		return await action();
 	},
@@ -124,6 +125,18 @@ describe("releaseItAction", () => {
 
 		expect(mockCore.setFailed).toHaveBeenCalledWith(
 			"Version 1.2.3 was tagged but never published to npm. Publish it before releasing a newer version, or bump the version manually if npm won't accept it again. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.",
+		);
+		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
+		expect(mockRunReleaseIt).not.toHaveBeenCalled();
+	});
+
+	it("fails without releasing when checking npm for an unpublished version fails", async () => {
+		mockGetUnpublishedVersion.mockRejectedValueOnce(new Error("Oh no!"));
+
+		await releaseItAction(mockOptions);
+
+		expect(mockCore.setFailed).toHaveBeenCalledWith(
+			"Error checking for a version that was pushed but not published: Error: Oh no!",
 		);
 		expect(mockShouldSemanticRelease).not.toHaveBeenCalled();
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();

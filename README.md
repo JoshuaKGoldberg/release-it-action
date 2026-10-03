@@ -169,6 +169,7 @@ Otherwise the action fails until you publish that version yourself, or bump the 
 The check assumes your package belongs on npm.
 If it doesn't, set `skip-npm-publish` or mark the package as `"private": true`.
 Otherwise every push fails as an unpublished version.
+Runs also fail when the action can't check npm, such as when the registry is down or npm can't authenticate with it.
 
 ### What happens when a newer commit lands during a release?
 

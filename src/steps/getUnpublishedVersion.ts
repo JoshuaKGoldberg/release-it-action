@@ -33,7 +33,7 @@ export async function getUnpublishedVersion(): Promise<
 		private: isPrivate,
 		publishConfig,
 		version,
-	} = JSON.parse(await fs.readFile("package.json", "utf8")) as PackageData;
+	} = (await readPackageData()) ?? {};
 
 	if (isPrivate || !name || !version) {
 		return undefined;
@@ -55,7 +55,9 @@ export async function getUnpublishedVersion(): Promise<
 		}
 
 		if (!view.stdout.includes('"E404"')) {
-			throw new Error(`Could not check npm for ${name}@${version}.`);
+			throw new Error(
+				`Could not check npm for ${name}@${version}: ${describeNpmError(view.stdout)}. Make sure the registry is reachable and npm is authenticated to read the package. If this package isn't meant to be on npm, set the skip-npm-publish option or mark it as private.`,
+			);
 		}
 
 		return false;
@@ -97,4 +99,25 @@ export async function getUnpublishedVersion(): Promise<
 		headTag: existingTags.find((tag) => headTags.includes(tag)),
 		version,
 	};
+}
+
+function describeNpmError(stdout: string) {
+	try {
+		const { error } = JSON.parse(stdout) as { error?: { summary?: string } };
+		return error?.summary ?? "unknown error";
+	} catch {
+		return "unknown error";
+	}
+}
+
+async function readPackageData() {
+	try {
+		return JSON.parse(await fs.readFile("package.json", "utf8")) as PackageData;
+	} catch (error) {
+		if ((error as { code?: string }).code === "ENOENT") {
+			return undefined;
+		}
+
+		throw error;
+	}
 }

@@ -8,7 +8,10 @@ import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
 import { getUnpublishedVersion } from "./steps/getUnpublishedVersion.js";
 import { hasGitHubRelease } from "./steps/hasGitHubRelease.js";
 import { runReleaseIt } from "./steps/runReleaseIt.js";
-import { tryCatchInfoAction } from "./tryCatchInfoAction.js";
+import {
+	tryCatchInfoAction,
+	tryCatchSetFailedAction,
+} from "./tryCatchInfoAction.js";
 
 export interface ReleaseItActionOptions {
 	bypassBranchProtections?: string;
@@ -68,11 +71,15 @@ async function runRelease({
 	const octokit = github.getOctokit(githubToken);
 
 	const unpublishedVersion = skipNpmPublish
-		? undefined
-		: await tryCatchInfoAction(
+		? false
+		: await tryCatchSetFailedAction(
 				"checking for a version that was pushed but not published",
-				getUnpublishedVersion,
+				async () => (await getUnpublishedVersion()) ?? false,
 			);
+
+	if (unpublishedVersion === undefined) {
+		return;
+	}
 
 	if (unpublishedVersion) {
 		const { headTag, version } = unpublishedVersion;
