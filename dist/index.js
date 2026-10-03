@@ -30292,7 +30292,7 @@ module.exports = {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8830);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(1466);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(1317);
 
 
 
@@ -30308,7 +30308,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 1466:
+/***/ 1317:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -41344,9 +41344,20 @@ async function deleteProtections({ existingProtections, octokit, requestData, })
     }
 }
 
+;// CONCATENATED MODULE: ./src/requestErrors.ts
+const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
+function getRequestErrorDetails(error) {
+    const { response, status } = error;
+    return { message: response?.data?.message ?? "", status };
+}
+function isPlanUpgradeRequired(error) {
+    const { message, status } = getRequestErrorDetails(error);
+    return status === 403 && planUpgradeRequired.test(message);
+}
+
 ;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
 
-const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
+
 async function fetchProtections({ octokit, requestData, }) {
     const label = `fetching existing branch protections for ${requestData.branch}`;
     core/* info */.pq(`Start: ${label}`);
@@ -41356,8 +41367,7 @@ async function fetchProtections({ octokit, requestData, }) {
         return data;
     }
     catch (error) {
-        const { response, status } = error;
-        const message = response?.data?.message ?? "";
+        const { message, status } = getRequestErrorDetails(error);
         if (status === 404 && message === "Branch not protected") {
             return undefined;
         }
@@ -41365,7 +41375,7 @@ async function fetchProtections({ octokit, requestData, }) {
             core/* warning */.$e(`Branch ${requestData.branch} doesn't exist, so it has no branch protections to bypass.`);
             return undefined;
         }
-        if (status === 403 && planUpgradeRequired.test(message)) {
+        if (isPlanUpgradeRequired(error)) {
             core/* warning */.$e(`Branch protections aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
             return undefined;
         }
@@ -41498,7 +41508,7 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
 
 ;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
 
-const fetchRulesets_planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
+
 async function fetchRulesets({ octokit, requestData, }) {
     const rules = await fetchLogged(`existing branch rules for ${requestData.branch}`, async () => {
         try {
@@ -41508,9 +41518,7 @@ async function fetchRulesets({ octokit, requestData, }) {
             });
         }
         catch (error) {
-            const { response, status } = error;
-            if (status === 403 &&
-                fetchRulesets_planUpgradeRequired.test(response?.data?.message ?? "")) {
+            if (isPlanUpgradeRequired(error)) {
                 core/* warning */.$e(`Repository rulesets aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
                 return [];
             }
