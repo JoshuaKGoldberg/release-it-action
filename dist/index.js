@@ -44087,11 +44087,25 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
 
 ;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
 
+const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
 async function fetchRulesets({ octokit, requestData, }) {
-    const rules = await fetchLogged(`existing branch rules for ${requestData.branch}`, async () => await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
-        ...requestData,
-        per_page: 100,
-    }));
+    const rules = await fetchLogged(`existing branch rules for ${requestData.branch}`, async () => {
+        try {
+            return await octokit.paginate("GET /repos/{owner}/{repo}/rules/branches/{branch}", {
+                ...requestData,
+                per_page: 100,
+            });
+        }
+        catch (error) {
+            const { response, status } = error;
+            if (status === 403 &&
+                planUpgradeRequired.test(response?.data?.message ?? "")) {
+                warning(`Repository rulesets aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
+                return [];
+            }
+            throw error;
+        }
+    });
     const rulesetIds = new Set();
     for (const rule of rules) {
         if (rule.ruleset_id === undefined) {
