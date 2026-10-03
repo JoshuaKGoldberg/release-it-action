@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { releaseItAction, ReleaseItActionOptions } from "./index.js";
 
-const mock$$ = vi.fn();
+const mock$$ = vi.fn().mockResolvedValue({ exitCode: 0, stdout: "" });
 
 vi.mock("./execa.js", () => ({
 	get $$() {
@@ -79,9 +79,13 @@ vi.mock("./steps/runReleaseIt.js", () => ({
 	},
 }));
 
+const mockTryCatchInfoAction = vi.fn(
+	async (_: string, action: () => Promise<unknown>) => await action(),
+);
+
 vi.mock("./tryCatchInfoAction.js", () => ({
-	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
-		return await action();
+	get tryCatchInfoAction() {
+		return mockTryCatchInfoAction;
 	},
 }));
 
@@ -220,6 +224,20 @@ describe("releaseItAction", () => {
 		);
 		expect(inspect(error)).not.toContain(mockOptions.npmToken);
 		expect(mockRunReleaseIt).not.toHaveBeenCalled();
+	});
+
+	it("does not hand the npm token cleanup's command result to the logger", async () => {
+		mockShouldSemanticRelease.mockResolvedValueOnce(false);
+
+		await releaseItAction(mockOptions);
+
+		const cleanupIndex = mockTryCatchInfoAction.mock.calls.findIndex(
+			([label]) => label === "removing the npm token from the npmrc",
+		);
+		expect(cleanupIndex).not.toBe(-1);
+		expect(
+			await mockTryCatchInfoAction.mock.results[cleanupIndex].value,
+		).toBeUndefined();
 	});
 
 	it("publishes a version tagged at HEAD that was never published, without recreating its GitHub release", async () => {
