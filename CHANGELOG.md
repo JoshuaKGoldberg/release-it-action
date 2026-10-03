@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.29](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.28...v0.5.29) (2026-10-03)
+
+### Bug Fixes
+
+- replace the redundant runReleaseIt wrapper with a top-level failure handler ([#942](https://github.com/JoshuaKGoldberg/release-it-action/issues/942)) ([23bbb72](https://github.com/JoshuaKGoldberg/release-it-action/commit/23bbb726293d8705b64a06ba4ad6f97062bb6c7c)), closes [#904](https://github.com/JoshuaKGoldberg/release-it-action/issues/904)
+
 ## [0.5.28](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.27...v0.5.28) (2026-10-03)
 
 ### Bug Fixes
