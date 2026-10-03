@@ -52,22 +52,14 @@ vi.mock("../tryCatchInfoAction.js", () => ({
 	},
 }));
 
+const commandFailure = Object.assign(
+	new Error(
+		"Command failed with exit code 1: npx release-it --verbose\n\noutput",
+	),
+	{ shortMessage: "Command failed with exit code 1: npx release-it --verbose" },
+);
+
 describe("runReleaseIt", () => {
-	it("logs an error if running release-it has a non-zero exit code", async () => {
-		mock$$.mockResolvedValue({ exitCode: 1 });
-
-		await runReleaseIt();
-
-		expect(mockError).not.toHaveBeenCalled();
-		expect(mockSetFailed.mock.calls).toMatchInlineSnapshot(`
-			[
-			  [
-			    "Error running release-it: Error: Exit code 1.",
-			  ],
-			]
-		`);
-	});
-
 	it("does not log an error if running release-it succeeds with stderr output", async () => {
 		mock$$.mockResolvedValue({ exitCode: 0, stderr: "npm notice" });
 
@@ -93,12 +85,7 @@ describe("runReleaseIt", () => {
 	});
 
 	it("logs only the short message of a release-it command failure", async () => {
-		mock$$.mockRejectedValue(
-			Object.assign(new Error("Command failed...\n\nrelease-it output"), {
-				shortMessage:
-					"Command failed with exit code 1: npx release-it --verbose",
-			}),
-		);
+		mock$$.mockRejectedValue(commandFailure);
 
 		await runReleaseIt();
 
@@ -108,7 +95,7 @@ describe("runReleaseIt", () => {
 	});
 
 	it("logs a warning instead of an error if release-it fails and the branch was superseded", async () => {
-		mock$$.mockResolvedValue({ exitCode: 1 });
+		mock$$.mockRejectedValue(commandFailure);
 		mockGetHeadSha.mockResolvedValue("start-sha");
 		mockCheckSuperseded.mockResolvedValue(true);
 
@@ -118,7 +105,7 @@ describe("runReleaseIt", () => {
 		expect(mockWarning.mock.calls).toMatchInlineSnapshot(`
 			[
 			  [
-			    "release-it failed, but the branch has moved past start-sha. A newer release run will handle releasing: Error: Exit code 1.",
+			    "release-it failed, but the branch has moved past start-sha. A newer release run will handle releasing: Command failed with exit code 1: npx release-it --verbose",
 			  ],
 			]
 		`);
@@ -127,7 +114,7 @@ describe("runReleaseIt", () => {
 	});
 
 	it("logs an error without checking for superseding when skipSupersededCheck is true", async () => {
-		mock$$.mockResolvedValue({ exitCode: 1 });
+		mock$$.mockRejectedValue(commandFailure);
 		mockGetHeadSha.mockResolvedValue("start-sha");
 		mockCheckSuperseded.mockResolvedValue(true);
 
@@ -136,12 +123,12 @@ describe("runReleaseIt", () => {
 		expect(mockCheckSuperseded).not.toHaveBeenCalled();
 		expect(mockWarning).not.toHaveBeenCalled();
 		expect(mockSetFailed).toHaveBeenCalledWith(
-			"Error running release-it: Error: Exit code 1.",
+			"Error running release-it: Command failed with exit code 1: npx release-it --verbose",
 		);
 	});
 
 	it("logs an error if release-it fails and the branch was not superseded", async () => {
-		mock$$.mockResolvedValue({ exitCode: 1 });
+		mock$$.mockRejectedValue(commandFailure);
 		mockGetHeadSha.mockResolvedValue("start-sha");
 		mockCheckSuperseded.mockResolvedValue(false);
 
@@ -228,7 +215,7 @@ describe("runReleaseIt", () => {
 	});
 
 	it("logs an error without checking for superseding if the starting sha is unknown", async () => {
-		mock$$.mockResolvedValue({ exitCode: 1 });
+		mock$$.mockRejectedValue(commandFailure);
 		mockGetHeadSha.mockResolvedValue(undefined);
 
 		await runReleaseIt();

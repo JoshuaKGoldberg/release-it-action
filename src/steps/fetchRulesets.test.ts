@@ -4,20 +4,14 @@ import { Octokit } from "../types.js";
 import { fetchRulesets } from "./fetchRulesets.js";
 
 const mockInfo = vi.fn();
+const mockWarning = vi.fn();
 
 vi.mock("@actions/core", () => ({
 	get info() {
 		return mockInfo;
 	},
-}));
-
-vi.mock("../tryCatchInfoAction.js", () => ({
-	async tryCatchInfoAction(_: string, action: () => Promise<unknown>) {
-		try {
-			return await action();
-		} catch {
-			return undefined;
-		}
+	get warning() {
+		return mockWarning;
 	},
 }));
 
@@ -30,19 +24,76 @@ const mockOctokit = {
 } as unknown as Octokit;
 const requestData = { branch, owner: "test-owner", repo: "test-repo" };
 
+function createRequestError(status: number, message: string) {
+	return Object.assign(new Error(message), {
+		name: "HttpError",
+		response: { data: { message } },
+		status,
+	});
+}
+
 describe("fetchRulesets", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	it("returns undefined when fetching branch rules fails", async () => {
+	it("throws when fetching branch rules fails", async () => {
 		mockPaginate.mockRejectedValueOnce(new Error("Oh no!"));
+
+		await expect(
+			fetchRulesets({ octokit: mockOctokit, requestData }),
+		).rejects.toThrowErrorMatchingInlineSnapshot(
+			`[Error: Could not fetch existing branch rules for test-branch: Error: Oh no!]`,
+		);
+		expect(mockPaginate).toHaveBeenCalledTimes(1);
+		expect(mockRequest).not.toHaveBeenCalled();
+	});
+
+	it("throws when fetching branch rules is forbidden", async () => {
+		mockPaginate.mockRejectedValueOnce(
+			createRequestError(403, "Resource not accessible by integration"),
+		);
+
+		await expect(
+			fetchRulesets({ octokit: mockOctokit, requestData }),
+		).rejects.toThrowErrorMatchingInlineSnapshot(
+			`[Error: Could not fetch existing branch rules for test-branch: HttpError: Resource not accessible by integration]`,
+		);
+		expect(mockWarning).not.toHaveBeenCalled();
+	});
+
+	it("throws when fetching branch rules is forbidden without a message", async () => {
+		mockPaginate.mockRejectedValueOnce(
+			Object.assign(new Error("Forbidden"), { name: "HttpError", status: 403 }),
+		);
+
+		await expect(
+			fetchRulesets({ octokit: mockOctokit, requestData }),
+		).rejects.toThrowErrorMatchingInlineSnapshot(
+			`[Error: Could not fetch existing branch rules for test-branch: HttpError: Forbidden]`,
+		);
+		expect(mockWarning).not.toHaveBeenCalled();
+	});
+
+	it("returns an empty array with a warning when rulesets aren't available on the repository's plan", async () => {
+		mockPaginate.mockRejectedValueOnce(
+			createRequestError(
+				403,
+				"Upgrade to GitHub Pro or make this repository public to enable this feature.",
+			),
+		);
 
 		const actual = await fetchRulesets({ octokit: mockOctokit, requestData });
 
-		expect(actual).toBeUndefined();
-		expect(mockPaginate).toHaveBeenCalledTimes(1);
+		expect(actual).toEqual([]);
 		expect(mockRequest).not.toHaveBeenCalled();
+		expect(mockWarning.mock.calls).toMatchInlineSnapshot(`
+			[
+			  [
+			    "Repository rulesets aren't available on this repository's GitHub plan, so test-branch has none to bypass.",
+			  ],
+			]
+		`);
 	});
 
 	it("returns an empty array when no rules apply to the branch", async () => {
@@ -116,18 +167,12 @@ describe("fetchRulesets", () => {
 			  ],
 			]
 		`);
-		expect(mockInfo.mock.calls).toMatchInlineSnapshot(`
-			[
-			  [
-			    "Skipping Organization ruleset 3 (test-owner): only repository rulesets can be bypassed.",
-			  ],
-			]
-		`);
+		expect(mockInfo).toHaveBeenCalledWith(
+			"Skipping Organization ruleset 3 (test-owner): only repository rulesets can be bypassed.",
+		);
 	});
 
-	it("omits rulesets that fail to be fetched", async () => {
-		const rulesetB = { enforcement: "active", id: 2, name: "B" };
-
+	it("throws when a ruleset fails to be fetched", async () => {
 		mockPaginate.mockResolvedValueOnce([
 			{
 				ruleset_id: 1,
@@ -140,12 +185,13 @@ describe("fetchRulesets", () => {
 				type: "deletion",
 			},
 		]);
-		mockRequest
-			.mockRejectedValueOnce(new Error("Oh no!"))
-			.mockResolvedValueOnce({ data: rulesetB });
+		mockRequest.mockRejectedValueOnce(new Error("Oh no!"));
 
-		const actual = await fetchRulesets({ octokit: mockOctokit, requestData });
-
-		expect(actual).toEqual([rulesetB]);
+		await expect(
+			fetchRulesets({ octokit: mockOctokit, requestData }),
+		).rejects.toThrowErrorMatchingInlineSnapshot(
+			`[Error: Could not fetch existing ruleset 1: Error: Oh no!]`,
+		);
+		expect(mockRequest).toHaveBeenCalledTimes(1);
 	});
 });
