@@ -9,8 +9,9 @@ import {
 	blockESLint,
 	blockKnip,
 	blockNcc,
+	blockREADME,
 	blockReleaseIt,
-	blockTSup,
+	blockTSDown,
 	createConfig,
 } from "create-typescript-app";
 
@@ -30,10 +31,19 @@ export default createConfig({
 				entry: ["src/action/index.ts"],
 				ignoreDependencies: ["create-typescript-app"],
 			}),
+			blockREADME({
+				badges: [
+					{
+						alt: "📦 npm version",
+						href: "http://npmjs.com/package/release-it-action",
+						src: "https://img.shields.io/npm/v/release-it-action?color=21bb42&label=%F0%9F%93%A6%20npm",
+					},
+				],
+			}),
 		],
 		blocks: {
 			add: [blockNcc],
-			exclude: [blockReleaseIt, blockTSup],
+			exclude: [blockReleaseIt, blockTSDown],
 		},
 	},
 });

@@ -169,4 +169,41 @@ describe("runBypassingBranchRulesets", () => {
 			expect.objectContaining({ setFailedOnError: true }),
 		);
 	});
+
+	test("restores rulesets without running when disabling them rejects", async () => {
+		const error = new Error("Oh no!");
+		const run = vi.fn();
+		mockUpdateRulesetsEnforcement.mockRejectedValueOnce(error);
+
+		await expect(
+			runBypassingBranchRulesets(
+				{ branch: "", owner: "", repo: "" },
+				mockOctokit,
+				run,
+			),
+		).rejects.toBe(error);
+
+		expect(run).not.toHaveBeenCalled();
+		expect(mockUpdateRulesetsEnforcement).toHaveBeenCalledTimes(2);
+		expect(mockUpdateRulesetsEnforcement).toHaveBeenLastCalledWith(
+			expect.objectContaining({ existingRulesets, setFailedOnError: true }),
+		);
+	});
+
+	test("does not update rulesets or run when fetching them rejects", async () => {
+		const error = new Error("Oh no!");
+		const run = vi.fn();
+		mockFetchRulesets.mockRejectedValueOnce(error);
+
+		await expect(
+			runBypassingBranchRulesets(
+				{ branch: "", owner: "", repo: "" },
+				mockOctokit,
+				run,
+			),
+		).rejects.toBe(error);
+
+		expect(mockUpdateRulesetsEnforcement).not.toHaveBeenCalled();
+		expect(run).not.toHaveBeenCalled();
+	});
 });
