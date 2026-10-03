@@ -30292,7 +30292,7 @@ module.exports = {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8830);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(2493);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(1317);
 
 
 
@@ -30308,7 +30308,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 2493:
+/***/ 1317:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -41000,6 +41000,7 @@ const $$captured = $({
     stdin: "inherit",
     stdout: ["inherit", "pipe"],
 });
+const $quiet = $({ reject: false });
 
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/shlex@3.0.0/node_modules/shlex/shlex.js
 
@@ -41344,9 +41345,20 @@ async function deleteProtections({ existingProtections, octokit, requestData, })
     }
 }
 
+;// CONCATENATED MODULE: ./src/requestErrors.ts
+const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
+function getRequestErrorDetails(error) {
+    const { response, status } = error;
+    return { message: response?.data?.message ?? "", status };
+}
+function isPlanUpgradeRequired(error) {
+    const { message, status } = getRequestErrorDetails(error);
+    return status === 403 && planUpgradeRequired.test(message);
+}
+
 ;// CONCATENATED MODULE: ./src/steps/fetchProtections.ts
 
-const planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
+
 async function fetchProtections({ octokit, requestData, }) {
     const label = `fetching existing branch protections for ${requestData.branch}`;
     core/* info */.pq(`Start: ${label}`);
@@ -41356,8 +41368,7 @@ async function fetchProtections({ octokit, requestData, }) {
         return data;
     }
     catch (error) {
-        const { response, status } = error;
-        const message = response?.data?.message ?? "";
+        const { message, status } = getRequestErrorDetails(error);
         if (status === 404 && message === "Branch not protected") {
             return undefined;
         }
@@ -41365,7 +41376,7 @@ async function fetchProtections({ octokit, requestData, }) {
             core/* warning */.$e(`Branch ${requestData.branch} doesn't exist, so it has no branch protections to bypass.`);
             return undefined;
         }
-        if (status === 403 && planUpgradeRequired.test(message)) {
+        if (isPlanUpgradeRequired(error)) {
             core/* warning */.$e(`Branch protections aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
             return undefined;
         }
@@ -41402,57 +41413,61 @@ async function recreateProtections({ commonRequestData, existingProtections, oct
     if (!existingProtections) {
         return;
     }
-    await tryCatchSetFailedAction("re-creating branch protections", async () => await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
-        ...commonRequestData,
-        allow_deletions: !!existingProtections.allow_deletions?.enabled,
-        allow_force_pushes: !!existingProtections.allow_force_pushes?.enabled,
-        allow_fork_syncing: !!existingProtections.allow_fork_syncing?.enabled,
-        block_creations: !!existingProtections.block_creations?.enabled,
-        enforce_admins: !!existingProtections.enforce_admins?.enabled,
-        lock_branch: !!existingProtections.lock_branch?.enabled,
-        required_conversation_resolution: !!existingProtections.required_conversation_resolution?.enabled,
-        required_linear_history: !!existingProtections.required_linear_history?.enabled,
-        required_pull_request_reviews: existingProtections.required_pull_request_reviews
-            ? {
-                bypass_pull_request_allowances: mapReviewRestrictions(existingProtections.required_pull_request_reviews
-                    .bypass_pull_request_allowances),
-                dismiss_stale_reviews: existingProtections.required_pull_request_reviews
-                    .dismiss_stale_reviews,
-                dismissal_restrictions: mapReviewRestrictions(existingProtections.required_pull_request_reviews
-                    .dismissal_restrictions),
-                require_code_owner_reviews: existingProtections.required_pull_request_reviews
-                    .require_code_owner_reviews,
-                require_last_push_approval: existingProtections.required_pull_request_reviews
-                    .require_last_push_approval,
-                required_approving_review_count: existingProtections.required_pull_request_reviews
-                    .required_approving_review_count,
-            }
-            : null,
-        restrictions: existingProtections.restrictions
-            ? {
-                apps: existingProtections.restrictions.apps.map(
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                (app) => app.slug),
-                teams: existingProtections.restrictions.teams.map((team) => team.slug),
-                users: existingProtections.restrictions.users.map(
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                (user) => user.login),
-            }
-            : null,
-        // @ts-expect-error -- The left types use 'null', while the right are 'undefined'...
-        required_status_checks: existingProtections.required_status_checks
-            ? {
-                checks: existingProtections.required_status_checks.checks.map((check) => ({
-                    app_id: check.app_id ?? -1,
-                    context: check.context,
-                })),
-                strict: existingProtections.required_status_checks.strict,
-            }
-            : null,
-    }));
+    await tryCatchSetFailedAction("re-creating branch protections", async () => {
+        await octokit.request(`PUT /repos/{owner}/{repo}/branches/{branch}/protection`, {
+            ...commonRequestData,
+            allow_deletions: !!existingProtections.allow_deletions?.enabled,
+            allow_force_pushes: !!existingProtections.allow_force_pushes?.enabled,
+            allow_fork_syncing: !!existingProtections.allow_fork_syncing?.enabled,
+            block_creations: !!existingProtections.block_creations?.enabled,
+            enforce_admins: !!existingProtections.enforce_admins?.enabled,
+            lock_branch: !!existingProtections.lock_branch?.enabled,
+            required_conversation_resolution: !!existingProtections.required_conversation_resolution?.enabled,
+            required_linear_history: !!existingProtections.required_linear_history?.enabled,
+            required_pull_request_reviews: existingProtections.required_pull_request_reviews
+                ? {
+                    bypass_pull_request_allowances: mapReviewRestrictions(existingProtections.required_pull_request_reviews
+                        .bypass_pull_request_allowances),
+                    dismiss_stale_reviews: existingProtections.required_pull_request_reviews
+                        .dismiss_stale_reviews,
+                    dismissal_restrictions: mapReviewRestrictions(existingProtections.required_pull_request_reviews
+                        .dismissal_restrictions),
+                    require_code_owner_reviews: existingProtections.required_pull_request_reviews
+                        .require_code_owner_reviews,
+                    require_last_push_approval: existingProtections.required_pull_request_reviews
+                        .require_last_push_approval,
+                    required_approving_review_count: existingProtections.required_pull_request_reviews
+                        .required_approving_review_count,
+                }
+                : null,
+            restrictions: existingProtections.restrictions
+                ? {
+                    apps: existingProtections.restrictions.apps.map(
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    (app) => app.slug),
+                    teams: existingProtections.restrictions.teams.map((team) => team.slug),
+                    users: existingProtections.restrictions.users.map(
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    (user) => user.login),
+                }
+                : null,
+            // @ts-expect-error -- The left types use 'null', while the right are 'undefined'...
+            required_status_checks: existingProtections.required_status_checks
+                ? {
+                    checks: existingProtections.required_status_checks.checks.map((check) => ({
+                        app_id: check.app_id ?? -1,
+                        context: check.context,
+                    })),
+                    strict: existingProtections.required_status_checks.strict,
+                }
+                : null,
+        });
+    });
     // The update protection endpoint doesn't accept required_signatures.
     if (existingProtections.required_signatures?.enabled) {
-        await tryCatchSetFailedAction("re-enabling required signatures", async () => await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, commonRequestData));
+        await tryCatchSetFailedAction("re-enabling required signatures", async () => {
+            await octokit.request(`POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures`, commonRequestData);
+        });
     }
 }
 function mapReviewRestrictions(restrictions) {
@@ -41498,7 +41513,7 @@ async function runBypassingBranchProtections(commonData, octokit, run) {
 
 ;// CONCATENATED MODULE: ./src/steps/fetchRulesets.ts
 
-const fetchRulesets_planUpgradeRequired = /^Upgrade to GitHub .+ to enable this feature/;
+
 async function fetchRulesets({ octokit, requestData, }) {
     const rules = await fetchLogged(`existing branch rules for ${requestData.branch}`, async () => {
         try {
@@ -41508,9 +41523,7 @@ async function fetchRulesets({ octokit, requestData, }) {
             });
         }
         catch (error) {
-            const { response, status } = error;
-            if (status === 403 &&
-                fetchRulesets_planUpgradeRequired.test(response?.data?.message ?? "")) {
+            if (isPlanUpgradeRequired(error)) {
                 core/* warning */.$e(`Repository rulesets aren't available on this repository's GitHub plan, so ${requestData.branch} has none to bypass.`);
                 return [];
             }
@@ -41566,11 +41579,13 @@ async function updateRulesetsEnforcement({ commonRequestData, enforcement, exist
     for (const existingRuleset of existingRulesets) {
         const nextEnforcement = enforcement(existingRuleset);
         const description = `ruleset ${existingRuleset.id.toString()} (${existingRuleset.name}) enforcement to ${nextEnforcement}`;
-        const update = async () => await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
-            ...commonRequestData,
-            enforcement: nextEnforcement,
-            ruleset_id: existingRuleset.id,
-        });
+        const update = async () => {
+            await octokit.request("PUT /repos/{owner}/{repo}/rulesets/{ruleset_id}", {
+                ...commonRequestData,
+                enforcement: nextEnforcement,
+                ruleset_id: existingRuleset.id,
+            });
+        };
         if (setFailedOnError) {
             await tryCatchSetFailedAction(`setting ${description}`, update);
             continue;
@@ -41617,30 +41632,6 @@ async function runBypassingBranchRulesets(commonData, octokit, run) {
     }
 }
 
-;// CONCATENATED MODULE: ./src/packageData.ts
-
-async function readPackageData() {
-    try {
-        return JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
-    }
-    catch (error) {
-        if (error.code === "ENOENT") {
-            return undefined;
-        }
-        throw error;
-    }
-}
-
-;// CONCATENATED MODULE: ./src/versionTags.ts
-
-const $quiet = $({ reject: false });
-async function getHeadTags() {
-    return (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
-}
-function getVersionTagNames(version) {
-    return [version, `v${version}`];
-}
-
 ;// CONCATENATED MODULE: ./src/steps/hasGitHubRelease.ts
 async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
     try {
@@ -41664,12 +41655,11 @@ async function hasGitHubRelease({ octokit, owner, repo, tag, }) {
 
 
 
-
 const configOverride = /^(?:-c|--config|--(?:no-)?github(?:\.(?:draft|release|web))?)(?:=|$)/;
 async function getHeadTagMissingGitHubRelease({ octokit, owner, releaseItArgs, repo, }) {
-    const packageData = await readPackageData();
-    const version = packageData?.version;
-    const { github } = (await readReleaseItJson()) ?? packageData?.["release-it"] ?? {};
+    const packageData = JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    const { version } = packageData;
+    const { github } = (await readReleaseItJson()) ?? packageData["release-it"] ?? {};
     // Draft and web releases aren't found by tag, and release-it-args can override the config.
     if (!version ||
         !github?.release ||
@@ -41678,8 +41668,8 @@ async function getHeadTagMissingGitHubRelease({ octokit, owner, releaseItArgs, r
         parseArgsString(releaseItArgs ?? "").some((arg) => configOverride.test(arg))) {
         return undefined;
     }
-    const headTags = await getHeadTags();
-    const tag = getVersionTagNames(version).find((tagName) => headTags.includes(tagName));
+    const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
+    const tag = [version, `v${version}`].find((tagName) => headTags.includes(tagName));
     if (!tag || (await hasGitHubRelease({ octokit, owner, repo, tag }))) {
         return undefined;
     }
@@ -41699,12 +41689,10 @@ async function readReleaseItJson() {
 
 
 
-
-const getUnpublishedVersion_$quiet = $({ reject: false });
 // npm can take a few minutes after a publish before it shows the new version.
 const recentTagSeconds = 10 * 60;
-const recheckAttempts = 12;
-const recheckDelayMs = 15_000;
+const recheckAttempts = 36;
+const recheckDelayMs = 5_000;
 async function getUnpublishedVersion(githubToken) {
     const { name, private: isPrivate, publishConfig, version, } = (await readPackageData()) ?? {};
     if (isPrivate || !name || !version) {
@@ -41718,7 +41706,7 @@ async function getUnpublishedVersion(githubToken) {
         : publishConfig?.registry;
     const registryArgs = registry ? ["--registry", registry] : [];
     const isOnNpm = async () => {
-        const view = await getUnpublishedVersion_$quiet({
+        const view = await $quiet({
             env: { GITHUB_TOKEN: githubToken },
         }) `npm view ${name}@${version} version --json ${registryArgs}`;
         if (!view.exitCode) {
@@ -41732,15 +41720,15 @@ async function getUnpublishedVersion(githubToken) {
     if (await isOnNpm()) {
         return undefined;
     }
-    const tagNames = getVersionTagNames(version);
-    const existingTags = (await getUnpublishedVersion_$quiet `git tag --list ${tagNames}`).stdout
+    const tagNames = [version, `v${version}`];
+    const existingTags = (await $quiet `git tag --list ${tagNames}`).stdout
         .split("\n")
         .filter(Boolean);
     // A version that was never tagged was never released, e.g. a new package.
     if (!existingTags.length) {
         return undefined;
     }
-    const tagSeconds = Number((await getUnpublishedVersion_$quiet `git log -1 --format=%ct ${existingTags[0]}`).stdout);
+    const tagSeconds = Number((await $quiet `git log -1 --format=%ct ${existingTags[0]}`).stdout);
     if (Date.now() / 1000 - tagSeconds < recentTagSeconds) {
         core/* info */.pq(`Version ${version} was tagged recently but isn't on npm yet. Waiting for npm to show it.`);
         for (let attempt = 0; attempt < recheckAttempts; attempt += 1) {
@@ -41750,7 +41738,7 @@ async function getUnpublishedVersion(githubToken) {
             }
         }
     }
-    const headTags = await getHeadTags();
+    const headTags = (await $quiet `git tag --points-at HEAD`).stdout.split("\n");
     return {
         headTag: existingTags.find((tag) => headTags.includes(tag)),
         version,
@@ -41765,22 +41753,32 @@ function describeNpmError(stdout) {
         return "unknown error";
     }
 }
+async function readPackageData() {
+    try {
+        return JSON.parse(await external_node_fs_promises_namespaceObject.readFile("package.json", "utf8"));
+    }
+    catch (error) {
+        if (error.code === "ENOENT") {
+            return undefined;
+        }
+        throw error;
+    }
+}
 
 ;// CONCATENATED MODULE: ./src/steps/checkSuperseded.ts
 
-const checkSuperseded_$quiet = $({ reject: false });
 async function checkSuperseded(startSha, githubToken) {
-    const branch = await checkSuperseded_$quiet `git rev-parse --abbrev-ref HEAD`;
+    const branch = await $quiet `git rev-parse --abbrev-ref HEAD`;
     if (branch.exitCode || branch.stdout === "HEAD") {
         return false;
     }
-    const fetch = await checkSuperseded_$quiet({
+    const fetch = await $quiet({
         env: { GITHUB_TOKEN: githubToken },
     }) `git fetch origin ${branch.stdout}`;
     if (fetch.exitCode) {
         return false;
     }
-    const remoteSha = (await checkSuperseded_$quiet `git rev-parse FETCH_HEAD`).stdout;
+    const remoteSha = (await $quiet `git rev-parse FETCH_HEAD`).stdout;
     if (!remoteSha || remoteSha === startSha) {
         return false;
     }
@@ -41789,11 +41787,11 @@ async function checkSuperseded(startSha, githubToken) {
     if (!localSha || localSha === startSha) {
         return true;
     }
-    const isAncestor = await checkSuperseded_$quiet `git merge-base --is-ancestor ${localSha} ${remoteSha}`;
+    const isAncestor = await $quiet `git merge-base --is-ancestor ${localSha} ${remoteSha}`;
     return isAncestor.exitCode === 1;
 }
 async function getHeadSha() {
-    const { exitCode, stdout } = await checkSuperseded_$quiet `git rev-parse HEAD`;
+    const { exitCode, stdout } = await $quiet `git rev-parse HEAD`;
     return exitCode ? undefined : stdout;
 }
 
