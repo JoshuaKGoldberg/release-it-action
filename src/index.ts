@@ -62,9 +62,6 @@ async function runRelease({
 	repo,
 	skipNpmPublish = false,
 }: ReleaseItActionOptions) {
-	// release-it reads the token from the environment, not from this process.
-	process.env.GITHUB_TOKEN = githubToken;
-
 	const octokit = github.getOctokit(githubToken);
 
 	const unpublishedVersion = skipNpmPublish
@@ -100,7 +97,7 @@ async function runRelease({
 				["--no-increment --no-git --no-npm.publish", releaseItArgs]
 					.filter(Boolean)
 					.join(" "),
-				{ skipSupersededCheck: true },
+				{ githubToken, skipSupersededCheck: true },
 			);
 		}
 
@@ -112,7 +109,7 @@ async function runRelease({
 			]
 				.filter(Boolean)
 				.join(" "),
-			{ allowPublishConflict: true, skipSupersededCheck: true },
+			{ allowPublishConflict: true, githubToken, skipSupersededCheck: true },
 		);
 		return;
 	}
@@ -131,7 +128,7 @@ async function runRelease({
 		.join(" ");
 
 	const runReleaseItWithArgs = async () => {
-		await runReleaseIt(args);
+		await runReleaseIt(args, { githubToken });
 	};
 
 	if (!bypassBranchProtections && !bypassBranchRulesets) {

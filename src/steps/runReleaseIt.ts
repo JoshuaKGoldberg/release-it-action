@@ -7,6 +7,7 @@ import { checkSuperseded, getHeadSha } from "./checkSuperseded.js";
 
 export interface RunReleaseItOptions {
 	allowPublishConflict?: boolean;
+	githubToken: string;
 	skipSupersededCheck?: boolean;
 }
 
@@ -14,15 +15,21 @@ const publishConflict =
 	/cannot publish over (?:the )?previously (?:published|staged) version/i;
 
 export async function runReleaseIt(
-	releaseItArgs?: string,
-	{ allowPublishConflict, skipSupersededCheck }: RunReleaseItOptions = {},
+	releaseItArgs: string,
+	{
+		allowPublishConflict,
+		githubToken,
+		skipSupersededCheck,
+	}: RunReleaseItOptions,
 ) {
 	await tryCatchInfoAction("running release-it", async () => {
 		const startSha = await getHeadSha();
 
 		try {
-			const args = parseArgsString(releaseItArgs ?? "");
-			const { exitCode } = await $$captured`npx release-it --verbose ${args}`;
+			const args = parseArgsString(releaseItArgs);
+			const { exitCode } = await $$captured({
+				env: { GITHUB_TOKEN: githubToken },
+			})`npx release-it --verbose ${args}`;
 			if (exitCode) {
 				throw new Error(`Exit code ${exitCode.toString()}.`);
 			}
