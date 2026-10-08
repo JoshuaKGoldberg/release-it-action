@@ -213,8 +213,8 @@ importers:
         specifier: 0.9.0
         version: 0.9.0
       create-typescript-app:
-        specifier: 2.68.1
-        version: 2.68.1(bingo-systems@0.7.0)(typescript@5.9.3)
+        specifier: 2.69.1
+        version: 2.69.1(bingo-systems@0.7.0)(typescript@5.9.3)
       cspell:
         specifier: 10.3.3
         version: 10.3.3
@@ -1654,6 +1654,10 @@ packages:
   ajv@6.15.0:
     resolution: {integrity: sha512-fgFx7Hfoq60ytK2c7DhnF8jIvzYgOMxfugjLOSMHjLIPgenqa7S7oaagATUq99mV6IYvN2tRmC0wnTYX6iPbMw==}
 
+  all-contributors-types@0.1.0:
+    resolution: {integrity: sha512-kYf1J31EEI44F0YQbbmBBvQ1m/UQXIfjZTr5ewBXXSJ9uXGFO5Kx4eAErM+FTJGchXn6miZ33kWHYIDqh6fEwg==}
+    engines: {node: ^22.13.0 || ^24.11.0 || >=26.0.0}
+
   all-properties-lazy@0.1.0:
     resolution: {integrity: sha512-Ab9UQDstwhrTcsRP1m4QkT6W1PRMBoAnPJeB5LZcuum/nLiFMlSwYxH1J8fsRAolaXez0ijgbm6BAWZkQC9DVg==}
     engines: {node: '>=18.3.0'}
@@ -1932,8 +1936,8 @@ packages:
     engines: {node: '>=22'}
     hasBin: true
 
-  create-typescript-app@2.68.1:
-    resolution: {integrity: sha512-GH2ipIoXYLT3QhirRAeEVGBa/PKNBe9OKJ4TQmuii7z86dlmg13UBB57DnqrP/KQiGRtmLKv/WA+6znzLaCCzQ==}
+  create-typescript-app@2.69.1:
+    resolution: {integrity: sha512-phzxazS/w8JrSlROKOQaLfqvWD+hnSBadBhnc46iDupVFuyBoaHXZx1F/KK/1e4xqMyoVilTMUBnkNWmX9mx+g==}
     engines: {node: ^22.13.0 || ^24.11.0 || >=26.0.0}
     hasBin: true
 
@@ -5299,6 +5303,8 @@ snapshots:
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
 
+  all-contributors-types@0.1.0: {}
+
   all-properties-lazy@0.1.0:
     dependencies:
       without-undefined-properties: 0.1.2
@@ -5581,10 +5587,11 @@ snapshots:
       conventional-commits-filter: 6.0.1
       conventional-commits-parser: 7.1.2
 
-  create-typescript-app@2.68.1(bingo-systems@0.7.0)(typescript@5.9.3):
+  create-typescript-app@2.69.1(bingo-systems@0.7.0)(typescript@5.9.3):
     dependencies:
       '@prettier/sync': 0.6.1(prettier@3.9.7)
       '@typescript-eslint/typescript-estree': 8.71.0(typescript@5.9.3)
+      all-contributors-types: 0.1.0
       bingo: 0.13.1
       bingo-fs: 0.6.0
       bingo-stratum: 0.7.1(bingo-fs@0.6.0)(bingo-systems@0.7.0)(bingo@0.13.1)(zod@4.6.5)
