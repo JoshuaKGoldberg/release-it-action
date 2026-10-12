@@ -30292,7 +30292,7 @@ module.exports = {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8830);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(6624);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(4678);
 
 
 
@@ -30308,7 +30308,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 6624:
+/***/ 4678:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -30983,7 +30983,7 @@ function isPlainObject(value) {
 
 // EXTERNAL MODULE: external "node:url"
 var external_node_url_ = __nccwpck_require__(3136);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/arguments/file-url.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/file-url.js
 
 
 // Allow some arguments/options to be either a file path string or a file URL
@@ -31010,7 +31010,7 @@ const isDenoExecPath = file => typeof file !== 'string'
 // Same but also allows other values, e.g. `boolean` for the `shell` option
 const normalizeFileUrl = file => file instanceof URL ? (0,external_node_url_.fileURLToPath)(file) : file;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/methods/parameters.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/parameters.js
 
 
 
@@ -31044,9 +31044,99 @@ const normalizeParameters = (rawFile, rawArguments = [], rawOptions = {}) => {
 	return [filePath, normalizedArguments, {__proto__: null, ...options}];
 };
 
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/escape.js
+
+
+
+// Compute `result.command` and `result.escapedCommand`
+const joinCommand = (filePath, rawArguments) => {
+	const fileAndArguments = [filePath, ...rawArguments];
+	const command = fileAndArguments.join(' ');
+	const escapedCommand = fileAndArguments
+		.map(fileAndArgument => quoteString(escapeControlCharacters(fileAndArgument)))
+		.join(' ');
+	return {command, escapedCommand};
+};
+
+// Remove ANSI sequences and escape control characters and newlines
+const escapeLines = lines => (0,external_node_util_.stripVTControlCharacters)(lines)
+	.split('\n')
+	.map(line => escapeControlCharacters(line))
+	.join('\n');
+
+const escapeControlCharacters = line => line.replaceAll(SPECIAL_CHAR_REGEXP, character => escapeControlCharacter(character));
+
+const escapeControlCharacter = character => {
+	const commonEscape = COMMON_ESCAPES[character];
+	if (commonEscape !== undefined) {
+		return commonEscape;
+	}
+
+	const codepoint = character.codePointAt(0);
+	const codepointHex = codepoint.toString(16);
+	return codepoint <= ASTRAL_START
+		? `\\u${codepointHex.padStart(4, '0')}`
+		: `\\U${codepointHex}`;
+};
+
+// Characters that would create issues when printed are escaped using the \u or \U notation.
+// Those include control characters and newlines.
+// The \u and \U notation is Bash specific, but there is no way to do this in a shell-agnostic way.
+// Some shells do not even have a way to print those characters in an escaped fashion.
+// Therefore, we prioritize printing those safely, instead of allowing those to be copy-pasted.
+// List of Unicode character categories: https://www.fileformat.info/info/unicode/category/index.htm
+const getSpecialCharRegExp = () => {
+	try {
+		// This throws when using Node.js without ICU support.
+		// When using a RegExp literal, this would throw at parsing-time, instead of runtime.
+		// eslint-disable-next-line prefer-regex-literals
+		return new RegExp('\\p{Separator}|\\p{Other}', 'gu');
+	} catch {
+		// Similar to the above RegExp, but works even when Node.js has been built without ICU support.
+		// Unlike the above RegExp, it only covers whitespaces and C0/C1 control characters.
+		// It does not cover some edge cases, such as Unicode reserved characters.
+		// See https://github.com/sindresorhus/execa/issues/1143
+		// eslint-disable-next-line no-control-regex, regexp/no-control-character, unicorn/prefer-unicode-code-point-escapes
+		return /[\s\u0000-\u001F\u007F-\u009F\u00AD]/g;
+	}
+};
+
+const SPECIAL_CHAR_REGEXP = getSpecialCharRegExp();
+
+// Accepted by $'...' in Bash.
+// Exclude \a \e \v which are accepted in Bash but not in JavaScript (except \v) and JSON.
+const COMMON_ESCAPES = {
+	' ': ' ',
+	'\b': '\\b',
+	'\f': '\\f',
+	'\n': '\\n',
+	'\r': '\\r',
+	'\t': '\\t',
+};
+
+// Up until that code point, a character is a single UTF-16 code unit, so the \u notation can be used instead of \U
+const ASTRAL_START = 0xFF_FF;
+
+// Some characters are shell-specific, i.e. need to be escaped when the command is copy-pasted then run.
+// Escaping is shell-specific. We cannot know which shell is used: `process.platform` detection is not enough.
+// For example, Windows users could be using `cmd.exe`, Powershell or Bash for Windows which all use different escaping.
+// We use '...' on Unix, which is POSIX shell compliant and escape all characters but ' so this is fairly safe.
+// On Windows, we assume cmd.exe is used and escape with "...", which also works with Powershell.
+const quoteString = escapedArgument => {
+	if (NO_ESCAPE_REGEXP.test(escapedArgument)) {
+		return escapedArgument;
+	}
+
+	return external_node_process_namespaceObject.platform === 'win32'
+		? `"${escapedArgument.replaceAll('"', '""')}"`
+		: `'${escapedArgument.replaceAll('\'', '\'\\\'\'')}'`;
+};
+
+const NO_ESCAPE_REGEXP = /^[\w\-./]+$/;
+
 ;// CONCATENATED MODULE: external "node:string_decoder"
 const external_node_string_decoder_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:string_decoder");
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/utils/uint-array.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/utils/uint-array.js
 
 
 const {toString: objectToString} = Object.prototype;
@@ -31084,13 +31174,7 @@ const uint8ArraysToStrings = (uint8ArraysOrStrings, encoding) => {
 	return finalString === '' ? strings : [...strings, finalString];
 };
 
-const joinToUint8Array = uint8ArraysOrStrings => {
-	if (uint8ArraysOrStrings.length === 1 && isUint8Array(uint8ArraysOrStrings[0])) {
-		return uint8ArraysOrStrings[0];
-	}
-
-	return concatUint8Arrays(stringsToUint8Arrays(uint8ArraysOrStrings));
-};
+const joinToUint8Array = uint8ArraysOrStrings => uint8ArraysOrStrings.length === 1 && isUint8Array(uint8ArraysOrStrings[0]) ? uint8ArraysOrStrings[0] : concatUint8Arrays(stringsToUint8Arrays(uint8ArraysOrStrings));
 
 const stringsToUint8Arrays = uint8ArraysOrStrings => uint8ArraysOrStrings.map(uint8ArrayOrString => typeof uint8ArrayOrString === 'string'
 	? stringToUint8Array(uint8ArrayOrString)
@@ -31117,7 +31201,8 @@ const getJoinLength = uint8Arrays => {
 	return joinLength;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/methods/template.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/template.js
+
 
 
 
@@ -31173,13 +31258,15 @@ const parseTemplate = ({templates, expressions, tokens, index, template}) => {
 //  - the first array argument, which does not escape backslash sequences
 //  - its `raw` property, which escapes them
 const splitByWhitespaces = (template, rawTemplate) => {
-	if (rawTemplate.length === 0) {
+	// The template is empty either between two `${expression}`, or when it only contains escaped newlines.
+	// Neither holds any whitespace, so neither separates tokens.
+	if (template.length === 0) {
 		return {nextTokens: [], leadingWhitespaces: false, trailingWhitespaces: false};
 	}
 
 	const nextTokens = [];
 	let templateStart = 0;
-	const isLeadingWhitespaces = DELIMITERS.has(rawTemplate[0]);
+	let isLeadingWhitespaces = false;
 
 	for (
 		let templateIndex = 0, rawIndex = 0;
@@ -31188,6 +31275,11 @@ const splitByWhitespaces = (template, rawTemplate) => {
 	) {
 		const rawCharacter = rawTemplate[rawIndex];
 		if (DELIMITERS.has(rawCharacter)) {
+			// Escaped newlines are ignored, so a whitespace after them is still a leading one
+			if (templateIndex === 0) {
+				isLeadingWhitespaces = true;
+			}
+
 			if (templateStart !== templateIndex) {
 				nextTokens.push(template.slice(templateStart, templateIndex));
 			}
@@ -31200,7 +31292,13 @@ const splitByWhitespaces = (template, rawTemplate) => {
 				templateIndex -= 1;
 				rawIndex += 1;
 			} else if (nextRawCharacter === 'u' && rawTemplate[rawIndex + 2] === '{') {
-				rawIndex = rawTemplate.indexOf('}', rawIndex + 3);
+				const closingBraceIndex = rawTemplate.indexOf('}', rawIndex + 3);
+				// A code point above the BMP is a surrogate pair, i.e. two characters, in the template string
+				if (isAstralEscape(rawTemplate.slice(rawIndex + 3, closingBraceIndex))) {
+					templateIndex += 1;
+				}
+
+				rawIndex = closingBraceIndex;
 			} else {
 				rawIndex += ESCAPE_LENGTH[nextRawCharacter] ?? 1;
 			}
@@ -31214,6 +31312,8 @@ const splitByWhitespaces = (template, rawTemplate) => {
 
 	return {nextTokens, leadingWhitespaces: isLeadingWhitespaces, trailingWhitespaces: isTrailingWhitespaces};
 };
+
+const isAstralEscape = codePointHex => Number.parseInt(codePointHex, 16) > ASTRAL_START;
 
 const DELIMITERS = new Set([' ', '\t', '\r', '\n']);
 
@@ -31244,7 +31344,8 @@ const parseExpression = expression => {
 		return String(expression);
 	}
 
-	if (isPlainObject(expression) && ('stdout' in expression || 'isMaxBuffer' in expression)) {
+	// Only own properties are checked: a polluted `Object.prototype.stdout` must not turn any plain object into a subprocess result
+	if (isPlainObject(expression) && (Object.hasOwn(expression, 'stdout') || Object.hasOwn(expression, 'isMaxBuffer'))) {
 		return getSubprocessResult(expression);
 	}
 
@@ -31256,7 +31357,9 @@ const parseExpression = expression => {
 	throw new TypeError(`Unexpected "${typeOfExpression}" in template expression`);
 };
 
-const getSubprocessResult = ({stdout}) => {
+const getSubprocessResult = result => {
+	// Read the own property only: results with `stdout: 'ignore'` have no `stdout` property, which must not be read from a polluted prototype
+	const stdout = Object.hasOwn(result, 'stdout') ? result.stdout : undefined;
 	if (typeof stdout === 'string') {
 		return stdout;
 	}
@@ -31272,7 +31375,7 @@ const getSubprocessResult = ({stdout}) => {
 	throw new TypeError(`Unexpected "${typeof stdout}" stdout in template expression`);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/utils/standard-stream.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/utils/standard-stream.js
 
 
 const isStandardStream = stream => STANDARD_STREAMS.includes(stream);
@@ -31280,7 +31383,13 @@ const STANDARD_STREAMS = [external_node_process_namespaceObject.stdin, external_
 const STANDARD_STREAMS_ALIASES = ['stdin', 'stdout', 'stderr'];
 const getStreamName = fdNumber => STANDARD_STREAMS_ALIASES[fdNumber] ?? `stdio[${fdNumber}]`;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/arguments/specific.js
+// `subprocess.all` is created by Execa itself, which then pipes `stdout`/`stderr` into it.
+// `verbose` needs to tell that pipe apart from a user pipe, which it disables.
+const allStreamSymbol = Symbol('execa.allStream');
+const setAllStream = stream => Object.assign(stream, {[allStreamSymbol]: true});
+const isAllStream = stream => stream?.[allStreamSymbol] === true;
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/specific.js
 
 
 
@@ -31289,7 +31398,8 @@ const getStreamName = fdNumber => STANDARD_STREAMS_ALIASES[fdNumber] ?? `stdio[$
 // This normalizes those to array of values.
 // For example, `{verbose: {stdout: 'none', stderr: 'full'}}` becomes `{verbose: ['none', 'none', 'full']}`
 const normalizeFdSpecificOptions = options => {
-	const optionsCopy = {...options};
+	// Keep the null prototype, otherwise a polluted `Object.prototype` would inject option values
+	const optionsCopy = {__proto__: null, ...options};
 
 	for (const optionName of FD_SPECIFIC_OPTIONS) {
 		optionsCopy[optionName] = normalizeFdSpecificOption(options, optionName);
@@ -31394,7 +31504,7 @@ const getFdSpecificValue = (optionArray, fdNumber) => fdNumber === 'ipc'
 	? optionArray.at(-1)
 	: optionArray[fdNumber];
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/verbose/values.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/values.js
 
 
 // The `verbose` option can have different values for `stdout`/`stderr`
@@ -31428,96 +31538,6 @@ const getFdGenericVerbose = verbose => verbose.find(fdVerbose => isVerboseFuncti
 const isVerboseFunction = fdVerbose => typeof fdVerbose === 'function';
 
 const VERBOSE_VALUES = ['none', 'short', 'full'];
-
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/arguments/escape.js
-
-
-
-// Compute `result.command` and `result.escapedCommand`
-const joinCommand = (filePath, rawArguments) => {
-	const fileAndArguments = [filePath, ...rawArguments];
-	const command = fileAndArguments.join(' ');
-	const escapedCommand = fileAndArguments
-		.map(fileAndArgument => quoteString(escapeControlCharacters(fileAndArgument)))
-		.join(' ');
-	return {command, escapedCommand};
-};
-
-// Remove ANSI sequences and escape control characters and newlines
-const escapeLines = lines => (0,external_node_util_.stripVTControlCharacters)(lines)
-	.split('\n')
-	.map(line => escapeControlCharacters(line))
-	.join('\n');
-
-const escapeControlCharacters = line => line.replaceAll(SPECIAL_CHAR_REGEXP, character => escapeControlCharacter(character));
-
-const escapeControlCharacter = character => {
-	const commonEscape = COMMON_ESCAPES[character];
-	if (commonEscape !== undefined) {
-		return commonEscape;
-	}
-
-	const codepoint = character.codePointAt(0);
-	const codepointHex = codepoint.toString(16);
-	return codepoint <= ASTRAL_START
-		? `\\u${codepointHex.padStart(4, '0')}`
-		: `\\U${codepointHex}`;
-};
-
-// Characters that would create issues when printed are escaped using the \u or \U notation.
-// Those include control characters and newlines.
-// The \u and \U notation is Bash specific, but there is no way to do this in a shell-agnostic way.
-// Some shells do not even have a way to print those characters in an escaped fashion.
-// Therefore, we prioritize printing those safely, instead of allowing those to be copy-pasted.
-// List of Unicode character categories: https://www.fileformat.info/info/unicode/category/index.htm
-const getSpecialCharRegExp = () => {
-	try {
-		// This throws when using Node.js without ICU support.
-		// When using a RegExp literal, this would throw at parsing-time, instead of runtime.
-		// eslint-disable-next-line prefer-regex-literals
-		return new RegExp('\\p{Separator}|\\p{Other}', 'gu');
-	} catch {
-		// Similar to the above RegExp, but works even when Node.js has been built without ICU support.
-		// Unlike the above RegExp, it only covers whitespaces and C0/C1 control characters.
-		// It does not cover some edge cases, such as Unicode reserved characters.
-		// See https://github.com/sindresorhus/execa/issues/1143
-		// eslint-disable-next-line no-control-regex, regexp/no-control-character, unicorn/prefer-unicode-code-point-escapes
-		return /[\s\u0000-\u001F\u007F-\u009F\u00AD]/g;
-	}
-};
-
-const SPECIAL_CHAR_REGEXP = getSpecialCharRegExp();
-
-// Accepted by $'...' in Bash.
-// Exclude \a \e \v which are accepted in Bash but not in JavaScript (except \v) and JSON.
-const COMMON_ESCAPES = {
-	' ': ' ',
-	'\b': '\\b',
-	'\f': '\\f',
-	'\n': '\\n',
-	'\r': '\\r',
-	'\t': '\\t',
-};
-
-// Up until that codepoint, \u notation can be used instead of \U
-const ASTRAL_START = 65_535;
-
-// Some characters are shell-specific, i.e. need to be escaped when the command is copy-pasted then run.
-// Escaping is shell-specific. We cannot know which shell is used: `process.platform` detection is not enough.
-// For example, Windows users could be using `cmd.exe`, Powershell or Bash for Windows which all use different escaping.
-// We use '...' on Unix, which is POSIX shell compliant and escape all characters but ' so this is fairly safe.
-// On Windows, we assume cmd.exe is used and escape with "...", which also works with Powershell.
-const quoteString = escapedArgument => {
-	if (NO_ESCAPE_REGEXP.test(escapedArgument)) {
-		return escapedArgument;
-	}
-
-	return external_node_process_namespaceObject.platform === 'win32'
-		? `"${escapedArgument.replaceAll('"', '""')}"`
-		: `'${escapedArgument.replaceAll('\'', '\'\\\'\'')}'`;
-};
-
-const NO_ESCAPE_REGEXP = /^[\w\-./]+$/;
 
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/is-unicode-supported@2.1.0/node_modules/is-unicode-supported/index.js
 
@@ -31958,7 +31978,7 @@ const underlineMagentaBright = format('58;5;13', 59);
 const underlineCyanBright = format('58;5;14', 59);
 const underlineWhiteBright = format('58;5;15', 59);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/verbose/default.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/default.js
 
 
 
@@ -32009,7 +32029,7 @@ const COLORS = {
 	duration: () => gray,
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/verbose/custom.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/custom.js
 
 
 // Apply the `verbose` function on each line
@@ -32037,7 +32057,7 @@ const appendNewline = printedLine => printedLine.endsWith('\n')
 	? printedLine
 	: `${printedLine}\n`;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/verbose/log.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/log.js
 
 
 
@@ -32083,17 +32103,14 @@ const getPrintedLine = verboseObject => {
 	return {verboseLine, verboseObject};
 };
 
-// Serialize any type to a line string, for logging
+// Serialize any type to a line string, for logging.
+// Tabs are escaped by `escapeLines()`, like any other control character.
 const serializeVerboseMessage = message => {
 	const messageString = typeof message === 'string' ? message : (0,external_node_util_.inspect)(message);
-	const escapedMessage = escapeLines(messageString);
-	return escapedMessage.replaceAll('\t', () => ' '.repeat(TAB_SIZE));
+	return escapeLines(messageString);
 };
 
-// Same as `util.inspect()`
-const TAB_SIZE = 2;
-
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/verbose/start.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/start.js
 
 
 
@@ -32110,7 +32127,7 @@ const logCommand = (escapedCommand, verboseInfo) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/verbose/info.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/info.js
 
 
 // Information computed before spawning, used by the `verbose` option
@@ -32151,7 +32168,7 @@ const validateVerbose = verbose => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/return/duration.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/return/duration.js
 
 
 // Start counting time before spawning the subprocess
@@ -32161,7 +32178,7 @@ const getStartTime = () => external_node_process_namespaceObject.hrtime.bigint()
 // Printed by the `verbose` option.
 const getDurationMs = startTime => Number(external_node_process_namespaceObject.hrtime.bigint() - startTime) / 1e6;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/arguments/command.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/command.js
 
 
 
@@ -32173,7 +32190,8 @@ const handleCommand = (filePath, rawArguments, rawOptions) => {
 	const startTime = getStartTime();
 	const {command, escapedCommand} = joinCommand(filePath, rawArguments);
 	const verbose = normalizeFdSpecificOption(rawOptions, 'verbose');
-	const verboseInfo = getVerboseInfo(verbose, escapedCommand, {...rawOptions});
+	// Keep the null prototype, otherwise a polluted `Object.prototype` would inject option values
+	const verboseInfo = getVerboseInfo(verbose, escapedCommand, {__proto__: null, ...rawOptions});
 	logCommand(escapedCommand, verboseInfo);
 	return {
 		command,
@@ -32309,7 +32327,7 @@ const npmRunPathEnv = ({env = external_node_process_namespaceObject.env, ...opti
 
 ;// CONCATENATED MODULE: external "node:timers/promises"
 const promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:timers/promises");
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/return/final-error.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/return/final-error.js
 // When the subprocess fails, this is the error instance being returned.
 // If another error instance is being thrown, it is kept as `error.cause`.
 const getFinalError = (originalError, message, isSync) => {
@@ -32754,7 +32772,7 @@ return signals.find((signalA)=>signalA.number===number)
 };
 
 const signalsByNumber=getSignalsByNumber();
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/terminate/signal.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/terminate/signal.js
 
 
 
@@ -32826,7 +32844,7 @@ const getAvailableSignalIntegers = () => [...new Set(Object.values(external_node
 // Human-friendly description of a signal
 const getSignalDescription = signal => signalsByName[signal].description;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/terminate/kill.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/terminate/kill.js
 
 
 
@@ -32923,7 +32941,7 @@ const killOnTimeout = async ({kill, forceKillAfterDelay, context, controllerSign
 
 // EXTERNAL MODULE: external "node:events"
 var external_node_events_ = __nccwpck_require__(8474);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/utils/abort-signal.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/utils/abort-signal.js
 
 
 // Combines `util.aborted()` and `events.addAbortListener()`: promise-based and cleaned up with a stop signal
@@ -32933,13 +32951,20 @@ const onAbortedSignal = async (mainSignal, stopSignal) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/terminate/cancel.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/terminate/cancel.js
 
 
 // Validate the `cancelSignal` option
 const validateCancelSignal = ({cancelSignal}) => {
 	if (cancelSignal !== undefined && Object.prototype.toString.call(cancelSignal) !== '[object AbortSignal]') {
 		throw new Error(`The \`cancelSignal\` option must be an AbortSignal: ${String(cancelSignal)}`);
+	}
+};
+
+// The `signal` option was renamed to `cancelSignal`. Validated for every method, otherwise synchronous methods would silently ignore it, since `child_process.spawnSync()` does not support that option either.
+const validateRenamedSignalOption = ({signal}) => {
+	if (signal !== undefined) {
+		throw new TypeError('The "signal" option has been renamed to "cancelSignal" instead.');
 	}
 };
 
@@ -32955,7 +32980,18 @@ const terminateOnCancel = async (kill, cancelSignal, context, {signal}) => {
 	throw cancelSignal.reason;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/ipc/validation.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/utils/options.js
+// The options of methods like `subprocess.pipe()`, `subprocess.readable()` or `sendMessage()` are kept on a null-prototype object, otherwise a polluted `Object.prototype` would inject option values.
+// Like destructuring them, `null` throws.
+const copyOptions = (options = {}) => {
+	if (options === null) {
+		throw new TypeError('The options must be an object, not `null`.');
+	}
+
+	return {__proto__: null, ...options};
+};
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/validation.js
 // Validate the IPC channel is connected before receiving/sending messages
 const validateIpcMethod = ({methodName, isSubprocess, ipc, isConnected}) => {
 	validateIpcOption(methodName, isSubprocess, ipc);
@@ -33012,7 +33048,7 @@ const getAbortDisconnectError = () => new Error(`\`cancelSignal\` aborted: the $
 
 // When the subprocess uses `cancelSignal` but not the current process
 const throwOnMissingParent = () => {
-	throw new Error('`getCancelSignal()` cannot be used without setting the `cancelSignal` subprocess option.');
+	throw new Error('`getCancelSignal()` cannot be used without setting the `gracefulCancel` option to `true`.');
 };
 
 // EPIPE can happen when sending a message to a subprocess that is closing but has not disconnected yet
@@ -33068,7 +33104,7 @@ const disconnect = anyProcess => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/utils/deferred.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/utils/deferred.js
 const createDeferred = () => {
 	const methods = {};
 	const promise = new Promise((resolve, reject) => {
@@ -33077,7 +33113,7 @@ const createDeferred = () => {
 	return Object.assign(promise, methods);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/utils/max-listeners.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/utils/max-listeners.js
 
 
 // Temporarily increase the maximum number of listeners on an eventEmitter
@@ -33093,7 +33129,7 @@ const incrementMaxListeners = (eventEmitter, maxListenersIncrement, signal) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/ipc/reference.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/reference.js
 // By default, Node.js keeps the subprocess alive while it has a `message` or `disconnect` listener.
 // We replicate the same logic for the events that we proxy.
 // This ensures the subprocess is kept alive while `getOneMessage()` and `getEachMessage()` are ongoing.
@@ -33143,7 +33179,7 @@ const redoAddedReferences = (channel, isSubprocess) => {
 	addReferenceCount(channel);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/ipc/incoming.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/incoming.js
 
 
 
@@ -33170,7 +33206,9 @@ const redoAddedReferences = (channel, isSubprocess) => {
 // To solve those problems, instead of buffering messages, we debounce them.
 // The `message` event so it is emitted at most once per macrotask.
 const onMessage = async ({anyProcess, channel, isSubprocess, ipcEmitter}, wrappedMessage) => {
-	if (handleStrictResponse(wrappedMessage) || handleAbort(wrappedMessage)) {
+	// `gracefulCancel` messages are only ever sent by the current process to its subprocess.
+	// Only the subprocess must interpret them, otherwise a subprocess could abort its parent's own `cancelSignal`, or make it silently drop a message.
+	if (handleStrictResponse(wrappedMessage, anyProcess) || (isSubprocess && handleAbort(wrappedMessage))) {
 		return;
 	}
 
@@ -33186,8 +33224,9 @@ const onMessage = async ({anyProcess, channel, isSubprocess, ipcEmitter}, wrappe
 	}
 
 	while (incomingMessages.length > 0) {
+		// The message being processed is the oldest one, which is not `wrappedMessage` after the first iteration
 		// eslint-disable-next-line no-await-in-loop
-		await waitForOutgoingMessages(anyProcess, ipcEmitter, wrappedMessage);
+		await waitForOutgoingMessages(anyProcess, ipcEmitter, incomingMessages[0]);
 		// eslint-disable-next-line no-await-in-loop
 		await promises_namespaceObject.scheduler.yield();
 
@@ -33208,7 +33247,11 @@ const onMessage = async ({anyProcess, channel, isSubprocess, ipcEmitter}, wrappe
 
 // If the `message` event is currently debounced, the `disconnect` event must wait for it
 const onDisconnect = async ({anyProcess, channel, isSubprocess, ipcEmitter, boundOnMessage}) => {
-	abortOnDisconnect();
+	// Like `gracefulCancel` messages, only the disconnection from the parent process aborts `getCancelSignal()`.
+	// Otherwise, disconnecting from one of the current process' own subprocesses would abort it.
+	if (isSubprocess) {
+		abortOnDisconnect();
+	}
 
 	const incomingMessages = INCOMING_MESSAGES.get(anyProcess);
 	while (incomingMessages?.length > 0) {
@@ -33224,7 +33267,7 @@ const onDisconnect = async ({anyProcess, channel, isSubprocess, ipcEmitter, boun
 
 const INCOMING_MESSAGES = new WeakMap();
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/ipc/forward.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/forward.js
 
 
 
@@ -33282,7 +33325,7 @@ const isConnected = anyProcess => {
 		: ipcEmitter.connected;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/ipc/strict.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/strict.js
 
 
 
@@ -33307,7 +33350,8 @@ const handleSendStrict = ({anyProcess, channel, isSubprocess, message, strict}) 
 	};
 };
 
-let count = 0n;
+// This is a plain number, not a `BigInt`, since it must be serializable with `serialization: 'json'`
+let count = 0;
 
 // Handles when both processes are calling `sendMessage()` with `strict` at the same time.
 // If neither process is listening, this would create a deadlock. We detect it and throw.
@@ -33318,7 +33362,7 @@ const validateStrictDeadlock = (outgoingMessages, wrappedMessage) => {
 
 	for (const {id} of outgoingMessages) {
 		if (id !== undefined) {
-			STRICT_RESPONSES[id].resolve({isDeadlock: true, hasListeners: false});
+			STRICT_RESPONSES[id].deferred.resolve({isDeadlock: true, hasListeners: false});
 		}
 	}
 };
@@ -33346,14 +33390,19 @@ const handleStrictRequest = async ({wrappedMessage, anyProcess, channel, isSubpr
 	return message;
 };
 
-// Reception of the acknowledgment response
-const handleStrictResponse = wrappedMessage => {
+// Reception of the acknowledgment response.
+// Ids are shared by all processes, so the response must come from the process the message was sent to. Otherwise, a subprocess could acknowledge a message sent to another one.
+const handleStrictResponse = (wrappedMessage, anyProcess) => {
 	if (wrappedMessage?.type !== RESPONSE_TYPE) {
 		return false;
 	}
 
 	const {id, message: hasListeners} = wrappedMessage;
-	STRICT_RESPONSES[id]?.resolve({isDeadlock: false, hasListeners});
+	const strictResponse = STRICT_RESPONSES[id];
+	if (strictResponse?.anyProcess === anyProcess) {
+		strictResponse.deferred.resolve({isDeadlock: false, hasListeners});
+	}
+
 	return true;
 };
 
@@ -33364,7 +33413,7 @@ const waitForStrictResponse = async (wrappedMessage, anyProcess, isSubprocess) =
 	}
 
 	const deferred = createDeferred();
-	STRICT_RESPONSES[wrappedMessage.id] = deferred;
+	STRICT_RESPONSES[wrappedMessage.id] = {deferred, anyProcess};
 	const controller = new AbortController();
 
 	try {
@@ -33386,7 +33435,7 @@ const waitForStrictResponse = async (wrappedMessage, anyProcess, isSubprocess) =
 	}
 };
 
-const STRICT_RESPONSES = {};
+const STRICT_RESPONSES = {__proto__: null};
 
 const throwOnDisconnect = async (anyProcess, isSubprocess, {signal}) => {
 	incrementMaxListeners(anyProcess, 1, signal);
@@ -33397,7 +33446,7 @@ const throwOnDisconnect = async (anyProcess, isSubprocess, {signal}) => {
 const REQUEST_TYPE = 'execa:ipc:request';
 const RESPONSE_TYPE = 'execa:ipc:response';
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/ipc/outgoing.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/outgoing.js
 
 
 
@@ -33452,7 +33501,8 @@ const getMinListenerCount = anyProcess => getOptions(anyProcess) !== undefined
 
 const getOptions = anyProcess => IPC_SUBPROCESS_OPTIONS.get(anyProcess);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/ipc/send.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/send.js
+
 
 
 
@@ -33462,7 +33512,8 @@ const getOptions = anyProcess => IPC_SUBPROCESS_OPTIONS.get(anyProcess);
 // We do not `await subprocess` during `.sendMessage()` nor `.getOneMessage()` since those methods are transient.
 // Users would still need to `await subprocess` after the method is done.
 // Also, this would prevent `unhandledRejection` event from being emitted, making it silent.
-const sendMessage = ({anyProcess, channel, isSubprocess, ipc}, message, {strict = false} = {}) => {
+const sendMessage = ({anyProcess, channel, isSubprocess, ipc}, message, options) => {
+	const {strict = false} = copyOptions(options);
 	const methodName = 'sendMessage';
 	validateIpcMethod({
 		methodName,
@@ -33540,7 +33591,7 @@ const getSendMethod = anyProcess => {
 
 const PROCESS_SEND_METHODS = new WeakMap();
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/ipc/graceful.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/graceful.js
 
 
 
@@ -33576,12 +33627,13 @@ const startIpc = async ({anyProcess, channel, isSubprocess, ipc}) => {
 		return;
 	}
 
-	isCancelListening = true;
-
+	// This is validated before the flag is set, so that a call which throws keeps failing on subsequent calls
 	if (!ipc) {
 		throwOnMissingParent();
 		return;
 	}
+
+	isCancelListening = true;
 
 	if (channel === null) {
 		abortOnDisconnect();
@@ -33614,7 +33666,7 @@ const abortOnDisconnect = () => {
 
 const cancelController = new AbortController();
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/terminate/graceful.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/terminate/graceful.js
 
 
 
@@ -33689,7 +33741,7 @@ const getReason = ({reason}) => {
 	return error;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/terminate/timeout.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/terminate/timeout.js
 
 
 
@@ -33712,7 +33764,7 @@ const killAfterTimeout = async (kill, timeout, context, {signal}) => {
 	throw new DiscardedError();
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/methods/node.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/node.js
 
 
 
@@ -33723,7 +33775,7 @@ const mapNode = ({options}) => {
 		throw new TypeError('The "node" option cannot be false with `execaNode()`.');
 	}
 
-	return {options: {...options, node: true}};
+	return {options: {__proto__: null, ...options, node: true}};
 };
 
 // Applies the `node: true` option, and the related `nodePath`/`nodeOptions` options.
@@ -33779,7 +33831,7 @@ const handleNodeOption = (file, commandArguments, {
 
 ;// CONCATENATED MODULE: external "node:v8"
 const external_node_v8_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:v8");
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/ipc/ipc-input.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/ipc-input.js
 
 
 
@@ -33793,7 +33845,8 @@ const validateIpcInputOption = ({ipcInput, ipc, serialization}) => {
 		throw new Error('The `ipcInput` option cannot be set unless the `ipc` option is `true`.');
 	}
 
-	validateIpcInput[serialization](ipcInput);
+	// An invalid `serialization` option is reported by `node:child_process` when spawning, like when `ipcInput` is not used
+	validateIpcInput[serialization]?.(ipcInput);
 };
 
 const validateAdvancedInput = ipcInput => {
@@ -33806,13 +33859,17 @@ const validateAdvancedInput = ipcInput => {
 
 const validateJsonInput = ipcInput => {
 	try {
-		JSON.stringify(ipcInput);
+		// `JSON.stringify()` returns `undefined` instead of throwing for values it cannot represent, such as functions and symbols
+		if (JSON.stringify(ipcInput) === undefined) {
+			throw new TypeError('The value cannot be represented as JSON.');
+		}
 	} catch (error) {
 		throw new Error('The `ipcInput` option is not serializable with JSON.', {cause: error});
 	}
 };
 
 const validateIpcInput = {
+	__proto__: null,
 	advanced: validateAdvancedInput,
 	json: validateJsonInput,
 };
@@ -33831,7 +33888,7 @@ const sendIpcInput = async (subprocess, ipcInput, ipc) => {
 	}, ipcInput);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/arguments/encoding-option.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/encoding-option.js
 // Validate `encoding` option
 const validateEncoding = ({encoding}) => {
 	if (ENCODINGS.has(encoding)) {
@@ -33853,6 +33910,16 @@ const TEXT_ENCODINGS = new Set(['utf8', 'utf16le']);
 const BINARY_ENCODINGS = new Set(['buffer', 'hex', 'base64', 'base64url', 'latin1', 'ascii']);
 const ENCODINGS = TEXT_ENCODINGS.union(BINARY_ENCODINGS);
 
+/*
+Encoding to use when converting a transform's string to bytes.
+Text encodings describe how text is represented as bytes, so those must be used, otherwise the string would be decoded with a different encoding than the one it was encoded with, which corrupts it.
+Binary encodings instead describe how bytes are serialized as text, so the string's UTF-8 bytes are used. The same applies with the `binary` transform option, since the transform then deals with raw bytes.
+*/
+const getStringEncoding = (binary, encoding) => binary || !TEXT_ENCODINGS.has(encoding) ? 'utf8' : encoding;
+
+// Text encodings only apply to the subprocess' output. Its input is always text encoded with UTF-8, so input transforms decode and encode strings with UTF-8 too, whichever text encoding the `encoding` option uses.
+const getInputEncoding = encoding => TEXT_ENCODINGS.has(encoding) ? 'utf8' : encoding;
+
 const getCorrectEncoding = encoding => {
 	if (encoding === null) {
 		return 'buffer';
@@ -33873,6 +33940,7 @@ const getCorrectEncoding = encoding => {
 };
 
 const ENCODING_ALIASES = {
+	__proto__: null,
 	// eslint-disable-next-line unicorn/text-encoding-identifier-case
 	'utf-8': 'utf8',
 	'utf-16le': 'utf16le',
@@ -34061,7 +34129,7 @@ function whichCommandAllSync(command, options = {}) {
 	return [...new Set(found)];
 }
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/arguments/command-file.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/command-file.js
 
 
 
@@ -34076,18 +34144,11 @@ const parseCommandFile = (file, commandArguments, options) => {
 	const parsed = {file, commandArguments: [...commandArguments], options};
 
 	// Under a shell, or on Unix, the OS resolves the file and escapes the arguments itself
-	if (options.shell || external_node_process_namespaceObject.platform !== 'win32') {
-		return parsed;
-	}
-
-	return escapeWindowsCommand(parsed);
+	return options.shell || external_node_process_namespaceObject.platform !== 'win32' ? parsed : escapeWindowsCommand(parsed);
 };
 
 // Only `.exe` and `.com` files can be spawned directly; anything else needs `cmd.exe`
 const directlyExecutableRegExp = /\.(?:com|exe)$/i;
-
-// `.cmd` and `.bat` files re-expand their own arguments via `%*`/`%1`, so metacharacters must survive being interpreted by `cmd.exe` twice: once when the batch file is invoked and once when it forwards the arguments
-const batchFileRegExp = /\.(?:bat|cmd)$/i;
 
 const escapeWindowsCommand = parsed => {
 	// Resolve the file to an absolute path, following its shebang to the interpreter if any
@@ -34111,17 +34172,21 @@ const escapeWindowsCommand = parsed => {
 		assertNoLineBreak(value);
 	}
 
-	const isDoubleEscape = resolvedFile !== undefined && batchFileRegExp.test(resolvedFile);
-	// POSIX separators must become Windows ones (`foo/bar` -> `foo\bar`), otherwise resolution always fails with ENOENT
+	/*
+	POSIX separators must become Windows ones (`foo/bar` -> `foo\bar`), otherwise resolution always fails with ENOENT.
+
+	Unlike Rust, which quotes the batch file's path, the file is caret-escaped. `cmd.exe` only interprets it once, and the file might not be resolved, for example when it is a `cmd.exe` builtin, which would not run if quoted.
+	*/
 	const escapedFile = escapeMetaChars(external_node_path_namespaceObject.normalize(resolvedFile ?? parsed.file));
-	const escapedArguments = parsed.commandArguments.map(argument => escapeArgument(argument, isDoubleEscape));
+	const escapedArguments = parsed.commandArguments.map(argument => escapeArgument(argument));
 	const commandLine = `"${[escapedFile, ...escapedArguments].join(' ')}"`;
 
 	// Let `node:child_process` pass the already-escaped command line through untouched
 	parsed.options.windowsVerbatimArguments = true;
 	return {
 		file: external_node_process_namespaceObject.env.comspec || 'cmd.exe',
-		commandArguments: ['/d', '/s', '/c', commandLine],
+		// `/e:on` enables the command extensions the `%` escaping relies on, and `/v:off` disables delayed expansion so `!` is literal, even when the registry changes either default
+		commandArguments: ['/d', '/e:on', '/v:off', '/s', '/c', commandLine],
 		options: parsed.options,
 	};
 };
@@ -34191,11 +34256,12 @@ const SHEBANG_BYTE_LENGTH = 150;
 // Read the file's first bytes to find its shebang interpreter, if it has one
 const readShebang = file => {
 	const buffer = external_node_buffer_.Buffer.alloc(SHEBANG_BYTE_LENGTH);
+	let bytesRead = 0;
 
 	try {
 		const fileDescriptor = (0,external_node_fs_namespaceObject.openSync)(file, 'r');
 		try {
-			(0,external_node_fs_namespaceObject.readSync)(fileDescriptor, buffer, 0, SHEBANG_BYTE_LENGTH, 0);
+			bytesRead = (0,external_node_fs_namespaceObject.readSync)(fileDescriptor, buffer, 0, SHEBANG_BYTE_LENGTH, 0);
 		} finally {
 			(0,external_node_fs_namespaceObject.closeSync)(fileDescriptor);
 		}
@@ -34203,7 +34269,9 @@ const readShebang = file => {
 		return undefined;
 	}
 
-	return parseShebang(buffer.toString());
+	// A file shorter than the buffer leaves it zero-filled, so only the bytes actually read must be parsed.
+	// Otherwise, a shebang line which is not terminated by a newline would include those `\0` characters.
+	return parseShebang(buffer.toString('utf8', 0, bytesRead));
 };
 
 const shebangRegExp = /^#!(?<line>.*)/;
@@ -34217,7 +34285,7 @@ const parseShebang = contents => {
 		return undefined;
 	}
 
-	const [interpreterPath, argument] = shebangLine.split(' ');
+	const [interpreterPath, argument] = shebangLine.split(' ', 2);
 	const interpreter = interpreterPath.split('/').at(-1);
 	if (interpreter === 'env') {
 		return argument;
@@ -34238,33 +34306,65 @@ const assertNoLineBreak = value => {
 // eslint-disable-next-line regexp/sort-character-class-elements
 const metaCharsRegExp = /[()\][%!^"`<>&|;, *?]/g;
 
-// Prefix every `cmd.exe` metacharacter with a caret to neutralize it
+// Prefix every `cmd.exe` metacharacter with a caret to neutralize it. This is only used for the file, since arguments are quoted instead.
 const escapeMetaChars = value => value.replaceAll(metaCharsRegExp, '^$&');
 
 const backslashRunRegExp = /\\+/g;
 
-const escapeArgument = (rawArgument, doubleEscape) => {
+// Matches any character requiring quoting: anything except ASCII letters, digits, a few punctuation characters that `cmd.exe` never interprets, and non-ASCII characters other than control characters
+const quotedCharacterRegExp = /[^\w#$*+\-./:?@\\\u{80}-\u{10FFFF}]|\p{Control}/u;
+
+/*
+Escape an argument the same way as Rust's `std::process::Command` does for batch files, which fixed the "BatBadBut" vulnerability (CVE-2024-24576): https://github.com/rust-lang/rust/blob/main/library/std/src/sys/args/windows.rs (`append_bat_arg()`). yt-dlp uses the same algorithm.
+
+Any argument containing a `cmd.exe` metacharacter is wrapped in double quotes, which keeps `cmd.exe` from interpreting it. `cmd.exe` might interpret it more than once: when invoking a batch file, then again when that batch file forwards it with `%*`, like npm cmd-shims do. Caret escaping depends on that count, so it breaks batch files reading their arguments directly with `%~1`, like Maven's `mvn.cmd`. Quoting does not, as long as the quotes stay balanced.
+
+Rust only uses this for batch files. We use it for any file run through `cmd.exe`, since it is also correct when `cmd.exe` interprets the argument only once.
+
+Limitations, which no escaping can fix since they depend on how the batch file uses its arguments:
+- A batch file reading `%~1` gets the escaped argument without its surrounding quotes: double quotes are doubled, and trailing backslashes too.
+- A batch file using `%~1` outside double quotes, or `%1` inside double quotes (like `if "%1" == ""`), lets `cmd.exe` interpret its metacharacters. Since `%1` includes the argument's surrounding quotes, the extra ones unquote it.
+- A batch file forwarding its arguments with `call` expands `%` again, and one enabling delayed expansion expands `!` again.
+*/
+const escapeArgument = rawArgument => {
 	/*
-	Escape backslashes and double quotes for `cmd.exe`, following the algorithm at https://web.archive.org/web/20240930203505/https://qntm.org/cmd.
+	Escape backslashes, following the algorithm at https://web.archive.org/web/20240930203505/https://qntm.org/cmd.
 
 	A run of backslashes only needs doubling when it precedes a double quote, or the end of the argument since that becomes a double quote once the argument is wrapped below. Otherwise the backslashes would be taken as escaping that quote. Every double quote is then escaped in turn.
 
 	Each backslash run is matched exactly once and consumed, so a long run cannot trigger the quadratic backtracking a naive pattern would, which would be a denial-of-service risk.
+
+	Double quotes are escaped as `""` instead of `\"`. Both are a literal double quote inside a quoted argument for the subprocess, but only `""` keeps the quotes balanced for `cmd.exe`, which does not know about backslashes. Otherwise, the metacharacters after the double quote would not be quoted anymore, allowing command injection.
+
+	`%` cannot be escaped inside double quotes, so it is replaced by `%%cd:~,%` instead. That is a literal `%` followed by an empty substring of the `%cd%` variable, which `cmd.exe` expands to nothing. This prevents `%VAR%` from being expanded.
 	*/
-	const argument = `${rawArgument}`
+	const argument = `${rawArgument}`;
+	if (!shouldQuoteArgument(argument)) {
+		return argument;
+	}
+
+	const escapedArgument = argument
 		.replaceAll(backslashRunRegExp, (backslashes, offset, string) => {
 			const nextCharacter = string[offset + backslashes.length];
 			const isPrecedesDoubleQuote = nextCharacter === '"' || nextCharacter === undefined;
 			return isPrecedesDoubleQuote ? backslashes.repeat(2) : backslashes;
 		})
-		.replaceAll('"', '\\"');
+		.replaceAll('"', '""')
+		.replaceAll('%', '%%cd:~,%');
 
-	// Wrap the whole argument in double quotes, then caret-escape the metacharacters, a second time when targeting a cmd-shim
-	const escapedArgument = escapeMetaChars(`"${argument}"`);
-	return doubleEscape ? escapeMetaChars(escapedArgument) : escapedArgument;
+	return `"${escapedArgument}"`;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/arguments/cwd.js
+/*
+An empty argument must be quoted, otherwise it would be dropped.
+An argument ending with a backslash must be quoted, otherwise a batch file wrapping it in double quotes, like `"%~1"`, would have that backslash escape its closing double quote.
+Since `"` and `%` require quoting, an unquoted argument never needs any escaping.
+*/
+const shouldQuoteArgument = argument => argument === ''
+	|| argument.endsWith('\\')
+	|| quotedCharacterRegExp.test(argument);
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/cwd.js
 
 
 
@@ -34285,9 +34385,17 @@ const getDefaultCwd = () => {
 	}
 };
 
+// `process.cwd()` throws if the current directory has been deleted.
+// This is only used to improve an error message, so it must not throw itself, which would hide that error.
+const getCurrentCwd = () => {
+	try {
+		return external_node_process_namespaceObject.cwd();
+	} catch {}
+};
+
 // When `cwd` option has an invalid value, provide with a better error message
 const fixCwdError = (originalMessage, cwd) => {
-	if (cwd === getDefaultCwd()) {
+	if (cwd === getCurrentCwd()) {
 		return originalMessage;
 	}
 
@@ -34298,14 +34406,10 @@ const fixCwdError = (originalMessage, cwd) => {
 		return `The "cwd" option is invalid: ${cwd}.\n${error.message}\n${originalMessage}`;
 	}
 
-	if (!cwdStat.isDirectory()) {
-		return `The "cwd" option is not a directory: ${cwd}.\n${originalMessage}`;
-	}
-
-	return originalMessage;
+	return cwdStat.isDirectory() ? originalMessage : `The "cwd" option is not a directory: ${cwd}.\n${originalMessage}`;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/arguments/options.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/options.js
 
 
 
@@ -34341,6 +34445,7 @@ const normalizeOptions = (filePath, rawArguments, rawOptions) => {
 	validateEncoding(options);
 	validateIpcInputOption(options);
 	validateCancelSignal(options);
+	validateRenamedSignalOption(options);
 	validateGracefulCancel(options);
 	options.shell = normalizeFileUrl(options.shell);
 	options.killSignal = normalizeKillSignal(options.killSignal);
@@ -34396,8 +34501,16 @@ const addDefaultOptions = ({
 	serialization,
 });
 
-const getEnv = ({env: envOption, extendEnv, preferLocal, node, localDirectory, nodePath}) => {
-	const env = extendEnv ? {...external_node_process_namespaceObject.env, ...envOption} : envOption;
+/*
+Keep a null prototype, otherwise a polluted `Object.prototype` would inject environment variables.
+Unlike the other options, `child_process` intentionally passes the inherited properties of `env` to the subprocess, so they are the ones which must not leak. This includes `PATH`, which decides which file the command resolves to.
+`npmRunPathEnv()` returns a plain object, so this is applied to its result too.
+*/
+const getEnv = options => ({__proto__: null, ...computeEnv(options)});
+
+const computeEnv = ({env: envOption, extendEnv, preferLocal, node, localDirectory, nodePath}) => {
+	// Spread `envOption` even when it is `undefined`, so `extendEnv: false` results in an empty environment instead of inheriting `process.env`
+	const env = {__proto__: null, ...(extendEnv && external_node_process_namespaceObject.env), ...envOption};
 
 	if (preferLocal || node) {
 		return npmRunPathEnv({
@@ -34412,7 +34525,8 @@ const getEnv = ({env: envOption, extendEnv, preferLocal, node, localDirectory, n
 	return env;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/arguments/shell.js
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/shell.js
 // When the `shell` option is set, any command argument is concatenated as a single string by Node.js:
 // https://github.com/nodejs/node/blob/e38ce27f3ca0a65f68a31cedd984cddb927d4002/lib/child_process.js#L614-L624
 // However, since Node 24, it also prints a deprecation warning.
@@ -34776,7 +34890,7 @@ class MaxBufferError extends Error {
 	}
 }
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/io/max-buffer.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/max-buffer.js
 
 
 
@@ -34807,16 +34921,13 @@ const getMaxBufferUnit = (readableObjectMode, lines, encoding) => {
 		return 'lines';
 	}
 
-	if (encoding === 'buffer') {
-		return 'bytes';
-	}
-
-	return 'characters';
+	return encoding === 'buffer' ? 'bytes' : 'characters';
 };
 
-// Check the `maxBuffer` option with `result.ipcOutput`
-const checkIpcMaxBuffer = (subprocess, ipcOutput, maxBuffer) => {
-	if (ipcOutput.length !== maxBuffer) {
+// Check the `maxBuffer` option with `result.ipcOutput`, before buffering one more message.
+// Like the stream-based `maxBuffer`, the threshold is hit when the buffered amount would exceed it, which also applies to non-integer values.
+const checkIpcMaxBuffer = (ipcOutput, maxBuffer) => {
+	if (ipcOutput.length + 1 <= maxBuffer) {
 		return;
 	}
 
@@ -34836,38 +34947,54 @@ const getMaxBufferInfo = (error, maxBuffer) => {
 		return {streamName: 'output', threshold: maxBuffer[1], unit: 'bytes'};
 	}
 
-	const {maxBufferInfo: {fdNumber, unit}} = error;
+	const {maxBufferInfo: {fdNumber, unit, threshold = getFdSpecificValue(maxBuffer, fdNumber)}} = error;
 	delete error.maxBufferInfo;
 
-	const threshold = getFdSpecificValue(maxBuffer, fdNumber);
-	if (fdNumber === 'ipc') {
-		return {streamName: 'IPC output', threshold, unit: 'messages'};
-	}
-
-	return {streamName: getStreamName(fdNumber), threshold, unit};
+	return fdNumber === 'ipc' ? {streamName: 'IPC output', threshold, unit: 'messages'} : {streamName: getStreamName(fdNumber), threshold, unit};
 };
 
-// The only way to apply `maxBuffer` with `spawnSync()` is to use the native `maxBuffer` option Node.js provides.
-// However, this has multiple limitations, and cannot behave the exact same way as the async behavior.
-// When the `maxBuffer` is hit, a `ENOBUFS` error is thrown.
-const isMaxBufferSync = (resultError, output, maxBuffer) => resultError?.code === 'ENOBUFS'
-	&& output !== null
-	&& output.some(result => result !== null && result.length > getMaxBufferSync(maxBuffer));
-
-// When `maxBuffer` is hit, ensure the result is truncated
-const truncateMaxBufferSync = (result, isMaxBuffer, maxBuffer) => {
-	if (!isMaxBuffer) {
-		return result;
-	}
-
-	const maxBufferValue = getMaxBufferSync(maxBuffer);
-	return result.length > maxBufferValue ? result.slice(0, maxBufferValue) : result;
-};
-
-// `spawnSync()` does not allow differentiating `maxBuffer` per file descriptor, so we always use `stdout`
+// The native `maxBuffer` option passed to `spawnSync()` does not allow differentiating values per file descriptor, so we use `stdout`'s.
+// Since each other file descriptor's own limit is capped by `stdout`'s, this is also the highest one.
+// Node.js applies it to the total output of all piped file descriptors, not to each of them. When it is hit, the subprocess is killed and a `ENOBUFS` error is thrown.
 const getMaxBufferSync = ([, stdoutMaxBuffer]) => stdoutMaxBuffer;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/return/message.js
+// File descriptors with a limit lower than `spawnSync()`'s native `maxBuffer` are enforced from the output, after the subprocess exits.
+// Since no native error was thrown, we create the `ENOBUFS` error ourselves.
+// Like with asynchronous methods, file descriptors which are not buffered are not limited by their own value. However, when they are piped, e.g. to a file, they still count towards the native limit, which is `stdout`'s value.
+const handleMaxBufferSync = ({resultError, output, maxBuffer, buffer}) => {
+	const fdNumber = findMaxBufferSync(output, maxBuffer, buffer);
+	if (fdNumber === undefined) {
+		// The native limit can be hit by the total output without any single file descriptor being over its own limit
+		return {resultError, isMaxBuffer: resultError?.code === 'ENOBUFS'};
+	}
+
+	const threshold = getMaxBufferValueSync(maxBuffer, fdNumber);
+	const error = resultError ?? Object.assign(new MaxBufferError(), {code: 'ENOBUFS'});
+	error.maxBufferInfo = {fdNumber, unit: 'bytes', threshold};
+	return {resultError: error, isMaxBuffer: true};
+};
+
+const findMaxBufferSync = (output, maxBuffer, buffer) => {
+	if (output === null) {
+		return;
+	}
+
+	const fdNumber = output.findIndex((result, index) => result !== null
+		&& buffer[index]
+		&& result.length > getMaxBufferValueSync(maxBuffer, index));
+	return fdNumber === -1 ? undefined : fdNumber;
+};
+
+// `spawnSync()` uses `maxBuffer.stdout` as its native `maxBuffer`, so other file descriptors' limits can only be lower than that
+const getMaxBufferValueSync = (maxBuffer, fdNumber) => Math.min(maxBuffer[1], maxBuffer[fdNumber]);
+
+// When `maxBuffer` is hit, ensure each buffered file descriptor's result is truncated at its own limit
+const truncateMaxBufferSync = (result, fdNumber, {maxBuffer, buffer}) => {
+	const maxBufferValue = getMaxBufferValueSync(maxBuffer, fdNumber);
+	return buffer[fdNumber] && result.length > maxBufferValue ? result.slice(0, maxBufferValue) : result;
+};
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/return/message.js
 
 
 
@@ -34983,11 +35110,7 @@ const getErrorPrefix = ({
 		return `Command was killed with ${signal} (${signalDescription})`;
 	}
 
-	if (exitCode !== undefined) {
-		return `Command failed with exit code ${exitCode}`;
-	}
-
-	return 'Command failed';
+	return exitCode === undefined ? 'Command failed' : `Command failed with exit code ${exitCode}`;
 };
 
 const getForcefulSuffix = (isForcefullyTerminated, forceKillAfterDelay) => isForcefullyTerminated
@@ -35019,14 +35142,10 @@ const serializeMessageItem = messageItem => {
 		return messageItem;
 	}
 
-	if (isUint8Array(messageItem)) {
-		return uint8ArrayToString(messageItem);
-	}
-
-	return '';
+	return isUint8Array(messageItem) ? uint8ArrayToString(messageItem) : '';
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/return/result.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/return/result.js
 
 
 
@@ -35413,7 +35532,7 @@ function prettyMilliseconds(milliseconds, options) {
 	return sign + result.join(separator);
 }
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/verbose/error.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/error.js
 
 
 // When `verbose` is `short|full|custom`, print each command's error when it fails
@@ -35428,7 +35547,7 @@ const logError = (result, verboseInfo) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/verbose/complete.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/complete.js
 
 
 
@@ -35454,7 +35573,7 @@ const logDuration = (result, verboseInfo) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/return/reject.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/return/reject.js
 
 
 // Applies the `reject` option.
@@ -35462,14 +35581,14 @@ const logDuration = (result, verboseInfo) => {
 const handleResult = (result, verboseInfo, {reject}) => {
 	logResult(result, verboseInfo);
 
-	if (result.failed && reject) {
+	if (reject && result.failed) {
 		throw result;
 	}
 
 	return result;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/stdio/type.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/type.js
 
 
 
@@ -35516,11 +35635,7 @@ const getStdioItemType = (value, optionName) => {
 		return getTransformStreamType({transform: value}, optionName);
 	}
 
-	if (isTransformOptions(value)) {
-		return getTransformObjectType(value, optionName);
-	}
-
-	return 'native';
+	return isTransformOptions(value) ? getTransformObjectType(value, optionName) : 'native';
 };
 
 const getTransformObjectType = (value, optionName) => {
@@ -35528,11 +35643,7 @@ const getTransformObjectType = (value, optionName) => {
 		return getDuplexType(value, optionName);
 	}
 
-	if (type_isTransformStream(value.transform)) {
-		return getTransformStreamType(value, optionName);
-	}
-
-	return getGeneratorObjectType(value, optionName);
+	return type_isTransformStream(value.transform) ? getTransformStreamType(value, optionName) : getGeneratorObjectType(value, optionName);
 };
 
 const getDuplexType = (value, optionName) => {
@@ -35652,7 +35763,7 @@ const TYPE_TO_MESSAGE = {
 	uint8Array: 'a Uint8Array',
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/transform/object-mode.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/object-mode.js
 
 
 /*
@@ -35695,7 +35806,7 @@ const getFdObjectMode = (stdioItems, direction) => {
 		: lastTransform.value.readableObjectMode;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/transform/normalize.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/normalize.js
 
 
 
@@ -35803,7 +35914,7 @@ const normalizeGenerator = ({stdioItem, stdioItem: {value}, index, newTransforms
 
 const sortTransforms = (newTransforms, direction) => direction === 'input' ? newTransforms.reverse() : newTransforms;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/stdio/direction.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/direction.js
 
 
 
@@ -35812,8 +35923,8 @@ const sortTransforms = (newTransforms, direction) => direction === 'input' ? new
 // This allows us to know whether to pipe _into_ or _from_ the stream.
 // When `stdio[fdNumber]` is a single value, this guess is fairly straightforward.
 // However, when it is an array instead, we also need to make sure the different values are not incompatible with each other.
-const getStreamDirection = (stdioItems, fdNumber, optionName) => {
-	const directions = stdioItems.map(stdioItem => getStdioItemDirection(stdioItem, fdNumber));
+const getStreamDirection = ({stdioItems, isStdioArray, fdNumber, optionName}) => {
+	const directions = stdioItems.map(stdioItem => getStdioItemDirection(stdioItem, fdNumber, isStdioArray));
 
 	if (directions.includes('input') && directions.includes('output')) {
 		throw new TypeError(`The \`${optionName}\` option must not be an array of both readable and writable values.`);
@@ -35822,10 +35933,19 @@ const getStreamDirection = (stdioItems, fdNumber, optionName) => {
 	return directions.find(Boolean) ?? DEFAULT_DIRECTION;
 };
 
+const getStdioItemDirection = (stdioItem, fdNumber, isStdioArray) => {
+	const knownDirection = KNOWN_DIRECTIONS[fdNumber];
+	const direction = getRequestedDirection(stdioItem);
+	if (knownDirection === undefined) {
+		return direction;
+	}
+
+	validateKnownDirection(stdioItem, knownDirection, isStdioArray);
+	return knownDirection;
+};
+
 // `direction` is set when the user explicitly requests it, e.g. `{value: 'pipe', input: true}`.
 // It takes precedence over guessing, but not over the fixed direction of `stdin`/`stdout`/`stderr`.
-const getStdioItemDirection = (stdioItem, fdNumber) => KNOWN_DIRECTIONS[fdNumber] ?? getRequestedDirection(stdioItem);
-
 // The explicitly requested `direction` must not contradict a value that is intrinsically the other direction.
 // For example, `{value: writableStream, input: true}` is invalid since a writable value can only be an output.
 const getRequestedDirection = ({type, value, direction, optionName}) => {
@@ -35837,13 +35957,34 @@ const getRequestedDirection = ({type, value, direction, optionName}) => {
 	return direction ?? guessedDirection;
 };
 
+// `stdin`/`stdout`/`stderr` have a fixed direction, which each value must not contradict.
+// Otherwise, asynchronous methods pipe in the wrong direction and crash, e.g. with `dest.end is not a function`.
+// Only values whose direction is intrinsic to a stream are checked: other values (e.g. `Uint8Array`) are already
+// rejected in the wrong direction when their stream properties are added.
+// A single file descriptor 0, 1 or 2, e.g. `stdin: 1`, is passed as is to `child_process.spawn()` instead of being piped by Execa, so it is not checked. Those are often the same terminal, which is both readable and writable.
+const validateKnownDirection = ({type, value, optionName}, knownDirection, isStdioArray) => {
+	if (!STREAM_TYPES.has(type) || (!isStdioArray && getStandardStreamDirection(value) !== undefined)) {
+		return;
+	}
+
+	const guessedDirection = guessStreamDirection[type](value);
+	if (guessedDirection === undefined || guessedDirection === knownDirection) {
+		return;
+	}
+
+	const valueName = guessedDirection === 'input' ? 'readable' : 'writable';
+	throw new TypeError(`The \`${optionName}\` option is invalid: a ${valueName} value is always an ${guessedDirection}, but \`${optionName}\` is an ${knownDirection}.`);
+};
+
+const STREAM_TYPES = new Set(['native', 'nodeStream', 'webStream']);
+
 // `stdin`/`stdout`/`stderr` have a known direction
 const KNOWN_DIRECTIONS = ['input', 'output', 'output'];
 
 const anyDirection = () => undefined;
 const alwaysInput = () => 'input';
 
-// `string` can only be added through the `input` option, i.e. does not need to be handled here
+// `string` can only be added through the `input` option, i.e. on `stdin`, so it is always an input
 const guessStreamDirection = {
 	generator: anyDirection,
 	asyncGenerator: anyDirection,
@@ -35852,6 +35993,7 @@ const guessStreamDirection = {
 	iterable: alwaysInput,
 	asyncIterable: alwaysInput,
 	uint8Array: alwaysInput,
+	string: alwaysInput,
 	webStream: value => type_isWritableStream(value) ? 'output' : 'input',
 	nodeStream(value) {
 		if (!isReadableStream(value, {checkOpen: false})) {
@@ -35890,13 +36032,13 @@ const getStandardStreamDirection = value => {
 // When the ambiguity remains, we default to `output` since it is the most common use case for additional file descriptors.
 const DEFAULT_DIRECTION = 'output';
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/ipc/array.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/array.js
 // The `ipc` option adds an `ipc` item to the `stdio` option
 const normalizeIpcStdioArray = (stdioArray, ipc) => ipc
 	? [...stdioArray, 'ipc']
 	: stdioArray;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/stdio/stdio-option.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/stdio-option.js
 
 
 
@@ -35904,7 +36046,9 @@ const normalizeIpcStdioArray = (stdioArray, ipc) => ipc
 
 // Add support for `stdin`/`stdout`/`stderr` as an alias for `stdio`.
 // Also normalize the `stdio` option.
-const normalizeStdioOption = ({stdio, ipc, buffer, ...options}, verboseInfo, isSync) => {
+// A rest pattern is not used to read the other options, since the object it creates inherits from `Object.prototype`, which a prototype pollution could then use to inject option values
+const normalizeStdioOption = (options, verboseInfo, isSync) => {
+	const {stdio, ipc, buffer} = options;
 	const stdioArray = getStdioArray(stdio, options).map((stdioOption, fdNumber) => stdio_option_addDefaultValue(stdioOption, fdNumber));
 	validateIpcStdioOption(stdioArray);
 	return isSync
@@ -35919,21 +36063,9 @@ const validateIpcStdioOption = stdioArray => {
 	}
 };
 
-const hasIpcStdioOption = stdioOption => {
-	if (Array.isArray(stdioOption)) {
-		return stdioOption.some(item => hasIpcStdioItem(item));
-	}
+const hasIpcStdioOption = stdioOption => Array.isArray(stdioOption) ? stdioOption.some(item => hasIpcStdioItem(item)) : hasIpcStdioItem(stdioOption);
 
-	return hasIpcStdioItem(stdioOption);
-};
-
-const hasIpcStdioItem = stdioOption => {
-	if (isStdioValueObject(stdioOption)) {
-		return stdioOption.value === 'ipc';
-	}
-
-	return stdioOption === 'ipc';
-};
+const hasIpcStdioItem = stdioOption => isStdioValueObject(stdioOption) ? stdioOption.value === 'ipc' : stdioOption === 'ipc';
 
 const getStdioArray = (stdio, options) => {
 	if (stdio === undefined) {
@@ -35972,16 +36104,19 @@ const stdio_option_addDefaultValue = (stdioOption, fdNumber) => {
 
 // Using `buffer: false` with synchronous methods implies `stdout`/`stderr`: `ignore`.
 // Unless the output is needed, e.g. due to `verbose: 'full'` or to redirecting to a file.
+// This is only done for `stdout`/`stderr`, since `ignore` redirects them to `/dev/null`.
+// With additional file descriptors, it does not pass them to the subprocess at all, which would make it fail when writing to them.
 const normalizeStdioSync = (stdioArray, buffer, verboseInfo) => stdioArray.map((stdioOption, fdNumber) =>
 	!buffer[fdNumber]
-	&& fdNumber !== 0
+	&& isStandardOutputFd(fdNumber)
 	&& !isFullVerbose(verboseInfo, fdNumber)
 	&& isOutputPipeOnly(stdioOption, fdNumber)
 		? 'ignore'
 		: stdioOption);
 
+// An empty array is not output pipe only: it must keep being rejected as an empty array below
 const isOutputPipeOnly = (stdioOption, fdNumber) => isOutputPipe(stdioOption, fdNumber)
-	|| (Array.isArray(stdioOption) && stdioOption.every(item => isOutputPipe(item, fdNumber)));
+	|| (Array.isArray(stdioOption) && stdioOption.length > 0 && stdioOption.every(item => isOutputPipe(item, fdNumber)));
 
 const isOutputPipe = (stdioOption, fdNumber) => stdioOption === 'pipe'
 	|| isOutputPipeObject(stdioOption, fdNumber);
@@ -35991,9 +36126,11 @@ const isOutputPipeObject = (stdioOption, fdNumber) => isStdioValueObject(stdioOp
 	&& (stdioOption.input === undefined || stdioOption.input === false || isFixedOutputPipe(fdNumber, stdioOption.input));
 
 // On `stdout`/`stderr`, the direction is always output, so `input: true` is ignored and the pipe stays output.
-const isFixedOutputPipe = (fdNumber, input) => input === true && (fdNumber === 1 || fdNumber === 2);
+const isFixedOutputPipe = (fdNumber, input) => input === true && isStandardOutputFd(fdNumber);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/arguments/fd-options.js
+const isStandardOutputFd = fdNumber => fdNumber === 1 || fdNumber === 2;
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/fd-options.js
 
 
 // Retrieve stream targeted by the `to` option
@@ -36054,11 +36191,11 @@ const validateFdNumber = (fdNumber, fdName, isWritable, fileDescriptors) => {
 Please set the "stdio" option to ensure that file descriptor exists.`);
 	}
 
-	if (fileDescriptor.direction === 'input' && !isWritable) {
+	if (!isWritable && fileDescriptor.direction === 'input') {
 		throw new TypeError(`"${getOptionName(isWritable)}" must not be ${fdName}. It must be a readable stream, not writable.`);
 	}
 
-	if (fileDescriptor.direction !== 'input' && isWritable) {
+	if (isWritable && fileDescriptor.direction !== 'input') {
 		throw new TypeError(`"${getOptionName(isWritable)}" must not be ${fdName}. It must be a writable stream, not readable.
 If you meant to use it as input, please set its "stdio" option to \`{value: 'pipe', input: true}\`.`);
 	}
@@ -36085,11 +36222,7 @@ const getInvalidStdioOption = (fdNumber, {stdin, stdout, stderr, stdio}) => {
 		return {optionName: 'stdout', optionValue: stdout};
 	}
 
-	if (usedDescriptor === 2 && stderr !== undefined) {
-		return {optionName: 'stderr', optionValue: stderr};
-	}
-
-	return {optionName: `stdio[${usedDescriptor}]`, optionValue: stdio[usedDescriptor]};
+	return usedDescriptor === 2 && stderr !== undefined ? {optionName: 'stderr', optionValue: stderr} : {optionName: `stdio[${usedDescriptor}]`, optionValue: stdio[usedDescriptor]};
 };
 
 const getUsedDescriptor = fdNumber => fdNumber === 'all' ? 1 : fdNumber;
@@ -36104,7 +36237,7 @@ const serializeOptionValue = value => {
 	return typeof value === 'number' ? `${value}` : 'Stream';
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/stdio/native.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/native.js
 
 
 
@@ -36163,7 +36296,8 @@ const getTargetFd = ({value, optionName, fdNumber, direction}) => {
 		throw new TypeError(`The \`${optionName}: ${serializeOptionValue(value)}\` option is invalid: it cannot be a TTY with synchronous methods.`);
 	}
 
-	return {type: 'uint8Array', value: bufferToUint8Array((0,external_node_fs_namespaceObject.readFileSync)(targetFdNumber)), optionName};
+	// The file descriptor is read lazily, like `inputFile`, so that a read failure is reported like any other early error, instead of being thrown as a raw error
+	return {type: 'uint8Array', contents: () => [bufferToUint8Array((0,external_node_fs_namespaceObject.readFileSync)(targetFdNumber))], optionName};
 };
 
 const getTargetFdNumber = (value, fdNumber) => {
@@ -36190,11 +36324,7 @@ const handleNativeStreamAsync = ({stdioItem, stdioItem: {value, optionName}, fdN
 		return {type: 'nodeStream', value: getStandardStream(value, value, optionName), optionName};
 	}
 
-	if (isStream(value, {checkOpen: false})) {
-		return {type: 'nodeStream', value, optionName};
-	}
-
-	return stdioItem;
+	return isStream(value, {checkOpen: false}) ? {type: 'nodeStream', value, optionName} : stdioItem;
 };
 
 // Node.js does not allow to easily retrieve file descriptors beyond stdin/stdout/stderr as streams.
@@ -36212,7 +36342,7 @@ const getStandardStream = (fdNumber, value, optionName) => {
 	return standardStream;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/stdio/input-option.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/input-option.js
 
 
 
@@ -36268,8 +36398,18 @@ const getInputFileType = inputFile => {
 	throw new Error('The `inputFile` option must be a file path string or a file URL.');
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/stdio/duplicate.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/duplicate.js
 
+
+
+
+// `{file: './output.txt'}` and a `file:` URL are two ways to target the same file, so both must be compared together
+const isFileType = type => SPECIAL_DUPLICATE_TYPES_SYNC.has(type);
+
+// The file that a `filePath` or `fileUrl` stdio item targets, as an absolute path
+const getFileTarget = ({type, value}) => type === 'filePath'
+	? external_node_path_namespaceObject.resolve(value.file)
+	: (0,external_node_url_.fileURLToPath)(value);
 
 // Duplicates in the same file descriptor is most likely an error.
 // However, this can be useful with generators.
@@ -36284,6 +36424,7 @@ const hasSameValueAndDirection = (stdioItemOne, stdioItemTwo) => stdioItemOne.va
 
 // Check if two file descriptors are sharing the same target.
 // For example `{stdout: {file: './output.txt'}, stderr: {file: './output.txt'}}`.
+// The same applies to two items of a single file descriptor, e.g. `{stdout: [{file: './output.txt'}, {file: './output.txt'}]}`.
 const getDuplicateStream = ({stdioItem: {type, value, optionName}, direction, fileDescriptors, isSync}) => {
 	const otherStdioItems = getOtherStdioItems(fileDescriptors, type);
 	if (otherStdioItems.length === 0) {
@@ -36321,11 +36462,15 @@ const getDuplicateStream = ({stdioItem: {type, value, optionName}, direction, fi
 	}
 };
 
-// Values shared by multiple file descriptors
+// Values shared by multiple file descriptors, including the other items of the file descriptor currently being built
 const getOtherStdioItems = (fileDescriptors, type) => fileDescriptors
 	.flatMap(({direction, stdioItems}) => stdioItems
-		.filter(stdioItem => stdioItem.type === type)
-		.map((stdioItem => ({...stdioItem, direction}))));
+		.map(stdioItem => ({...stdioItem, direction})),
+	)
+	.filter(stdioItem => isSameDuplicateType(stdioItem.type, type));
+
+// A `filePath` and a `fileUrl` are compared together, since they can target the same file
+const isSameDuplicateType = (otherType, type) => otherType === type || (isFileType(otherType) && isFileType(type));
 
 // With `execaSync()`, do not allow setting a file path both in input and output
 const validateDuplicateStreamSync = ({otherStdioItems, type, value, optionName, direction}) => {
@@ -36346,7 +36491,7 @@ const validateDuplicateStreamSync = ({otherStdioItems, type, value, optionName, 
 // This is not a problem with generator functions since those create a new instance for each file descriptor.
 // We also forbid input and output file descriptors sharing the same file or stream, since that does not make sense.
 const getDuplicateStreamInstance = ({otherStdioItems, type, value, optionName, direction}) => {
-	const duplicateStdioItems = otherStdioItems.filter(stdioItem => hasSameValue(stdioItem, value));
+	const duplicateStdioItems = otherStdioItems.filter(stdioItem => hasSameValue(stdioItem, type, value));
 	if (duplicateStdioItems.length === 0) {
 		return;
 	}
@@ -36354,20 +36499,15 @@ const getDuplicateStreamInstance = ({otherStdioItems, type, value, optionName, d
 	const differentStdioItem = duplicateStdioItems.find(stdioItem => stdioItem.direction !== direction);
 	throwOnDuplicateStream(differentStdioItem, optionName, type);
 
-	return direction === 'output' ? duplicateStdioItems[0].stream : undefined;
+	// Output streams must be re-used so they are not closed twice.
+	// Web streams must be re-used in the input direction too, since they cannot be converted twice: reading one locks it.
+	return direction === 'output' || type === 'webStream' ? duplicateStdioItems[0].stream : undefined;
 };
 
-const hasSameValue = ({type, value}, secondValue) => {
-	if (type === 'filePath') {
-		return value.file === secondValue.file;
-	}
-
-	if (type === 'fileUrl') {
-		return value.href === secondValue.href;
-	}
-
-	return value === secondValue;
-};
+// `type` and `value` are the current item's, `otherStdioItem` is the other one
+const hasSameValue = (otherStdioItem, type, value) => isFileType(otherStdioItem.type)
+	? getFileTarget(otherStdioItem) === getFileTarget({type, value})
+	: otherStdioItem.value === value;
 
 // We do not allow two file descriptors to share the same Duplex or TransformStream.
 // This is because those are set directly to `subprocess.std*`.
@@ -36384,7 +36524,7 @@ const throwOnDuplicateStream = (stdioItem, optionName, type) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/stdio/handle.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/handle.js
 
 
 
@@ -36424,7 +36564,12 @@ const getFileDescriptor = ({stdioOption, fdNumber, options, isSync}) => {
 		options,
 		optionName,
 	});
-	const direction = getStreamDirection(initialStdioItems, fdNumber, optionName);
+	const direction = getStreamDirection({
+		stdioItems: initialStdioItems,
+		isStdioArray,
+		fdNumber,
+		optionName,
+	});
 	const stdioItems = initialStdioItems.map(stdioItem => handleNativeStream({
 		stdioItem,
 		isStdioArray,
@@ -36511,8 +36656,19 @@ const INVALID_STDIO_ARRAY_OPTIONS = new Set(['ignore']);
 const validateStreams = stdioItems => {
 	for (const stdioItem of stdioItems) {
 		validateFileStdio(stdioItem);
+		validateFileDescriptorStdio(stdioItem);
 	}
 };
+
+// A number is a file descriptor. Anything else is not a valid one, and passing it to `node:child_process` aborts the current process with a fatal assertion instead of throwing.
+const validateFileDescriptorStdio = ({type, value, optionName}) => {
+	if (type === 'native' && typeof value === 'number' && (!Number.isInteger(value) || value < 0 || value > MAX_FILE_DESCRIPTOR)) {
+		throw new TypeError(`The \`${optionName}\` option must be a non-negative 32-bit integer: got ${value}.`);
+	}
+};
+
+// `node:child_process` converts file descriptors to a 32-bit signed integer, and aborts the process when it cannot
+const MAX_FILE_DESCRIPTOR = (2 ** 31) - 1;
 
 const validateFileStdio = ({type, value, optionName}) => {
 	if (isRegularUrl(value)) {
@@ -36544,13 +36700,13 @@ const getFinalFileDescriptors = ({initialFileDescriptors, addProperties, options
 
 	try {
 		for (const fileDescriptor of initialFileDescriptors) {
-			fileDescriptors.push(getFinalFileDescriptor({
+			addFinalFileDescriptor({
 				fileDescriptor,
 				fileDescriptors,
 				addProperties,
 				options,
 				isSync,
-			}));
+			});
 		}
 
 		return fileDescriptors;
@@ -36560,22 +36716,26 @@ const getFinalFileDescriptors = ({initialFileDescriptors, addProperties, options
 	}
 };
 
-const getFinalFileDescriptor = ({
-	fileDescriptor: {direction, objectMode, stdioItems},
-	fileDescriptors,
-	addProperties,
-	options,
-	isSync,
-}) => {
-	const finalStdioItems = stdioItems.map(stdioItem => addStreamProperties({
-		stdioItem,
-		addProperties,
-		direction,
-		options,
-		fileDescriptors,
-		isSync,
-	}));
-	return {direction, objectMode, stdioItems: finalStdioItems};
+/*
+The file descriptor is added to `fileDescriptors` before its items are, for two reasons:
+  - its items are added one at a time, so that each one knows about the previous ones, to detect duplicates within the same file descriptor
+  - if an item throws, the streams created by the previous ones are cleaned up too
+*/
+const addFinalFileDescriptor = ({fileDescriptor, fileDescriptors, addProperties, options, isSync}) => {
+	const {direction, objectMode, stdioItems} = fileDescriptor;
+	const finalFileDescriptor = {direction, objectMode, stdioItems: []};
+	fileDescriptors.push(finalFileDescriptor);
+
+	for (const stdioItem of stdioItems) {
+		finalFileDescriptor.stdioItems.push(addStreamProperties({
+			stdioItem,
+			addProperties,
+			direction,
+			options,
+			fileDescriptors,
+			isSync,
+		}));
+	}
 };
 
 const addStreamProperties = ({stdioItem, addProperties, direction, options, fileDescriptors, isSync}) => {
@@ -36601,12 +36761,15 @@ const addStreamProperties = ({stdioItem, addProperties, direction, options, file
 // We need to create those streams before subprocess spawning, in case their creation fails, e.g. when passing an invalid generator as argument.
 // Like this, an exception would be thrown, which would prevent spawning a subprocess.
 const cleanupCustomStreams = fileDescriptors => {
-	for (const {stdioItems} of fileDescriptors) {
-		for (const {stream} of stdioItems) {
-			if (stream !== undefined && !isStandardStream(stream)) {
-				stream.destroy();
-			}
+	for (const {stream} of fileDescriptors.flatMap(({stdioItems}) => stdioItems)) {
+		if (stream === undefined || isStandardStream(stream)) {
+			continue;
 		}
+
+		// The stream can still error after being destroyed, e.g. when its file cannot be opened.
+		// That error would be uncaught and crash the current process, although it is irrelevant since execa already fails with its own error.
+		stream.on('error', () => {});
+		stream.destroy();
 	}
 };
 
@@ -36622,7 +36785,7 @@ const forwardStdio = stdioItems => {
 	return type === 'native' ? value : 'pipe';
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/stdio/handle-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/handle-sync.js
 
 
 
@@ -36674,12 +36837,14 @@ const addPropertiesSync = {
 	input: {
 		...addProperties,
 		native: forbiddenNativeInputIfSync,
-		fileUrl: ({value}) => ({contents: [bufferToUint8Array((0,external_node_fs_namespaceObject.readFileSync)(value))]}),
-		filePath: ({value: {file}}) => ({contents: [bufferToUint8Array((0,external_node_fs_namespaceObject.readFileSync)(file))]}),
+		// Files are read lazily, so that a file which cannot be read is reported like any other early error, instead of being thrown as a raw error
+		fileUrl: ({value}) => ({contents: () => [bufferToUint8Array((0,external_node_fs_namespaceObject.readFileSync)(value))]}),
+		filePath: ({value: {file}}) => ({contents: () => [bufferToUint8Array((0,external_node_fs_namespaceObject.readFileSync)(file))]}),
 		fileNumber: forbiddenIfSync,
 		iterable: ({value}) => ({contents: [...value]}),
 		string: ({value}) => ({contents: [value]}),
-		uint8Array: ({value}) => ({contents: [value]}),
+		// `contents` is already set when reading from a file descriptor
+		uint8Array: ({value, contents = [value]}) => ({contents}),
 	},
 	output: {
 		...addProperties,
@@ -36692,23 +36857,26 @@ const addPropertiesSync = {
 	},
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/io/strip-newline.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/strip-newline.js
 
 
 // Apply `stripFinalNewline` option, which applies to `result.stdout|stderr|all|stdio[*]`.
 // If the `lines` option is used, it is applied on each line, but using a different function.
-const stripNewline = (value, {stripFinalNewline}, fdNumber) => getStripFinalNewline(stripFinalNewline, fdNumber) && value !== undefined && !Array.isArray(value)
+const stripNewline = (value, {stripFinalNewline}, fdNumber, allFds) => value !== undefined && !Array.isArray(value) && getStripFinalNewline(stripFinalNewline, fdNumber, allFds)
 	? strip_final_newline_stripFinalNewline(value)
 	: value;
 
 // Retrieve `stripFinalNewline` option value, including with `subprocess.all`
-const getStripFinalNewline = (stripFinalNewline, fdNumber) => fdNumber === 'all'
-	? stripFinalNewline[1] || stripFinalNewline[2]
+// With `subprocess.all`, `allFds` are the file descriptors it actually interleaves. Only those are considered, otherwise a single one would be stripped because another one defaults to being stripped.
+const getStripFinalNewline = (stripFinalNewline, fdNumber, allFds) => fdNumber === 'all'
+	? allFds.some(allFd => stripFinalNewline[allFd])
 	: stripFinalNewline[fdNumber];
 
 // EXTERNAL MODULE: external "node:stream"
 var external_node_stream_ = __nccwpck_require__(7075);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/transform/split.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/split.js
+
+
 // Split chunks line-wise for generators passed to the `std*` options
 const getSplitLinesGenerator = (binary, preserveNewlines, skipped, state) => binary || skipped
 	? undefined
@@ -36747,15 +36915,16 @@ const splitGenerator = function * (state, preserveNewlines, chunk) {
 			continue;
 		}
 
-		const newlineLength = getNewlineLength(chunk, end, preserveNewlines, state);
-		let line = chunk.slice(start + 1, end + 1 - newlineLength);
+		// The `\r` of a `\r\n` sequence is stripped further below, once `previousChunks` has been prepended.
+		// Otherwise, a `\r\n` sequence split across two chunks would not be detected.
+		let line = chunk.slice(start + 1, preserveNewlines ? end + 1 : end);
 
 		if (previousChunks.length > 0) {
 			line = concatString(previousChunks, line);
 			previousChunks = '';
 		}
 
-		yield line;
+		yield preserveNewlines ? line : stripCarriageReturn(line, state);
 		start = end;
 	}
 
@@ -36766,13 +36935,9 @@ const splitGenerator = function * (state, preserveNewlines, chunk) {
 	state.previousChunks = previousChunks;
 };
 
-const getNewlineLength = (chunk, end, preserveNewlines, state) => {
-	if (preserveNewlines) {
-		return 0;
-	}
-
-	state.isWindowsNewline = end !== 0 && chunk[end - 1] === '\r';
-	return state.isWindowsNewline ? 2 : 1;
+const stripCarriageReturn = (line, state) => {
+	state.isWindowsNewline = line.endsWith('\r');
+	return state.isWindowsNewline ? line.slice(0, -1) : line;
 };
 
 const linesFinal = function * ({previousChunks}) {
@@ -36783,29 +36948,36 @@ const linesFinal = function * ({previousChunks}) {
 
 // Unless `preserveNewlines: true` is used, we strip the newline of each line.
 // This re-adds them after the user `transform` code has run.
-const getAppendNewlineGenerator = ({binary, preserveNewlines, readableObjectMode, state}) => binary || preserveNewlines || readableObjectMode
+// The re-added newline must be encoded with the `encoding` option when the chunk is bytes: a UTF-8 newline would misalign `utf16le` bytes.
+const getAppendNewlineGenerator = ({binary, preserveNewlines, readableObjectMode, state, encoding}) => binary || preserveNewlines || readableObjectMode
 	? undefined
-	: {transform: appendNewlineGenerator.bind(undefined, state)};
+	: {transform: appendNewlineGenerator.bind(undefined, state, getStringEncoding(binary, encoding))};
 
-const appendNewlineGenerator = function * ({isWindowsNewline = false}, chunk) {
-	const {unixNewline, windowsNewline, LF, concatBytes} = typeof chunk === 'string' ? linesStringInfo : linesUint8ArrayInfo;
+const appendNewlineGenerator = function * ({isWindowsNewline = false}, stringEncoding, chunk) {
+	const {unixNewline, windowsNewline, concat} = typeof chunk === 'string'
+		? linesStringInfo
+		: LINES_BYTES_INFO[stringEncoding];
 
-	if (chunk.at(-1) === LF) {
+	if (endsWithNewline(chunk, unixNewline)) {
 		yield chunk;
 		return;
 	}
 
 	const newline = isWindowsNewline ? windowsNewline : unixNewline;
-	yield concatBytes(chunk, newline);
+	yield concat(chunk, newline);
 };
+
+const endsWithNewline = (chunk, unixNewline) => typeof chunk === 'string'
+	? chunk.endsWith(unixNewline)
+	: chunk.length >= unixNewline.length
+		&& chunk.subarray(-unixNewline.length).every((byte, index) => byte === unixNewline[index]);
 
 const concatString = (firstChunk, secondChunk) => `${firstChunk}${secondChunk}`;
 
 const linesStringInfo = {
 	windowsNewline: '\r\n',
 	unixNewline: '\n',
-	LF: '\n',
-	concatBytes: concatString,
+	concat: concatString,
 };
 
 const concatUint8Array = (firstChunk, secondChunk) => {
@@ -36815,14 +36987,22 @@ const concatUint8Array = (firstChunk, secondChunk) => {
 	return chunk;
 };
 
-const linesUint8ArrayInfo = {
-	windowsNewline: new Uint8Array([0x0D, 0x0A]),
-	unixNewline: new Uint8Array([0x0A]),
-	LF: 0x0A,
-	concatBytes: concatUint8Array,
+// Only indexed with text encodings, since the `binary` option and binary encodings disable this generator
+const LINES_BYTES_INFO = {
+	__proto__: null,
+	utf8: {
+		windowsNewline: new Uint8Array([0x0D, 0x0A]),
+		unixNewline: new Uint8Array([0x0A]),
+		concat: concatUint8Array,
+	},
+	utf16le: {
+		windowsNewline: new Uint8Array([0x0D, 0x00, 0x0A, 0x00]),
+		unixNewline: new Uint8Array([0x0A, 0x00]),
+		concat: concatUint8Array,
+	},
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/transform/validate.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/validate.js
 
 
 
@@ -36867,7 +37047,8 @@ Instead, \`yield\` should either be called with a value, or not be called at all
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/transform/encoding-transform.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/encoding-transform.js
+
 
 
 
@@ -36920,7 +37101,21 @@ const encodingStringFinal = function * (stringDecoder) {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/transform/run-async.js
+/*
+Once the user's transform has run, its string chunks are converted to bytes: by `Transform.push()` with the asynchronous methods, and by `joinToString()` with the synchronous ones. Both use UTF-8, yet the result is then decoded with the `encoding` option, which would corrupt the text when that option is a different text encoding.
+Therefore, those chunks are converted using the `encoding` option beforehand.
+With the `binary` transform option, they are converted with UTF-8 even when the `encoding` option is another text encoding. Otherwise, with synchronous methods, the next transform would receive the string itself, while with asynchronous methods it receives those UTF-8 bytes decoded with the `encoding` option.
+When the `encoding` option is UTF-8, strings round-trip unchanged, so there is nothing to do.
+*/
+const getStringToBytesGenerator = (binary, encoding, skipped) => skipped || encoding === 'utf8'
+	? undefined
+	: {transform: stringToBytesGenerator.bind(undefined, getStringEncoding(binary, encoding))};
+
+const stringToBytesGenerator = function * (stringEncoding, chunk) {
+	yield typeof chunk === 'string' ? bufferToUint8Array(external_node_buffer_.Buffer.from(chunk, stringEncoding)) : chunk;
+};
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/run-async.js
 
 
 // Applies a series of generator functions asynchronously
@@ -36982,7 +37177,7 @@ const identityGenerator = function * (chunk) {
 	yield chunk;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/transform/run-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/run-sync.js
 // Duplicate the code from `run-async.js` but as synchronous functions
 const pushChunksSync = (getChunksSync, getChunksArguments, transformStream, done) => {
 	try {
@@ -37034,7 +37229,8 @@ const run_sync_identityGenerator = function * (chunk) {
 	yield chunk;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/transform/generator.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/generator.js
+
 
 
 
@@ -37064,7 +37260,13 @@ Transform an array of generator functions into a `Transform` stream.
 */
 const generatorToStream = ({
 	value,
-	value: {transform, final, writableObjectMode, readableObjectMode},
+	value: {
+		transform,
+		final,
+		binary,
+		writableObjectMode,
+		readableObjectMode,
+	},
 	optionName,
 }, {encoding}) => {
 	const state = {};
@@ -37087,6 +37289,8 @@ const generatorToStream = ({
 		writableHighWaterMark: (0,external_node_stream_.getDefaultHighWaterMark)(writableObjectMode),
 		readableObjectMode,
 		readableHighWaterMark: (0,external_node_stream_.getDefaultHighWaterMark)(readableObjectMode),
+		// A string written to the stream is converted to bytes with this encoding, which `getEncodingTransformGenerator()` then decodes with the `encoding` option
+		defaultEncoding: getStringEncoding(binary, encoding),
 		transform(chunk, encoding, done) {
 			transformMethod([chunk, generators, 0], this, done);
 		},
@@ -37129,11 +37333,14 @@ const addInternalGenerators = (
 			preserveNewlines,
 			readableObjectMode,
 			state,
+			encoding,
 		}),
+		getStringToBytesGenerator(binary, encoding, readableObjectMode),
 	].filter(Boolean);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/io/input-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/input-sync.js
+
 
 
 
@@ -37161,13 +37368,15 @@ const addInputOptionSync = (fileDescriptors, fdNumber, options) => {
 		throw new TypeError(`Only the \`stdin\` option, not \`${optionName}\`, can be ${TYPE_TO_MESSAGE[type]} with synchronous methods.`);
 	}
 
-	const allContents = allStdioItems.map(({contents}) => contents);
-	const transformedContents = allContents.map(contents => applySingleInputGeneratorsSync(contents, stdioItems));
-	options.input = joinToUint8Array(transformedContents);
+	// All input sources are merged into a single list of chunks, like asynchronous methods merge input streams, so that transforms receive a single stream of data: line splitting spans all sources and `final` runs only once.
+	// Files are read lazily, so that a read failure is reported like any other early error
+	const chunks = allStdioItems.flatMap(({contents}) => typeof contents === 'function' ? contents() : contents);
+	options.input = applyInputGeneratorsSync(chunks, stdioItems, options.encoding);
 };
 
-const applySingleInputGeneratorsSync = (contents, stdioItems) => {
-	const newContents = runGeneratorsSync(contents, stdioItems, 'utf8', true);
+const applyInputGeneratorsSync = (chunks, stdioItems, encoding) => {
+	// Input transforms use UTF-8 with text encodings, since those only apply to the output
+	const newContents = runGeneratorsSync(chunks, stdioItems, getInputEncoding(encoding), true);
 	validateSerializable(newContents);
 	return joinToUint8Array(newContents);
 };
@@ -37179,7 +37388,8 @@ const validateSerializable = newContents => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/verbose/output.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/output.js
+
 
 
 
@@ -37227,8 +37437,9 @@ const logLinesSync = (linesArray, fdNumber, verboseInfo) => {
 //    For example, `subprocess.stdout.pipe(process.stdin)` would print each line twice.
 //  - When chaining subprocesses with `subprocess.pipe(otherSubprocess)`, only the last one should print its output.
 // Detecting whether `.pipe()` is impossible without monkey-patching it, so we use the following undocumented property.
+// The pipe into `subprocess.all` is done by Execa itself, so it only counts when `subprocess.all` is itself piped, e.g. `subprocess.all.pipe(process.stdout)`.
 // This is not a critical behavior since changes of the following property would only make `verbose` more verbose.
-const isPipingStream = stream => stream._readableState.pipes.length > 0;
+const isPipingStream = stream => stream._readableState.pipes.some(pipe => !isAllStream(pipe) || isPipingStream(pipe));
 
 // When `verbose` is `full`, print stdout|stderr
 const logLine = (line, fdNumber, verboseInfo) => {
@@ -37241,7 +37452,8 @@ const logLine = (line, fdNumber, verboseInfo) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/io/output-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/output-sync.js
+
 
 
 
@@ -37251,39 +37463,41 @@ const logLine = (line, fdNumber, verboseInfo) => {
 
 
 // Apply `stdout`/`stderr` options, after spawning, in sync mode
-const transformOutputSync = ({fileDescriptors, syncResult: {output}, options, isMaxBuffer, verboseInfo}) => {
-	if (output === null) {
-		return {output: Array.from({length: 3})};
-	}
-
-	const state = {};
+const transformOutputSync = ({fileDescriptors, syncResult, options, verboseInfo}) => {
+	const output = syncResult.output ?? getSpawnFailureOutput(options);
 	const outputFiles = new Set();
+	// Transforms, `verbose` and file writes apply to a single file descriptor each, so their errors must not affect the other ones
+	const errors = [];
 	const transformedOutput = output.map((result, fdNumber) =>
 		transformOutputResultSync({
 			result,
 			fileDescriptors,
 			fdNumber,
-			state,
+			errors,
 			outputFiles,
-			isMaxBuffer,
 			verboseInfo,
 		}, options));
-	return {output: transformedOutput, ...state};
+	return {output: transformedOutput, error: errors.find(error => error !== undefined)};
 };
 
+// When the subprocess fails to spawn, `spawnSync()` returns no output. Like with asynchronous methods, each piped output is empty instead.
+// This is the output `spawnSync()` returns when the subprocess succeeds without printing anything: `stdin` and non-piped file descriptors are `null`. Input pipes on other file descriptors cannot be used with synchronous methods.
+const getSpawnFailureOutput = ({stdio}) => stdio.map((stdioOption, fdNumber) => fdNumber !== 0 && stdioOption === 'pipe' ? new Uint8Array() : null);
+
 const transformOutputResultSync = (
-	{result, fileDescriptors, fdNumber, state, outputFiles, isMaxBuffer, verboseInfo},
+	{result, fileDescriptors, fdNumber, errors, outputFiles, verboseInfo},
 	{buffer, encoding, lines, stripFinalNewline, maxBuffer},
 ) => {
 	if (result === null) {
 		return;
 	}
 
-	const truncatedResult = truncateMaxBufferSync(result, isMaxBuffer, maxBuffer);
+	const truncatedResult = truncateMaxBufferSync(result, fdNumber, {maxBuffer, buffer});
 	const uint8ArrayResult = bufferToUint8Array(truncatedResult);
 	const {stdioItems, objectMode} = fileDescriptors[fdNumber];
-	const chunks = runOutputGeneratorsSync([uint8ArrayResult], stdioItems, encoding, state);
-	const {serializedResult, finalResult = serializedResult} = serializeChunks({
+	// Empty output must not be passed as a chunk: with a binary encoding, no line is split, so transforms would wrongly run on it
+	const {chunks, error: transformError} = runOutputGeneratorsSync(uint8ArrayResult.length === 0 ? [] : [uint8ArrayResult], stdioItems, encoding);
+	const {serializedResult, finalResult} = serializeChunks({
 		chunks,
 		objectMode,
 		encoding,
@@ -37292,61 +37506,61 @@ const transformOutputResultSync = (
 		fdNumber,
 	});
 
-	logOutputSync({
+	const logError = logOutputSync({
 		serializedResult,
 		fdNumber,
-		state,
 		verboseInfo,
 		encoding,
 		stdioItems,
 		objectMode,
 	});
 
+	const error = transformError ?? logError;
+	errors.push(error);
+
 	const returnedResult = buffer[fdNumber] ? finalResult : undefined;
 
 	try {
-		if (state.error === undefined) {
-			writeToFiles(serializedResult, stdioItems, outputFiles);
+		if (error === undefined) {
+			writeToFiles(chunks, stdioItems, outputFiles);
 		}
 
 		return returnedResult;
-	} catch (error) {
-		state.error = error;
+	} catch (writeError) {
+		errors.push(writeError);
 		return returnedResult;
 	}
 };
 
 // Applies transform generators to `stdout`/`stderr`
-const runOutputGeneratorsSync = (chunks, stdioItems, encoding, state) => {
+const runOutputGeneratorsSync = (chunks, stdioItems, encoding) => {
 	try {
-		return runGeneratorsSync(chunks, stdioItems, encoding, false);
+		// `error` is set, so that a polluted `Object.prototype.error` is not read when destructuring
+		return {chunks: runGeneratorsSync(chunks, stdioItems, encoding, false), error: undefined};
 	} catch (error) {
-		state.error = error;
-		return chunks;
+		return {chunks, error};
 	}
 };
 
 // The contents is converted to three stages:
-//  - serializedResult: used when the target is a file path/URL or a file descriptor (including 'inherit')
+//  - serializedResult: used by `verbose`
 //  - finalResult/returnedResult: returned as `result.std*`
 const serializeChunks = ({chunks, objectMode, encoding, lines, stripFinalNewline, fdNumber}) => {
 	if (objectMode) {
-		return {serializedResult: chunks};
+		return {serializedResult: chunks, finalResult: chunks};
 	}
 
 	if (encoding === 'buffer') {
-		return {serializedResult: joinToUint8Array(chunks)};
+		const serializedResult = joinToUint8Array(chunks);
+		return {serializedResult, finalResult: serializedResult};
 	}
 
 	const serializedResult = joinToString(chunks, encoding);
-	if (lines[fdNumber]) {
-		return {serializedResult, finalResult: splitLinesSync(serializedResult, !stripFinalNewline[fdNumber], objectMode)};
-	}
-
-	return {serializedResult};
+	const finalResult = lines[fdNumber] ? splitLinesSync(serializedResult, !stripFinalNewline[fdNumber], objectMode) : serializedResult;
+	return {serializedResult, finalResult};
 };
 
-const logOutputSync = ({serializedResult, fdNumber, state, verboseInfo, encoding, stdioItems, objectMode}) => {
+const logOutputSync = ({serializedResult, fdNumber, verboseInfo, encoding, stdioItems, objectMode}) => {
 	if (!shouldLogOutput({
 		stdioItems,
 		encoding,
@@ -37361,60 +37575,93 @@ const logOutputSync = ({serializedResult, fdNumber, state, verboseInfo, encoding
 	try {
 		logLinesSync(linesArray, fdNumber, verboseInfo);
 	} catch (error) {
-		state.error ??= error;
+		return error;
 	}
 };
 
 // When the `std*` target is a file path/URL or a file descriptor
-const writeToFiles = (serializedResult, stdioItems, outputFiles) => {
+// Object mode cannot be used with those targets.
+const writeToFiles = (chunks, stdioItems, outputFiles) => {
 	const fileItems = stdioItems.filter(({type}) => FILE_TYPES.has(type));
-	for (const {path, append} of fileItems) {
-		const pathString = typeof path === 'string' ? path : path.toString();
-		if (append || outputFiles.has(pathString)) {
-			(0,external_node_fs_namespaceObject.appendFileSync)(path, serializedResult);
-		} else {
-			outputFiles.add(pathString);
-			(0,external_node_fs_namespaceObject.writeFileSync)(path, serializedResult);
+	if (fileItems.length === 0) {
+		return;
+	}
+
+	// Like with asynchronous methods, the bytes are written as is, not the text decoded with the `encoding` option, which would change them
+	const contents = joinToUint8Array(chunks);
+	const writtenPaths = new Set();
+
+	for (const stdioItem of fileItems) {
+		const {type, append} = stdioItem;
+		// A `filePath` and a `fileUrl` can target the same file, so they must share the same key
+		const path = type === 'fileNumber' ? stdioItem.path : getFileTarget(stdioItem);
+
+		// A single file descriptor can target the same file twice, e.g. `stdout: [{file}, {file}]`.
+		// Its output is a single stream, so it must only be written once.
+		if (writtenPaths.has(path)) {
+			continue;
 		}
+
+		writtenPaths.add(path);
+		// Like with asynchronous methods, when several file descriptors target the same file, the first one decides whether it is appended to
+		if (append || outputFiles.has(path)) {
+			(0,external_node_fs_namespaceObject.appendFileSync)(path, contents);
+		} else {
+			(0,external_node_fs_namespaceObject.writeFileSync)(path, contents);
+		}
+
+		outputFiles.add(path);
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/resolve/all-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/resolve/all-sync.js
 
 
+
+
+// The file descriptors which `result.all` interleaves. Those are the ones with an output, like with the `all` stream.
+const getAllSyncFds = ([, stdout, stderr]) => [
+	...(stdout === undefined ? [] : [1]),
+	...(stderr === undefined ? [] : [2]),
+];
 
 // Retrieve `result.all` with synchronous methods
-const getAllSync = ([, stdout, stderr], options) => {
+const getAllSync = ([, stdout, stderr], allFds, options) => {
 	if (!options.all) {
 		return;
 	}
 
 	if (stdout === undefined) {
-		return stderr;
+		return splitAllLines(stderr, allFds, options);
 	}
 
 	if (stderr === undefined) {
-		return stdout;
+		return splitAllLines(stdout, allFds, options);
 	}
 
-	if (Array.isArray(stdout)) {
-		return Array.isArray(stderr)
-			? [...stdout, ...stderr]
-			: [...stdout, stripNewline(stderr, options, 'all')];
+	// Like asynchronous methods, `all` is split into lines as soon as the `lines` option applies to either file descriptor.
+	// A file descriptor which uses the `lines` option is already split with its own `stripFinalNewline` value, like `result.stdout` and `result.stderr` are. The other one is split with the `stripFinalNewline` value of `result.all`.
+	// This differs from asynchronous methods, which cannot tell which file descriptor the merged output's last newline belongs to.
+	if (hasLines(options)) {
+		return [splitAllLines(stdout, allFds, options), splitAllLines(stderr, allFds, options)].flat();
 	}
 
-	if (Array.isArray(stderr)) {
-		return [stripNewline(stdout, options, 'all'), ...stderr];
+	// Without the `lines` option, arrays can only come from object mode, which does not apply to the other file descriptor
+	if (Array.isArray(stdout) || Array.isArray(stderr)) {
+		return [stdout, stderr].flat();
 	}
 
-	if (isUint8Array(stdout) && isUint8Array(stderr)) {
-		return concatUint8Arrays([stdout, stderr]);
-	}
-
-	return `${stdout}${stderr}`;
+	return isUint8Array(stdout) && isUint8Array(stderr) ? concatUint8Arrays([stdout, stderr]) : `${stdout}${stderr}`;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/resolve/exit-async.js
+const hasLines = ({lines}) => Boolean(lines[1] || lines[2]);
+
+// Each file descriptor is either already split into lines, or is a string which still needs to be split
+const splitAllLines = (value, allFds, options) => value === undefined || Array.isArray(value) || !hasLines(options)
+	? value
+	: splitLinesSync(value, !getStripFinalNewline(options.stripFinalNewline, 'all', allFds), false);
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/resolve/exit-async.js
 
 
 
@@ -37470,16 +37717,24 @@ const isSubprocessErrorExit = (exitCode, signal) => exitCode === undefined && si
 // When the subprocess fails due to a non-0 exit code or to a signal termination
 const isFailedExit = (exitCode, signal) => exitCode !== 0 || signal !== null;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/resolve/exit-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/resolve/exit-sync.js
 
 
 
 
 // Retrieve exit code, signal name and error information, with synchronous methods
-const getExitResultSync = ({error, status: exitCode, signal, output}, {maxBuffer}) => {
-	const resultError = getResultError(error, exitCode, signal);
-	const isTimedOut = resultError?.code === 'ETIMEDOUT';
-	const isMaxBuffer = isMaxBufferSync(resultError, output, maxBuffer);
+const getExitResultSync = ({error, status: exitCode, signal, output}, {maxBuffer, buffer}) => {
+	const initialError = getResultError(error, exitCode, signal);
+	const isTimedOut = initialError?.code === 'ETIMEDOUT';
+	// A file descriptor over its `maxBuffer` does not stop the subprocess, so the timeout that did is reported instead. That file descriptor is still truncated.
+	const {resultError, isMaxBuffer} = isTimedOut
+		? {resultError: initialError, isMaxBuffer: false}
+		: handleMaxBufferSync({
+			resultError: initialError,
+			output,
+			maxBuffer,
+			buffer,
+		});
 	return {
 		resultError,
 		exitCode,
@@ -37497,7 +37752,7 @@ const getResultError = (error, exitCode, signal) => {
 	return isFailedExit(exitCode, signal) ? new DiscardedError() : undefined;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/methods/main-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/main-sync.js
 
 
 
@@ -37552,7 +37807,8 @@ const normalizeSyncOptions = options => options.node && !options.ipc ? {...optio
 
 // Options validation logic specific to sync methods
 const validateSyncOptions = ({ipc, ipcInput, detached, cancelSignal, killDescendants}) => {
-	if (ipcInput) {
+	// Any value can be sent over IPC, including falsy ones, so only `undefined` means the option is not set
+	if (ipcInput !== undefined) {
 		throwInvalidSyncOption('ipcInput');
 	}
 
@@ -37596,11 +37852,11 @@ const spawnSubprocessSync = ({file, commandArguments, options, command, escapedC
 		fileDescriptors,
 		syncResult,
 		options,
-		isMaxBuffer,
 		verboseInfo,
 	});
 	const stdio = output.map((stdioOutput, fdNumber) => stripNewline(stdioOutput, options, fdNumber));
-	const all = stripNewline(getAllSync(output, options), options, 'all');
+	const allFds = getAllSyncFds(output);
+	const all = stripNewline(getAllSync(output, allFds, options), options, 'all', allFds);
 	return getSyncResult({
 		error,
 		exitCode,
@@ -37620,7 +37876,8 @@ const runSubprocessSync = ({file, commandArguments, options, command, escapedCom
 	try {
 		addInputOptionsSync(fileDescriptors, options);
 		const normalizedOptions = normalizeSpawnSyncOptions(options);
-		return (0,external_node_child_process_namespaceObject.spawnSync)(...concatenateShell(file, commandArguments, normalizedOptions));
+		// Keep the null prototype, otherwise a polluted `Object.prototype.failed` would make the result look like an early error
+		return {__proto__: null, ...(0,external_node_child_process_namespaceObject.spawnSync)(...concatenateShell(file, commandArguments, normalizedOptions))};
 	} catch (error) {
 		return makeEarlyError({
 			error,
@@ -37666,7 +37923,8 @@ const getSyncResult = ({error, exitCode, signal, timedOut, isMaxBuffer, stdio, a
 		isSync: true,
 	});
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/ipc/get-one.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/get-one.js
+
 
 
 
@@ -37675,7 +37933,8 @@ const getSyncResult = ({error, exitCode, signal, timedOut, isMaxBuffer, stdio, a
 const internalGetOneMessageOptions = Symbol('internalGetOneMessageOptions');
 
 // Like `[sub]process.once('message')` but promise-based
-const getOneMessage = ({anyProcess, channel, isSubprocess, ipc}, options = {}) => {
+const getOneMessage = ({anyProcess, channel, isSubprocess, ipc}, rawOptions) => {
+	const options = copyOptions(rawOptions);
 	const {reference = true, filter} = options;
 	const {signal} = options[internalGetOneMessageOptions] ?? {};
 
@@ -37755,7 +38014,8 @@ const throwOnStrictError = async (ipcEmitter, isSubprocess, {signal}) => {
 	throw getStrictResponseError(error, isSubprocess);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/ipc/get-each.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/get-each.js
+
 
 
 
@@ -37764,7 +38024,8 @@ const throwOnStrictError = async (ipcEmitter, isSubprocess, {signal}) => {
 const internalGetEachMessageOptions = Symbol('internalGetEachMessageOptions');
 
 // Like `[sub]process.on('message')` but promise-based
-const getEachMessage = (subprocessInfo, options = {}) => {
+const getEachMessage = (subprocessInfo, rawOptions) => {
+	const options = copyOptions(rawOptions);
 	const {reference = true} = options;
 	// Internal callers can stop the IPC listener without exposing cancellation or pipe-awaiting options as public API.
 	const {signal, shouldAwait = !subprocessInfo.isSubprocess} = options[internalGetEachMessageOptions] ?? {};
@@ -37870,7 +38131,7 @@ const throwIfStrictError = ({error}) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/ipc/methods.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/methods.js
 
 
 
@@ -37922,7 +38183,8 @@ const getIpcMethods = (anyProcess, isSubprocess, ipc, waitProcess = anyProcess) 
 	}),
 });
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/return/early-error.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/return/early-error.js
+
 
 
 
@@ -37935,32 +38197,25 @@ const handleEarlyError = ({error, command, escapedCommand, fileDescriptors, opti
 	cleanupCustomStreams(fileDescriptors);
 
 	const subprocess = new external_node_child_process_namespaceObject.ChildProcess();
+	// The subprocess never spawned, so there is no process to signal.
+	// `ChildProcess.prototype.kill()` would signal the current process group instead, since its process id is `0`.
+	subprocess.kill = () => false;
 	const all = createDummyStreams(subprocess, fileDescriptors);
 
-	const earlyError = makeEarlyError({
+	const promise = handleDummyPromise({
 		error,
 		command,
 		escapedCommand,
 		fileDescriptors,
 		options,
 		startTime,
-		isSync: false,
+		verboseInfo,
 	});
-	const promise = handleDummyPromise(earlyError, verboseInfo, options);
 	return {
 		subprocess,
 		promise,
 		all: options.all ? all : undefined,
-		convertedStreams: {
-			readable,
-			writable,
-			duplex,
-			readableStream,
-			writableStream,
-			transformStream,
-			iterable,
-			[Symbol.asyncIterator]: iterable,
-		},
+		convertedStreams: getConvertedStreams(promise),
 	};
 };
 
@@ -37986,17 +38241,61 @@ const createDummyStream = () => {
 	return stream;
 };
 
-const readable = () => new external_node_stream_.Readable({read() {}});
-const writable = () => new external_node_stream_.Writable({write() {}});
-const duplex = () => new external_node_stream_.Duplex({read() {}, write() {}});
-const readableStream = () => external_node_stream_.Readable.toWeb(readable());
-const writableStream = () => external_node_stream_.Writable.toWeb(writable());
-const transformStream = () => external_node_stream_.Duplex.toWeb(duplex());
-const iterable = async function * () {};
+// The subprocess never started, so those streams have no contents.
+// Like when the subprocess did start, they end once its promise resolves, or error with its error, as opposed to hanging forever.
+const getConvertedStreams = promise => {
+	const waitForPromise = async () => {
+		await promise;
+	};
 
-const handleDummyPromise = async (error, verboseInfo, options) => handleResult(error, verboseInfo, options);
+	const endReadable = function () {
+		(0,external_node_util_.callbackify)(waitForPromise)(error => {
+			if (error) {
+				this.destroy(error);
+			} else {
+				this.push(null);
+			}
+		});
+	};
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/stdio/handle-async.js
+	const endWritable = (0,external_node_util_.callbackify)(waitForPromise);
+	const writeWritable = (chunk, encoding, done) => {
+		endWritable(done);
+	};
+
+	const readable = () => new external_node_stream_.Readable({read: endReadable});
+	const writable = () => new external_node_stream_.Writable({write: writeWritable, final: endWritable});
+	const duplex = () => new external_node_stream_.Duplex({read: endReadable, write: writeWritable, final: endWritable});
+	const iterable = () => readable()[Symbol.asyncIterator]();
+
+	return {
+		readable,
+		writable,
+		duplex,
+		readableStream: () => external_node_stream_.Readable.toWeb(readable()),
+		writableStream: () => external_node_stream_.Writable.toWeb(writable()),
+		transformStream: () => external_node_stream_.Duplex.toWeb(duplex()),
+		iterable,
+		[Symbol.asyncIterator]: iterable,
+	};
+};
+
+// `error` is a promise when the spawn error is only emitted on the next tick
+const handleDummyPromise = async ({error, command, escapedCommand, fileDescriptors, options, startTime, verboseInfo}) => {
+	const earlyError = makeEarlyError({
+		error: await error,
+		command,
+		escapedCommand,
+		fileDescriptors,
+		options,
+		startTime,
+		isSync: false,
+	});
+	return handleResult(earlyError, verboseInfo, options);
+};
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/handle-async.js
+
 
 
 
@@ -38027,9 +38326,14 @@ const handle_async_addProperties = {
 	native() {},
 };
 
+// Input transforms use UTF-8 with text encodings, since those only apply to the output
+const generatorToInputStream = (stdioItem, {encoding}) => generatorToStream(stdioItem, {encoding: getInputEncoding(encoding)});
+
 const addPropertiesAsync = {
 	input: {
 		...handle_async_addProperties,
+		generator: generatorToInputStream,
+		asyncGenerator: generatorToInputStream,
 		fileUrl: ({value}) => ({stream: (0,external_node_fs_namespaceObject.createReadStream)(value)}),
 		filePath: ({value: {file}}) => ({stream: (0,external_node_fs_namespaceObject.createReadStream)(file)}),
 		webStream: ({value}) => ({stream: external_node_stream_.Readable.fromWeb(value)}),
@@ -38319,7 +38623,7 @@ const PASSTHROUGH_LISTENERS_COUNT = 2;
 //  - once due to `stream.pipe(passThroughStream)`
 const PASSTHROUGH_LISTENERS_PER_STREAM = 1;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/io/pipeline.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/pipeline.js
 
 
 
@@ -38369,7 +38673,7 @@ const abortSourceStream = source => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/io/output-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/output-async.js
 
 
 
@@ -38455,7 +38759,7 @@ const MAX_LISTENERS_INCREMENT = 2;
 
 ;// CONCATENATED MODULE: external "node:path/win32"
 const win32_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path/win32");
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/terminate/kill-descendants.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/terminate/kill-descendants.js
 
 
 
@@ -38467,7 +38771,7 @@ const kill_descendants_isWindows = external_node_process_namespaceObject.platfor
 // `detached` argument passed to `child_process.spawn()`.
 // This is kept separate from the user-facing `detached` option, which must keep its own value,
 // so the `cleanup` behavior is not affected.
-const getSpawnOptions = options => options.killDescendants && !kill_descendants_isWindows
+const getSpawnOptions = options => !kill_descendants_isWindows && options.killDescendants
 	? {...options, detached: true}
 	: options;
 
@@ -38475,17 +38779,33 @@ const getSpawnOptions = options => options.killDescendants && !kill_descendants_
 // With the `killDescendants` option, the signal is sent to the whole process tree.
 const getKillFunction = (subprocess, {killDescendants}) => {
 	if (!killDescendants) {
-		return subprocess.kill.bind(subprocess);
+		/*
+		`subprocess.pid` is `undefined` when the subprocess failed to spawn, e.g. with `ENOENT`.
+		`ChildProcess.prototype.kill()` then signals the current process group, since its process id is `0`.
+		So, like `ChildProcess.prototype.kill()` does for a subprocess which already exited, nothing is signaled and `false` is returned.
+		*/
+		const killSubprocess = subprocess.kill.bind(subprocess);
+		return (...arguments_) => (subprocess.pid === undefined ? false : killSubprocess(...arguments_));
 	}
 
 	const killDescendantsFunction = kill_descendants_isWindows ? killDescendantsWindows : killDescendantsUnix;
 	return killDescendantsFunction.bind(undefined, subprocess);
 };
 
+/*
+Unlike `subprocess.kill()`, signaling a process group or a process tree uses the PID directly, without going through the subprocess' handle. The OS can re-assign that PID once it is not used anymore, and signaling it then would terminate an unrelated process, and on Windows its own descendants too.
+On Unix, a PID stays reserved as long as it is the process group ID of a running process, i.e. as long as any descendant in that group is still running. So signaling the process group after the subprocess exited is still useful, e.g. for the `forceKillAfterDelay` escalation while Execa is waiting on a descendant, or with `subprocess.kill()` to terminate background descendants once the subprocess has settled. Once the whole group exited, the PID can only be signaled if the OS re-assigned it to a new process group leader, which is unlikely, so this is a documented limitation.
+On Windows, there are no process groups: a PID is only reserved while a handle to the process is open, which Node.js closes once the subprocess exits. `taskkill /T` also cannot find the descendants of a process which exited. So the process tree is never signaled once the subprocess exited.
+*/
+const isAbandoned = subprocess => subprocess.pid === undefined
+	|| (kill_descendants_isWindows && hasExited(subprocess));
+
+const hasExited = ({exitCode, signalCode}) => exitCode !== null || signalCode !== null;
+
 // On Unix, the subprocess is its own process group leader (its PGID equals its PID), since it
 // was spawned with `detached: true`. Sending the signal to `-pid` targets the whole group.
 const killDescendantsUnix = (subprocess, signal) => {
-	if (subprocess.pid === undefined) {
+	if (isAbandoned(subprocess)) {
 		return false;
 	}
 
@@ -38504,7 +38824,7 @@ const killDescendantsUnix = (subprocess, signal) => {
 // If `taskkill` is unavailable or fails, the fallback only terminates the direct subprocess.
 // `taskkill` ignores the signal (`/F` terminates the tree).
 const killDescendantsWindows = (subprocess, signal) => {
-	if (subprocess.pid === undefined) {
+	if (isAbandoned(subprocess)) {
 		return false;
 	}
 
@@ -38852,7 +39172,7 @@ load,
  */
 unload, } = signalExitWrap(processOk(mjs_process) ? new SignalExit(mjs_process) : new SignalExitFallback());
 //# sourceMappingURL=index.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/terminate/cleanup.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/terminate/cleanup.js
 
 
 
@@ -38870,7 +39190,7 @@ const cleanupOnExit = (kill, {cleanup, detached}, {signal}) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/convert/concurrent.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/concurrent.js
 
 
 // When using multiple `.readable()`/`.writable()`/`.duplex()`, `final` and `destroy` should wait for other streams
@@ -38905,7 +39225,7 @@ const waitForConcurrentStreams = async ({resolve, promises}, subprocess) => {
 	return !isSubprocessExit;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/io/iterate.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/iterate.js
 
 
 
@@ -39017,17 +39337,15 @@ const getGenerators = ({binary, shouldEncode, encoding, shouldSplit, preserveNew
 	getSplitLinesGenerator(binary, preserveNewlines, !shouldSplit, {}),
 ].filter(Boolean);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/convert/iterable.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/iterable.js
+
 
 
 
 
 // Convert the subprocess to an async iterable
-const createIterable = (subprocess, encoding, {
-	from,
-	binary: binaryOption = false,
-	preserveNewlines = false,
-} = {}) => {
+const createIterable = (subprocess, encoding, options) => {
+	const {from, binary: binaryOption = false, preserveNewlines = false} = copyOptions(options);
 	const binary = binaryOption || BINARY_ENCODINGS.has(encoding);
 	const subprocessStdout = getFromStream(subprocess, from);
 	const onStdoutData = iterateOnSubprocessStream({
@@ -39053,19 +39371,29 @@ const iterateOnStdoutData = async function * (onStdoutData, subprocessStdout, su
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/resolve/wait-stream.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/resolve/wait-stream.js
 
 
 // Wraps `finished(stream)` to handle the following case:
 //  - When the subprocess exits, Node.js automatically calls `subprocess.stdin.destroy()`, which we need to ignore.
 //  - However, we still need to throw if `subprocess.stdin.destroy()` is called before subprocess exit.
-const waitForStream = async (stream, fdNumber, streamInfo, {isSameDirection, stopOnExit = false} = {}) => {
+const waitForStream = async (stream, fdNumber, streamInfo, {
+	isSameDirection,
+	stopOnExit = false,
+	readable = true,
+	writable = true,
+} = {}) => {
 	const state = handleStdinDestroy(stream, streamInfo);
 	const abortController = new AbortController();
 	try {
 		await Promise.race([
 			...(stopOnExit ? [streamInfo.exitPromise] : []),
-			(0,external_node_stream_promises_namespaceObject.finished)(stream, {cleanup: true, signal: abortController.signal}),
+			(0,external_node_stream_promises_namespaceObject.finished)(stream, {
+				cleanup: true,
+				signal: abortController.signal,
+				readable,
+				writable,
+			}),
 		]);
 	} catch (error) {
 		if (!state.stdinCleanedUp) {
@@ -39152,7 +39480,7 @@ const isStreamAbort = error => error?.code === 'ERR_STREAM_PREMATURE_CLOSE';
 // Therefore, we ignore this error on writable streams.
 const isStreamEpipe = error => error?.code === 'EPIPE';
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/convert/shared.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/shared.js
 
 
 
@@ -39200,7 +39528,8 @@ const destroyOtherStream = (stream, isOpen, error) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/convert/readable.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/readable.js
+
 
 
 
@@ -39211,7 +39540,8 @@ const destroyOtherStream = (stream, isOpen, error) => {
 
 
 // Create a `Readable` stream that forwards from `stdout` and awaits the subprocess
-const createReadable = ({subprocess, concurrentStreams, encoding}, {from, binary: binaryOption = true, preserveNewlines = true} = {}) => {
+const createReadable = ({subprocess, concurrentStreams, encoding}, options) => {
+	const {from, binary: binaryOption = true, preserveNewlines = true} = copyOptions(options);
 	const binary = binaryOption || BINARY_ENCODINGS.has(encoding);
 	const {subprocessStdout, waitReadableDestroy} = getSubprocessStdout(subprocess, from, concurrentStreams);
 	const {readableEncoding, readableObjectMode, readableHighWaterMark} = getReadableOptions(subprocessStdout, binary);
@@ -39326,7 +39656,7 @@ const destroyOtherReadable = (stream, error) => {
 	destroyOtherStream(stream, stream.readable, error);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/convert/web.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/web.js
 
 
 // Web stream versions of `subprocess.readable()`, `subprocess.writable()` and `subprocess.duplex()`.
@@ -39335,7 +39665,8 @@ const createReadableStream = (subprocess, readableOptions) => external_node_stre
 const createWritableStream = (subprocess, writableOptions) => external_node_stream_.Writable.toWeb(subprocess.writable(writableOptions));
 const createTransformStream = (subprocess, duplexOptions) => external_node_stream_.Duplex.toWeb(subprocess.duplex(duplexOptions));
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/pipe/pipe-arguments.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/pipe/pipe-arguments.js
+
 
 
 
@@ -39368,11 +39699,18 @@ const normalizePipeArguments = ({source, sourcePromise, boundOptions, createNest
 };
 
 const getDestinationStream = (boundOptions, createNested, pipeArguments) => {
+	let destinationInfo;
+
 	try {
-		const {
-			destination,
-			pipeOptions: {from, to, unpipeSignal} = {},
-		} = getDestination(boundOptions, createNested, ...pipeArguments);
+		destinationInfo = getDestination(boundOptions, createNested, ...pipeArguments);
+	} catch (error) {
+		return {destinationError: error};
+	}
+
+	const {destination, pipeOptions} = destinationInfo;
+
+	try {
+		const {from, to, unpipeSignal} = copyOptions(pipeOptions);
 		const destinationStream = getToStream(destination, to);
 		return {
 			destination,
@@ -39381,8 +39719,22 @@ const getDestinationStream = (boundOptions, createNested, pipeArguments) => {
 			unpipeSignal,
 		};
 	} catch (error) {
+		abortDestination(destination, pipeArguments[0]);
 		return {destinationError: error};
 	}
+};
+
+/*
+The destination has already been spawned at that point, since the `to` option is validated afterwards.
+When Execa spawned it, nothing else can end it, so it is terminated. Otherwise, it would keep running, e.g. waiting for its `stdin` forever, which also prevents the current process from exiting. A destination passed by the user is left to them.
+In both cases, its error must be handled, otherwise it becomes an unhandled rejection which crashes the current process, e.g. with `source.pipe(execa('command'), {to: 'fd9'})`. This does not prevent the user from awaiting it.
+*/
+const abortDestination = (destination, firstArgument) => {
+	if (destination !== firstArgument) {
+		destination.kill();
+	}
+
+	destination.catch(() => {});
 };
 
 // Piping subprocesses can use three syntaxes:
@@ -39417,7 +39769,16 @@ const getDestination = (boundOptions, createNested, firstArgument, ...pipeArgume
 };
 
 // Force `stdin: 'pipe'` with the destination subprocess
-const mapDestinationArguments = ({options}) => ({options: {...options, stdin: 'pipe', piped: true}});
+const mapDestinationArguments = ({options}) => ({
+	options: {
+		__proto__: null,
+		...options,
+		// Piping writes to the destination's `stdin`, which is forced even if the user set another value.
+		// However, `stdin` cannot be combined with `stdio`, which is needed for `to: 'fd3'` and higher.
+		...((options.stdio === undefined) && {stdin: 'pipe'}),
+		piped: true,
+	},
+});
 
 const getSourceStream = (source, from) => {
 	try {
@@ -39428,7 +39789,7 @@ const getSourceStream = (source, from) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/pipe/throw.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/pipe/throw.js
 
 
 
@@ -39469,10 +39830,12 @@ const getPipeArgumentsError = ({sourceStream, sourceError, destinationStream, de
 		return destinationError;
 	}
 
-	if (sourceError !== undefined) {
-		endDestinationStream(destinationStream);
-		return sourceError;
+	if (sourceError === undefined) {
+		return;
 	}
+
+	endDestinationStream(destinationStream);
+	return sourceError;
 };
 
 // Specific error return value when passing invalid arguments to `subprocess.pipe()` or when using `unpipeSignal`
@@ -39488,7 +39851,7 @@ const createNonCommandError = ({error, fileDescriptors, sourceOptions, startTime
 
 const PIPE_COMMAND_MESSAGE = 'source.pipe(destination)';
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/pipe/sequence.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/pipe/sequence.js
 // Like Bash, we await both subprocesses. This is unlike some other shells which only await the destination subprocess.
 // Like Bash with the `pipefail` option, if either subprocess fails, the whole pipe fails.
 // Like Bash, if both subprocesses fail, we return the failure of the destination.
@@ -39514,7 +39877,7 @@ const waitForBothSubprocesses = async subprocessPromises => {
 	return destinationResult;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/pipe/streaming.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/pipe/streaming.js
 
 
 
@@ -39567,7 +39930,7 @@ const SOURCE_LISTENERS_PER_PIPE = 2;
 // Those are added by `finished()` in `cleanupMergedStreamsMap()`
 const DESTINATION_LISTENERS_PER_PIPE = 1;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/pipe/abort.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/pipe/abort.js
 
 
 
@@ -39589,7 +39952,7 @@ const unpipeOnSignalAbort = async (unpipeSignal, {sourceStream, mergedStream, fi
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/pipe/setup.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/pipe/setup.js
 
 
 
@@ -39992,7 +40355,7 @@ const stringMethods = {
 	finalize: getContentsProperty,
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/io/contents.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/contents.js
 
 
 
@@ -40002,7 +40365,7 @@ const stringMethods = {
 
 
 // Retrieve `result.stdout|stderr|all|stdio[*]`
-const getStreamOutput = async ({stream, onStreamEnd, fdNumber, encoding, buffer, maxBuffer, lines, allMixed, stripFinalNewline, verboseInfo, streamInfo}) => {
+const getStreamOutput = async ({stream, onStreamEnd, fdNumber, encoding, buffer, maxBuffer, lines, allMixed, stripFinalNewline, allFds, verboseInfo, streamInfo}) => {
 	const logPromise = logOutputAsync({
 		stream,
 		onStreamEnd,
@@ -40018,7 +40381,7 @@ const getStreamOutput = async ({stream, onStreamEnd, fdNumber, encoding, buffer,
 		return;
 	}
 
-	const stripFinalNewlineValue = getStripFinalNewline(stripFinalNewline, fdNumber);
+	const stripFinalNewlineValue = getStripFinalNewline(stripFinalNewline, fdNumber, allFds);
 	const iterable = iterateForResult({
 		stream,
 		onStreamEnd,
@@ -40077,11 +40440,7 @@ const contents_getStreamContents = async ({stream, stream: {readableObjectMode},
 			return await getStreamAsArray(iterable, {maxBuffer});
 		}
 
-		if (encoding === 'buffer') {
-			return new Uint8Array(await getStreamAsArrayBuffer(iterable, {maxBuffer}));
-		}
-
-		return await getStreamAsString(iterable, {maxBuffer});
+		return encoding === 'buffer' ? new Uint8Array(await getStreamAsArrayBuffer(iterable, {maxBuffer})) : (await getStreamAsString(iterable, {maxBuffer}));
 	} catch (error) {
 		return handleBufferedData(handleMaxBuffer({
 			error,
@@ -40106,11 +40465,12 @@ const getBufferedData = async streamPromise => {
 };
 
 // Ensure we are returning Uint8Arrays when using `encoding: 'buffer'`
-const handleBufferedData = ({bufferedData}) => isArrayBuffer(bufferedData)
-	? new Uint8Array(bufferedData)
-	: bufferedData;
+// The error might be any value thrown by the `verbose` function, including `null` or `undefined`
+const handleBufferedData = error => isArrayBuffer(error?.bufferedData)
+	? new Uint8Array(error.bufferedData)
+	: error?.bufferedData;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/resolve/stdio.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/resolve/stdio.js
 
 
 
@@ -40129,7 +40489,7 @@ const waitForStdioStreams = ({subprocess, encoding, buffer, maxBuffer, lines, st
 }));
 
 // Read the contents of `subprocess.std*` or `subprocess.all` and|or wait for its completion
-const waitForSubprocessStream = async ({stream, fdNumber, encoding, buffer, maxBuffer, lines, allMixed, stripFinalNewline, verboseInfo, streamInfo}) => {
+const waitForSubprocessStream = async ({stream, fdNumber, encoding, buffer, maxBuffer, lines, allMixed, stripFinalNewline, allFds, verboseInfo, streamInfo}) => {
 	if (!stream) {
 		return;
 	}
@@ -40151,6 +40511,7 @@ const waitForSubprocessStream = async ({stream, fdNumber, encoding, buffer, maxB
 			lines,
 			allMixed,
 			stripFinalNewline,
+			allFds,
 			verboseInfo,
 			streamInfo,
 		}),
@@ -40159,27 +40520,51 @@ const waitForSubprocessStream = async ({stream, fdNumber, encoding, buffer, maxB
 	return output;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/resolve/all-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/resolve/all-async.js
+
+
 
 
 
 // `all` interleaves `stdout` and `stderr`
-const makeAllStream = ({stdout, stderr}, {all}) => all && (stdout || stderr)
-	? mergeStreams([stdout, stderr].filter(Boolean))
-	: undefined;
+const makeAllStream = ({stdout, stderr}, {all}) => {
+	if (!all) {
+		return;
+	}
+
+	const fileDescriptors = [[stdout, 1], [stderr, 2]].filter(([stream]) => stream);
+	return fileDescriptors.length === 0 ? undefined : setAllStream(mergeStreams(fileDescriptors.map(([stream]) => stream)));
+};
+
+// The file descriptors which `result.all` contains, which the `all` options must follow
+// Unlike `subprocess.all`, this excludes the file descriptors which are not buffered, since their output is not included
+const getAllFds = ({stdout, stderr}, [, bufferStdout, bufferStderr]) => [
+	...(stdout !== null && bufferStdout ? [1] : []),
+	...(stderr !== null && bufferStderr ? [2] : []),
+];
 
 // Read the contents of `subprocess.all` and|or wait for its completion
-const waitForAllStream = ({subprocess, all, encoding, buffer, maxBuffer, lines, stripFinalNewline, verboseInfo, streamInfo}) => waitForSubprocessStream({
-	...getAllStream(subprocess, all, buffer),
-	fdNumber: 'all',
-	encoding,
-	maxBuffer: maxBuffer[1] + maxBuffer[2],
-	lines: lines[1] || lines[2],
-	allMixed: getAllMixed(subprocess, all),
-	stripFinalNewline,
-	verboseInfo,
-	streamInfo,
-});
+const waitForAllStream = ({subprocess, all, encoding, buffer, maxBuffer, lines, stripFinalNewline, verboseInfo, streamInfo}) => {
+	const {stream, buffer: bufferAll, drainedStream} = getAllStream(subprocess, all, buffer);
+	return Promise.all([
+		waitForSubprocessStream({
+			stream,
+			buffer: bufferAll,
+			fdNumber: 'all',
+			encoding,
+			maxBuffer: maxBuffer[1] + maxBuffer[2],
+			lines: lines[1] || lines[2],
+			allFds: getAllFds(subprocess, buffer),
+			allMixed: getAllMixed(subprocess, all),
+			stripFinalNewline,
+			verboseInfo,
+			streamInfo,
+		}),
+		// When only one of the two file descriptors is buffered, its stream is read instead of the merged one.
+		// The merged one is then drained, otherwise it would apply backpressure on that file descriptor and hang the subprocess.
+		drainedStream === undefined ? undefined : resumeStream(drainedStream),
+	]).then(([output]) => output);
+};
 
 const getAllStream = ({stdout, stderr}, all, [, bufferStdout, bufferStderr]) => {
 	const buffer = bufferStdout || bufferStderr;
@@ -40187,15 +40572,15 @@ const getAllStream = ({stdout, stderr}, all, [, bufferStdout, bufferStderr]) => 
 		return {stream: all, buffer};
 	}
 
+	if (!all) {
+		return {stream: undefined, buffer};
+	}
+
 	if (!bufferStdout) {
-		return {stream: stderr, buffer};
+		return {stream: stderr, buffer, drainedStream: all};
 	}
 
-	if (!bufferStderr) {
-		return {stream: stdout, buffer};
-	}
-
-	return {stream: all, buffer};
+	return bufferStderr ? {stream: all, buffer} : {stream: stdout, buffer, drainedStream: all};
 };
 
 // When `subprocess.stdout` is in objectMode but not `subprocess.stderr` (or the opposite), we need to use both:
@@ -40207,7 +40592,7 @@ const getAllMixed = ({stdout, stderr}, all) => all
 	&& stderr
 	&& stdout.readableObjectMode !== stderr.readableObjectMode;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/verbose/ipc.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/ipc.js
 
 
 
@@ -40224,7 +40609,7 @@ const logIpcOutput = (message, verboseInfo) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/ipc/buffer-messages.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/buffer-messages.js
 
 
 
@@ -40246,6 +40631,8 @@ const waitForIpcOutput = async ({
 	const isVerbose = shouldLogIpc(verboseInfo);
 	const buffer = getFdSpecificValue(bufferArray, 'ipc');
 	const maxBuffer = getFdSpecificValue(maxBufferArray, 'ipc');
+	// A throwing `verbose` function must not prevent the following messages from being buffered
+	const logErrors = [];
 
 	for await (const message of loopOnMessages({
 		anyProcess: subprocess,
@@ -40256,13 +40643,21 @@ const waitForIpcOutput = async ({
 		reference: true,
 	})) {
 		if (buffer) {
-			checkIpcMaxBuffer(subprocess, ipcOutput, maxBuffer);
+			checkIpcMaxBuffer(ipcOutput, maxBuffer);
 			ipcOutput.push(message);
 		}
 
 		if (isVerbose) {
-			logIpcOutput(message, verboseInfo);
+			try {
+				logIpcOutput(message, verboseInfo);
+			} catch (error) {
+				logErrors.push(error);
+			}
 		}
+	}
+
+	if (logErrors.length > 0) {
+		throw logErrors[0];
 	}
 
 	return ipcOutput;
@@ -40273,7 +40668,7 @@ const getBufferedIpcOutput = async (ipcOutputPromise, ipcOutput) => {
 	return ipcOutput;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/resolve/wait-subprocess.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/resolve/wait-subprocess.js
 
 
 
@@ -40412,11 +40807,13 @@ const waitForOriginalStreams = (originalStreams, subprocess, streamInfo) =>
 // Some `stdin`/`stdout`/`stderr` options create a stream, e.g. when passing a file path.
 // The `.pipe()` method automatically ends that stream when `subprocess` ends.
 // This makes sure we wait for the completion of those streams, in order to catch any error.
-const waitForCustomStreamsEnd = (fileDescriptors, streamInfo) => fileDescriptors.flatMap(({stdioItems}, fdNumber) => stdioItems
+const waitForCustomStreamsEnd = (fileDescriptors, streamInfo) => fileDescriptors.flatMap(({stdioItems, direction}, fdNumber) => stdioItems
 	.filter(({value, stream = value}) => isStream(stream, {checkOpen: false}) && !isStandardStream(stream))
 	.map(({type, value, stream = value}) => waitForStream(stream, fdNumber, streamInfo, {
 		isSameDirection: TRANSFORM_TYPES.has(type),
 		stopOnExit: type === 'native',
+		// Output streams are destinations which are handed back to the user: waiting for their readable side would mean waiting for the user to consume them.
+		readable: direction !== 'output' || TRANSFORM_TYPES.has(type),
 	})));
 
 // Fails when the subprocess emits an `error` event
@@ -40425,7 +40822,8 @@ const throwOnSubprocessError = async (subprocess, {signal}) => {
 	throw error;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/convert/writable.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/writable.js
+
 
 
 
@@ -40434,7 +40832,8 @@ const throwOnSubprocessError = async (subprocess, {signal}) => {
 
 
 // Create a `Writable` stream that forwards to `stdin` and awaits the subprocess
-const createWritable = ({subprocess, concurrentStreams}, {to} = {}) => {
+const createWritable = ({subprocess, concurrentStreams}, options) => {
+	const {to} = copyOptions(options);
 	const {subprocessStdin, waitWritableFinal, waitWritableDestroy} = getSubprocessStdin(subprocess, to, concurrentStreams);
 	const writable = new external_node_stream_.Writable({
 		...getWritableMethods(subprocessStdin, subprocess, waitWritableFinal),
@@ -40523,17 +40922,20 @@ const shouldUseSubprocessError = error => error === undefined
 // When `writable` aborts/errors, do the same on `subprocess.stdin`
 const onWritableDestroy = async ({subprocessStdin, subprocess, waitWritableFinal, waitWritableDestroy}, error) => {
 	await waitForConcurrentStreams(waitWritableFinal, subprocess);
-	if (await waitForConcurrentStreams(waitWritableDestroy, subprocess)) {
-		destroyOtherWritable(subprocessStdin, error);
-		await waitForSubprocess(subprocess, error);
+	if (!await waitForConcurrentStreams(waitWritableDestroy, subprocess)) {
+		return;
 	}
+
+	destroyOtherWritable(subprocessStdin, error);
+	await waitForSubprocess(subprocess, error);
 };
 
 const destroyOtherWritable = (stream, error) => {
 	destroyOtherStream(stream, stream.writable, error);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/convert/duplex.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/duplex.js
+
 
 
 
@@ -40541,7 +40943,8 @@ const destroyOtherWritable = (stream, error) => {
 
 
 // Create a `Duplex` stream combining both `subprocess.readable()` and `subprocess.writable()`
-const createDuplex = ({subprocess, concurrentStreams, encoding}, {from, to, binary: binaryOption = true, preserveNewlines = true} = {}) => {
+const createDuplex = ({subprocess, concurrentStreams, encoding}, options) => {
+	const {from, to, binary: binaryOption = true, preserveNewlines = true} = copyOptions(options);
 	const binary = binaryOption || BINARY_ENCODINGS.has(encoding);
 	const {subprocessStdout, waitReadableDestroy} = getSubprocessStdout(subprocess, from, concurrentStreams);
 	const {subprocessStdin, waitWritableFinal, waitWritableDestroy} = getSubprocessStdin(subprocess, to, concurrentStreams);
@@ -40593,7 +40996,7 @@ const onDuplexDestroy = async ({subprocessStdout, subprocessStdin, subprocess, w
 	]);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/convert/add.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/add.js
 
 
 
@@ -40614,11 +41017,11 @@ const addConvertedStreams = (subprocess, {encoding}) => {
 	subprocess[Symbol.asyncIterator] = createIterable.bind(undefined, subprocess, encoding, {});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/methods/promise.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/promise.js
 // The return value is a native Promise with Execa-specific properties.
 const mergePromise = (promise, properties) => Object.assign(promise, properties);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/methods/main-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/main-async.js
 
 
 
@@ -40695,13 +41098,9 @@ const handleAsyncArguments = (rawFile, rawArguments, rawOptions) => {
 
 // Options normalization logic specific to async methods.
 // Prevent passing the `timeout` option directly to `child_process.spawn()`.
-const handleAsyncOptions = ({timeout, signal, ...options}) => {
-	if (signal !== undefined) {
-		throw new TypeError('The "signal" option has been renamed to "cancelSignal" instead.');
-	}
-
-	return {...options, timeoutDuration: timeout};
-};
+// The `signal` option is not passed either: it has been renamed and is validated in `normalizeOptions()`, for both synchronous and asynchronous methods.
+// The returned object keeps a null prototype, otherwise a polluted `Object.prototype` would inject option values.
+const handleAsyncOptions = ({timeout, signal, ...options}) => ({__proto__: null, ...options, timeoutDuration: timeout});
 
 const spawnSubprocessAsync = ({file, commandArguments, options, startTime, verboseInfo, command, escapedCommand, fileDescriptors}) => {
 	let subprocess;
@@ -40710,6 +41109,20 @@ const spawnSubprocessAsync = ({file, commandArguments, options, startTime, verbo
 	} catch (error) {
 		return handleEarlyError({
 			error,
+			command,
+			escapedCommand,
+			fileDescriptors,
+			options,
+			startTime,
+			verboseInfo,
+		});
+	}
+
+	// With EMFILE or ENFILE, Node.js does not create the subprocess' streams, and emits the error on the next tick instead of throwing it.
+	// The listener must be added right away, or that error would crash the current process.
+	if (subprocess.stdio === undefined) {
+		return handleEarlyError({
+			error: (0,external_node_events_.once)(subprocess, 'error').then(([error]) => error),
 			command,
 			escapedCommand,
 			fileDescriptors,
@@ -40809,7 +41222,7 @@ const handlePromise = async ({subprocess, kill, all: allStream, options, startTi
 	onInternalError.resolve();
 
 	const stdio = stdioResults.map((stdioResult, fdNumber) => stripNewline(stdioResult, options, fdNumber));
-	const all = stripNewline(allResult, options, 'all');
+	const all = stripNewline(allResult, options, 'all', getAllFds(subprocess, options.buffer));
 	const result = getAsyncResult({
 		errorInfo,
 		exitCode,
@@ -40826,7 +41239,7 @@ const handlePromise = async ({subprocess, kill, all: allStream, options, startTi
 	return handleResult(result, verboseInfo, options);
 };
 
-const getAsyncResult = ({errorInfo, exitCode, signal, stdio, all, ipcOutput, context, options, command, escapedCommand, startTime}) => 'error' in errorInfo
+const getAsyncResult = ({errorInfo, exitCode, signal, stdio, all, ipcOutput, context, options, command, escapedCommand, startTime}) => Object.hasOwn(errorInfo, 'error')
 	? makeError({
 		error: errorInfo.error,
 		command,
@@ -40855,7 +41268,7 @@ const getAsyncResult = ({errorInfo, exitCode, signal, stdio, all, ipcOutput, con
 		startTime,
 	});
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/methods/bind.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/bind.js
 
 
 
@@ -40867,20 +41280,14 @@ const mergeOptions = (boundOptions, options) => {
 		optionName,
 		mergeOption(optionName, safeBoundOptions[optionName], optionValue),
 	]));
-	return {...safeBoundOptions, ...mergedOptions};
+	return {__proto__: null, ...safeBoundOptions, ...mergedOptions};
 };
 
-const mergeOption = (optionName, boundOptionValue, optionValue) => {
-	if (DEEP_OPTIONS.has(optionName) && isPlainObject(boundOptionValue) && isPlainObject(optionValue)) {
-		return {...boundOptionValue, ...optionValue};
-	}
-
-	return optionValue;
-};
+const mergeOption = (optionName, boundOptionValue, optionValue) => DEEP_OPTIONS.has(optionName) && isPlainObject(boundOptionValue) && isPlainObject(optionValue) ? {...boundOptionValue, ...optionValue} : optionValue;
 
 const DEEP_OPTIONS = new Set(['env', ...FD_SPECIFIC_OPTIONS]);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/methods/create.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/create.js
 
 
 
@@ -40933,10 +41340,12 @@ const parseArguments = ({mapArguments, firstArgument, nextArguments, deepOptions
 		: [firstArgument, ...nextArguments];
 	const [initialFile, initialArguments, initialOptions] = normalizeParameters(...callArguments);
 	const mergedOptions = mergeOptions(mergeOptions(deepOptions, boundOptions), initialOptions);
+	// `mapArguments()` returns a plain object, so its result is read from a null-prototype copy.
+	// Otherwise a polluted `Object.prototype` would replace every option, or switch the execution mode.
 	const {
 		options = mergedOptions,
 		isSync = false,
-	} = mapArguments({options: mergedOptions});
+	} = {__proto__: null, ...mapArguments({options: mergedOptions})};
 	return {
 		file: initialFile,
 		commandArguments: initialArguments,
@@ -40945,7 +41354,7 @@ const parseArguments = ({mapArguments, firstArgument, nextArguments, deepOptions
 	};
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/lib/methods/script.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/script.js
 // Sets `$.sync` and `$.s`
 const setScriptSync = (boundExeca, createNested, boundOptions) => {
 	boundExeca.sync = createNested(mapScriptSync, boundOptions);
@@ -40959,7 +41368,7 @@ const mapScriptAsync = ({options}) => getScriptOptions(options);
 const mapScriptSync = ({options}) => ({...getScriptOptions(options), isSync: true});
 
 // `$` is like `execa` but with script-friendly options: `{stdin: 'inherit', preferLocal: true}`
-const getScriptOptions = options => ({options: {...getScriptStdinOption(options), ...options}});
+const getScriptOptions = options => ({options: {__proto__: null, ...getScriptStdinOption(options), ...options}});
 
 const getScriptStdinOption = ({input, inputFile, stdio}) => input === undefined && inputFile === undefined && stdio === undefined
 	? {stdin: 'inherit'}
@@ -40969,7 +41378,7 @@ const getScriptStdinOption = ({input, inputFile, stdio}) => input === undefined 
 // However, some options (like `stdin: 'inherit'`) would create issues with piping, i.e. cannot be deep.
 const deepScriptOptions = {preferLocal: true};
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.0.1/node_modules/execa/index.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/index.js
 
 
 
