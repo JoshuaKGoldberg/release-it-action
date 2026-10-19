@@ -56,7 +56,7 @@ const http = __importStar(__nccwpck_require__(8611));
 const https = __importStar(__nccwpck_require__(5692));
 const pm = __importStar(__nccwpck_require__(568));
 const tunnel = __importStar(__nccwpck_require__(7013));
-const undici_1 = __nccwpck_require__(9162);
+const undici_1 = __nccwpck_require__(9309);
 var HttpCodes;
 (function (HttpCodes) {
     HttpCodes[HttpCodes["OK"] = 200] = "OK";
@@ -2302,33 +2302,33 @@ exports.debug = debug; // for test
 
 /***/ }),
 
-/***/ 9162:
+/***/ 9309:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const Client = __nccwpck_require__(147)
-const Dispatcher = __nccwpck_require__(8789)
-const Pool = __nccwpck_require__(5530)
-const BalancedPool = __nccwpck_require__(9571)
-const Agent = __nccwpck_require__(591)
-const ProxyAgent = __nccwpck_require__(874)
-const EnvHttpProxyAgent = __nccwpck_require__(6375)
-const RetryAgent = __nccwpck_require__(1052)
-const errors = __nccwpck_require__(5581)
-const util = __nccwpck_require__(7198)
+const Client = __nccwpck_require__(7140)
+const Dispatcher = __nccwpck_require__(5030)
+const Pool = __nccwpck_require__(2921)
+const BalancedPool = __nccwpck_require__(9390)
+const Agent = __nccwpck_require__(4586)
+const ProxyAgent = __nccwpck_require__(3747)
+const EnvHttpProxyAgent = __nccwpck_require__(6920)
+const RetryAgent = __nccwpck_require__(9089)
+const errors = __nccwpck_require__(9934)
+const util = __nccwpck_require__(8529)
 const { InvalidArgumentError } = errors
-const api = __nccwpck_require__(2101)
-const buildConnector = __nccwpck_require__(1646)
-const MockClient = __nccwpck_require__(3635)
-const MockAgent = __nccwpck_require__(1647)
-const MockPool = __nccwpck_require__(6490)
-const mockErrors = __nccwpck_require__(8159)
-const RetryHandler = __nccwpck_require__(6378)
-const { getGlobalDispatcher, setGlobalDispatcher } = __nccwpck_require__(931)
-const DecoratorHandler = __nccwpck_require__(3457)
-const RedirectHandler = __nccwpck_require__(2636)
-const createRedirectInterceptor = __nccwpck_require__(5766)
+const api = __nccwpck_require__(7998)
+const buildConnector = __nccwpck_require__(951)
+const MockClient = __nccwpck_require__(8570)
+const MockAgent = __nccwpck_require__(8444)
+const MockPool = __nccwpck_require__(3927)
+const mockErrors = __nccwpck_require__(9654)
+const RetryHandler = __nccwpck_require__(7877)
+const { getGlobalDispatcher, setGlobalDispatcher } = __nccwpck_require__(4498)
+const DecoratorHandler = __nccwpck_require__(4606)
+const RedirectHandler = __nccwpck_require__(3669)
+const createRedirectInterceptor = __nccwpck_require__(7327)
 
 Object.assign(Dispatcher.prototype, api)
 
@@ -2346,10 +2346,10 @@ module.exports.DecoratorHandler = DecoratorHandler
 module.exports.RedirectHandler = RedirectHandler
 module.exports.createRedirectInterceptor = createRedirectInterceptor
 module.exports.interceptors = {
-  redirect: __nccwpck_require__(5008),
-  retry: __nccwpck_require__(2480),
-  dump: __nccwpck_require__(9414),
-  dns: __nccwpck_require__(8897)
+  redirect: __nccwpck_require__(910),
+  retry: __nccwpck_require__(2503),
+  dump: __nccwpck_require__(7407),
+  dns: __nccwpck_require__(6814)
 }
 
 module.exports.buildConnector = buildConnector
@@ -2411,7 +2411,7 @@ function makeDispatcher (fn) {
 module.exports.setGlobalDispatcher = setGlobalDispatcher
 module.exports.getGlobalDispatcher = getGlobalDispatcher
 
-const fetchImpl = (__nccwpck_require__(5120).fetch)
+const fetchImpl = (__nccwpck_require__(8263).fetch)
 module.exports.fetch = async function fetch (init, options = undefined) {
   try {
     return await fetchImpl(init, options)
@@ -2423,39 +2423,39 @@ module.exports.fetch = async function fetch (init, options = undefined) {
     throw err
   }
 }
-module.exports.Headers = __nccwpck_require__(3810).Headers
-module.exports.Response = __nccwpck_require__(9753).Response
-module.exports.Request = __nccwpck_require__(1565).Request
-module.exports.FormData = __nccwpck_require__(3732).FormData
+module.exports.Headers = __nccwpck_require__(3257).Headers
+module.exports.Response = __nccwpck_require__(1328).Response
+module.exports.Request = __nccwpck_require__(6398).Request
+module.exports.FormData = __nccwpck_require__(7653).FormData
 module.exports.File = globalThis.File ?? (__nccwpck_require__(4573).File)
-module.exports.FileReader = __nccwpck_require__(6389).FileReader
+module.exports.FileReader = __nccwpck_require__(5660).FileReader
 
-const { setGlobalOrigin, getGlobalOrigin } = __nccwpck_require__(6537)
+const { setGlobalOrigin, getGlobalOrigin } = __nccwpck_require__(8712)
 
 module.exports.setGlobalOrigin = setGlobalOrigin
 module.exports.getGlobalOrigin = getGlobalOrigin
 
-const { CacheStorage } = __nccwpck_require__(7351)
-const { kConstruct } = __nccwpck_require__(291)
+const { CacheStorage } = __nccwpck_require__(2118)
+const { kConstruct } = __nccwpck_require__(8404)
 
 // Cache & CacheStorage are tightly coupled with fetch. Even if it may run
 // in an older version of Node, it doesn't have any use without fetch.
 module.exports.caches = new CacheStorage(kConstruct)
 
-const { deleteCookie, getCookies, getSetCookies, setCookie } = __nccwpck_require__(5171)
+const { deleteCookie, getCookies, getSetCookies, setCookie } = __nccwpck_require__(6748)
 
 module.exports.deleteCookie = deleteCookie
 module.exports.getCookies = getCookies
 module.exports.getSetCookies = getSetCookies
 module.exports.setCookie = setCookie
 
-const { parseMIMEType, serializeAMimeType } = __nccwpck_require__(5610)
+const { parseMIMEType, serializeAMimeType } = __nccwpck_require__(5192)
 
 module.exports.parseMIMEType = parseMIMEType
 module.exports.serializeAMimeType = serializeAMimeType
 
-const { CloseEvent, ErrorEvent, MessageEvent } = __nccwpck_require__(9770)
-module.exports.WebSocket = __nccwpck_require__(3180).WebSocket
+const { CloseEvent, ErrorEvent, MessageEvent } = __nccwpck_require__(659)
+module.exports.WebSocket = __nccwpck_require__(9708).WebSocket
 module.exports.CloseEvent = CloseEvent
 module.exports.ErrorEvent = ErrorEvent
 module.exports.MessageEvent = MessageEvent
@@ -2471,18 +2471,18 @@ module.exports.MockPool = MockPool
 module.exports.MockAgent = MockAgent
 module.exports.mockErrors = mockErrors
 
-const { EventSource } = __nccwpck_require__(5100)
+const { EventSource } = __nccwpck_require__(9207)
 
 module.exports.EventSource = EventSource
 
 
 /***/ }),
 
-/***/ 340:
+/***/ 2917:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const { addAbortListener } = __nccwpck_require__(7198)
-const { RequestAbortedError } = __nccwpck_require__(5581)
+const { addAbortListener } = __nccwpck_require__(8529)
+const { RequestAbortedError } = __nccwpck_require__(9934)
 
 const kListener = Symbol('kListener')
 const kSignal = Symbol('kSignal')
@@ -2542,16 +2542,16 @@ module.exports = {
 
 /***/ }),
 
-/***/ 3530:
+/***/ 4505:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 const assert = __nccwpck_require__(4589)
 const { AsyncResource } = __nccwpck_require__(6698)
-const { InvalidArgumentError, SocketError } = __nccwpck_require__(5581)
-const util = __nccwpck_require__(7198)
-const { addSignal, removeSignal } = __nccwpck_require__(340)
+const { InvalidArgumentError, SocketError } = __nccwpck_require__(9934)
+const util = __nccwpck_require__(8529)
+const { addSignal, removeSignal } = __nccwpck_require__(2917)
 
 class ConnectHandler extends AsyncResource {
   constructor (opts, callback) {
@@ -2657,7 +2657,7 @@ module.exports = connect
 
 /***/ }),
 
-/***/ 3792:
+/***/ 7329:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -2671,10 +2671,10 @@ const {
   InvalidArgumentError,
   InvalidReturnValueError,
   RequestAbortedError
-} = __nccwpck_require__(5581)
-const util = __nccwpck_require__(7198)
+} = __nccwpck_require__(9934)
+const util = __nccwpck_require__(8529)
 const { AsyncResource } = __nccwpck_require__(6698)
-const { addSignal, removeSignal } = __nccwpck_require__(340)
+const { addSignal, removeSignal } = __nccwpck_require__(2917)
 const assert = __nccwpck_require__(4589)
 
 const kResume = Symbol('resume')
@@ -2915,16 +2915,16 @@ module.exports = pipeline
 
 /***/ }),
 
-/***/ 7253:
+/***/ 3850:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 const assert = __nccwpck_require__(4589)
-const { Readable } = __nccwpck_require__(1546)
-const { InvalidArgumentError, RequestAbortedError } = __nccwpck_require__(5581)
-const util = __nccwpck_require__(7198)
-const { getResolveErrorBodyCallback } = __nccwpck_require__(8917)
+const { Readable } = __nccwpck_require__(2036)
+const { InvalidArgumentError, RequestAbortedError } = __nccwpck_require__(9934)
+const util = __nccwpck_require__(8529)
+const { getResolveErrorBodyCallback } = __nccwpck_require__(8352)
 const { AsyncResource } = __nccwpck_require__(6698)
 
 class RequestHandler extends AsyncResource {
@@ -3136,18 +3136,18 @@ module.exports.RequestHandler = RequestHandler
 
 /***/ }),
 
-/***/ 9798:
+/***/ 2159:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 const assert = __nccwpck_require__(4589)
 const { finished, PassThrough } = __nccwpck_require__(7075)
-const { InvalidArgumentError, InvalidReturnValueError } = __nccwpck_require__(5581)
-const util = __nccwpck_require__(7198)
-const { getResolveErrorBodyCallback } = __nccwpck_require__(8917)
+const { InvalidArgumentError, InvalidReturnValueError } = __nccwpck_require__(9934)
+const util = __nccwpck_require__(8529)
+const { getResolveErrorBodyCallback } = __nccwpck_require__(8352)
 const { AsyncResource } = __nccwpck_require__(6698)
-const { addSignal, removeSignal } = __nccwpck_require__(340)
+const { addSignal, removeSignal } = __nccwpck_require__(2917)
 
 class StreamHandler extends AsyncResource {
   constructor (opts, factory, callback) {
@@ -3363,15 +3363,15 @@ module.exports = stream
 
 /***/ }),
 
-/***/ 6900:
+/***/ 3827:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { InvalidArgumentError, SocketError } = __nccwpck_require__(5581)
+const { InvalidArgumentError, SocketError } = __nccwpck_require__(9934)
 const { AsyncResource } = __nccwpck_require__(6698)
-const util = __nccwpck_require__(7198)
-const { addSignal, removeSignal } = __nccwpck_require__(340)
+const util = __nccwpck_require__(8529)
+const { addSignal, removeSignal } = __nccwpck_require__(2917)
 const assert = __nccwpck_require__(4589)
 
 class UpgradeHandler extends AsyncResource {
@@ -3478,21 +3478,21 @@ module.exports = upgrade
 
 /***/ }),
 
-/***/ 2101:
+/***/ 7998:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-module.exports.request = __nccwpck_require__(7253)
-module.exports.stream = __nccwpck_require__(9798)
-module.exports.pipeline = __nccwpck_require__(3792)
-module.exports.upgrade = __nccwpck_require__(6900)
-module.exports.connect = __nccwpck_require__(3530)
+module.exports.request = __nccwpck_require__(3850)
+module.exports.stream = __nccwpck_require__(2159)
+module.exports.pipeline = __nccwpck_require__(7329)
+module.exports.upgrade = __nccwpck_require__(3827)
+module.exports.connect = __nccwpck_require__(4505)
 
 
 /***/ }),
 
-/***/ 1546:
+/***/ 2036:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 // Ported from https://github.com/nodejs/undici/pull/907
@@ -3501,9 +3501,9 @@ module.exports.connect = __nccwpck_require__(3530)
 
 const assert = __nccwpck_require__(4589)
 const { Readable } = __nccwpck_require__(7075)
-const { RequestAbortedError, NotSupportedError, InvalidArgumentError, AbortError } = __nccwpck_require__(5581)
-const util = __nccwpck_require__(7198)
-const { ReadableStreamFrom } = __nccwpck_require__(7198)
+const { RequestAbortedError, NotSupportedError, InvalidArgumentError, AbortError } = __nccwpck_require__(9934)
+const util = __nccwpck_require__(8529)
+const { ReadableStreamFrom } = __nccwpck_require__(8529)
 
 const kConsume = Symbol('kConsume')
 const kReading = Symbol('kReading')
@@ -3884,15 +3884,15 @@ module.exports = { Readable: BodyReadable, chunksDecode }
 
 /***/ }),
 
-/***/ 8917:
+/***/ 8352:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const assert = __nccwpck_require__(4589)
 const {
   ResponseStatusCodeError
-} = __nccwpck_require__(5581)
+} = __nccwpck_require__(9934)
 
-const { chunksDecode } = __nccwpck_require__(1546)
+const { chunksDecode } = __nccwpck_require__(2036)
 const CHUNK_LIMIT = 128 * 1024
 
 async function getResolveErrorBodyCallback ({ callback, body, contentType, statusCode, statusMessage, headers }) {
@@ -3984,16 +3984,16 @@ module.exports = {
 
 /***/ }),
 
-/***/ 1646:
+/***/ 951:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 const net = __nccwpck_require__(7030)
 const assert = __nccwpck_require__(4589)
-const util = __nccwpck_require__(7198)
-const { InvalidArgumentError, ConnectTimeoutError } = __nccwpck_require__(5581)
-const timers = __nccwpck_require__(21)
+const util = __nccwpck_require__(8529)
+const { InvalidArgumentError, ConnectTimeoutError } = __nccwpck_require__(9934)
+const timers = __nccwpck_require__(4486)
 
 function noop () {}
 
@@ -4231,7 +4231,7 @@ module.exports = buildConnector
 
 /***/ }),
 
-/***/ 7425:
+/***/ 4448:
 /***/ ((module) => {
 
 
@@ -4356,7 +4356,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 9344:
+/***/ 1509:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -4565,7 +4565,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 5581:
+/***/ 9934:
 /***/ ((module) => {
 
 
@@ -4997,7 +4997,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 1393:
+/***/ 6540:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -5005,7 +5005,7 @@ module.exports = {
 const {
   InvalidArgumentError,
   NotSupportedError
-} = __nccwpck_require__(5581)
+} = __nccwpck_require__(9934)
 const assert = __nccwpck_require__(4589)
 const {
   isValidHTTPToken,
@@ -5020,9 +5020,9 @@ const {
   validateHandler,
   getServerName,
   normalizedMethodRecords
-} = __nccwpck_require__(7198)
-const { channels } = __nccwpck_require__(9344)
-const { headerNameLowerCasedRecord } = __nccwpck_require__(7425)
+} = __nccwpck_require__(8529)
+const { channels } = __nccwpck_require__(1509)
+const { headerNameLowerCasedRecord } = __nccwpck_require__(4448)
 
 // Verifies that a given path is valid does not contain control chars \x00 to \x20
 const invalidPathRegex = /[^\u0021-\u00ff]/
@@ -5486,7 +5486,7 @@ module.exports = Request
 
 /***/ }),
 
-/***/ 8573:
+/***/ 5424:
 /***/ ((module) => {
 
 module.exports = {
@@ -5560,7 +5560,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 3698:
+/***/ 8313:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -5568,7 +5568,7 @@ module.exports = {
 const {
   wellknownHeaderNames,
   headerNameLowerCasedRecord
-} = __nccwpck_require__(7425)
+} = __nccwpck_require__(4448)
 
 class TstNode {
   /** @type {any} */
@@ -5719,13 +5719,13 @@ module.exports = {
 
 /***/ }),
 
-/***/ 7198:
+/***/ 8529:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 const assert = __nccwpck_require__(4589)
-const { kDestroyed, kBodyUsed, kListeners, kBody } = __nccwpck_require__(8573)
+const { kDestroyed, kBodyUsed, kListeners, kBody } = __nccwpck_require__(5424)
 const { IncomingMessage } = __nccwpck_require__(7067)
 const stream = __nccwpck_require__(7075)
 const net = __nccwpck_require__(7030)
@@ -5733,9 +5733,9 @@ const { Blob } = __nccwpck_require__(4573)
 const nodeUtil = __nccwpck_require__(7975)
 const { stringify } = __nccwpck_require__(1792)
 const { EventEmitter: EE } = __nccwpck_require__(8474)
-const { InvalidArgumentError } = __nccwpck_require__(5581)
-const { headerNameLowerCasedRecord } = __nccwpck_require__(7425)
-const { tree } = __nccwpck_require__(3698)
+const { InvalidArgumentError } = __nccwpck_require__(9934)
+const { headerNameLowerCasedRecord } = __nccwpck_require__(4448)
+const { tree } = __nccwpck_require__(8313)
 
 const [nodeMajor, nodeMinor] = process.versions.node.split('.').map(v => Number(v))
 
@@ -6445,18 +6445,18 @@ module.exports = {
 
 /***/ }),
 
-/***/ 591:
+/***/ 4586:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { InvalidArgumentError } = __nccwpck_require__(5581)
-const { kClients, kRunning, kClose, kDestroy, kDispatch, kInterceptors } = __nccwpck_require__(8573)
-const DispatcherBase = __nccwpck_require__(5463)
-const Pool = __nccwpck_require__(5530)
-const Client = __nccwpck_require__(147)
-const util = __nccwpck_require__(7198)
-const createRedirectInterceptor = __nccwpck_require__(5766)
+const { InvalidArgumentError } = __nccwpck_require__(9934)
+const { kClients, kRunning, kClose, kDestroy, kDispatch, kInterceptors } = __nccwpck_require__(5424)
+const DispatcherBase = __nccwpck_require__(6870)
+const Pool = __nccwpck_require__(2921)
+const Client = __nccwpck_require__(7140)
+const util = __nccwpck_require__(8529)
+const createRedirectInterceptor = __nccwpck_require__(7327)
 
 const kOnConnect = Symbol('onConnect')
 const kOnDisconnect = Symbol('onDisconnect')
@@ -6473,7 +6473,7 @@ function defaultFactory (origin, opts) {
 }
 
 class Agent extends DispatcherBase {
-  constructor ({ factory = defaultFactory, maxRedirections = 0, connect, ...options } = {}) {
+  constructor ({ factory = defaultFactory, maxRedirections = 0, connect, tls, ...options } = {}) {
     if (typeof factory !== 'function') {
       throw new InvalidArgumentError('factory must be a function.')
     }
@@ -6492,11 +6492,15 @@ class Agent extends DispatcherBase {
       connect = { ...connect }
     }
 
+    if (tls && typeof tls !== 'function') {
+      tls = { ...tls }
+    }
+
     this[kInterceptors] = options.interceptors?.Agent && Array.isArray(options.interceptors.Agent)
       ? options.interceptors.Agent
       : [createRedirectInterceptor({ maxRedirections })]
 
-    this[kOptions] = { ...util.deepClone(options), connect }
+    this[kOptions] = { ...util.deepClone(options), connect, tls }
     this[kOptions].interceptors = options.interceptors
       ? { ...options.interceptors }
       : undefined
@@ -6581,7 +6585,7 @@ module.exports = Agent
 
 /***/ }),
 
-/***/ 9571:
+/***/ 9390:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -6589,7 +6593,7 @@ module.exports = Agent
 const {
   BalancedPoolMissingUpstreamError,
   InvalidArgumentError
-} = __nccwpck_require__(5581)
+} = __nccwpck_require__(9934)
 const {
   PoolBase,
   kClients,
@@ -6597,10 +6601,10 @@ const {
   kAddClient,
   kRemoveClient,
   kGetDispatcher
-} = __nccwpck_require__(8594)
-const Pool = __nccwpck_require__(5530)
-const { kUrl, kInterceptors } = __nccwpck_require__(8573)
-const { parseOrigin } = __nccwpck_require__(7198)
+} = __nccwpck_require__(627)
+const Pool = __nccwpck_require__(2921)
+const { kUrl, kInterceptors } = __nccwpck_require__(5424)
+const { parseOrigin } = __nccwpck_require__(8529)
 const kFactory = Symbol('factory')
 
 const kOptions = Symbol('options')
@@ -6797,7 +6801,7 @@ module.exports = BalancedPool
 
 /***/ }),
 
-/***/ 7711:
+/***/ 3010:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -6805,9 +6809,9 @@ module.exports = BalancedPool
 /* global WebAssembly */
 
 const assert = __nccwpck_require__(4589)
-const util = __nccwpck_require__(7198)
-const { channels } = __nccwpck_require__(9344)
-const timers = __nccwpck_require__(21)
+const util = __nccwpck_require__(8529)
+const { channels } = __nccwpck_require__(1509)
+const timers = __nccwpck_require__(4486)
 const {
   RequestContentLengthMismatchError,
   ResponseContentLengthMismatchError,
@@ -6820,7 +6824,7 @@ const {
   BodyTimeoutError,
   HTTPParserError,
   ResponseExceededMaxSizeError
-} = __nccwpck_require__(5581)
+} = __nccwpck_require__(9934)
 const {
   kUrl,
   kReset,
@@ -6853,9 +6857,9 @@ const {
   kOnError,
   kResume,
   kHTTPContext
-} = __nccwpck_require__(8573)
+} = __nccwpck_require__(5424)
 
-const constants = __nccwpck_require__(7214)
+const constants = __nccwpck_require__(2811)
 const EMPTY_BUF = Buffer.alloc(0)
 const FastBuffer = Buffer[Symbol.species]
 const addListener = util.addListener
@@ -6867,11 +6871,11 @@ const kSocketUsed = Symbol('kSocketUsed')
 let extractBody
 
 async function lazyllhttp () {
-  const llhttpWasmData = process.env.JEST_WORKER_ID ? __nccwpck_require__(9076) : undefined
+  const llhttpWasmData = process.env.JEST_WORKER_ID ? __nccwpck_require__(5381) : undefined
 
   let mod
   try {
-    mod = await WebAssembly.compile(__nccwpck_require__(7388))
+    mod = await WebAssembly.compile(__nccwpck_require__(4823))
   } catch (e) {
     /* istanbul ignore next */
 
@@ -6879,7 +6883,7 @@ async function lazyllhttp () {
     // being enabled, but the occurring of this other error
     // * https://github.com/emscripten-core/emscripten/issues/11495
     // got me to remove that check to avoid breaking Node 12.
-    mod = await WebAssembly.compile(llhttpWasmData || __nccwpck_require__(9076))
+    mod = await WebAssembly.compile(llhttpWasmData || __nccwpck_require__(5381))
   }
 
   return await WebAssembly.instantiate(mod, {
@@ -7529,8 +7533,6 @@ async function connectH1 (client, socket) {
   socket[kParser] = new Parser(client, socket, llhttpInstance)
 
   addListener(socket, 'error', function (err) {
-    assert(err.code !== 'ERR_TLS_CERT_ALTNAME_INVALID')
-
     const parser = this[kParser]
 
     // On Mac OS, we get an ECONNRESET even if there is a full body to be forwarded
@@ -7796,7 +7798,7 @@ function writeH1 (client, request) {
 
   if (util.isFormDataLike(body)) {
     if (!extractBody) {
-      extractBody = (__nccwpck_require__(3334).extractBody)
+      extractBody = (__nccwpck_require__(6455).extractBody)
     }
 
     const [bodyStream, contentType] = extractBody(body)
@@ -8319,7 +8321,7 @@ module.exports = connectH1
 
 /***/ }),
 
-/***/ 914:
+/***/ 1967:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -8327,13 +8329,13 @@ module.exports = connectH1
 const assert = __nccwpck_require__(4589)
 const { errorMonitor } = __nccwpck_require__(8474)
 const { pipeline } = __nccwpck_require__(7075)
-const util = __nccwpck_require__(7198)
+const util = __nccwpck_require__(8529)
 const {
   RequestContentLengthMismatchError,
   RequestAbortedError,
   SocketError,
   InformationalError
-} = __nccwpck_require__(5581)
+} = __nccwpck_require__(9934)
 const {
   kUrl,
   kReset,
@@ -8352,7 +8354,7 @@ const {
   kResume,
   kSize,
   kHTTPContext
-} = __nccwpck_require__(8573)
+} = __nccwpck_require__(5424)
 
 const kOpenStreams = Symbol('open streams')
 
@@ -8460,8 +8462,6 @@ async function connectH2 (client, socket) {
   socket[kHTTP2Session] = session
 
   util.addListener(socket, 'error', function (err) {
-    assert(err.code !== 'ERR_TLS_CERT_ALTNAME_INVALID')
-
     this[kError] = err
 
     this[kClient][kOnError](err)
@@ -8535,8 +8535,6 @@ function resumeH2 (client) {
 }
 
 function onHttp2SessionError (err) {
-  assert(err.code !== 'ERR_TLS_CERT_ALTNAME_INVALID')
-
   this[kSocket][kError] = err
   this[kClient][kOnError](err)
 }
@@ -8762,7 +8760,7 @@ function writeH2 (client, request) {
   let contentLength = util.bodyLength(body)
 
   if (util.isFormDataLike(body)) {
-    extractBody ??= (__nccwpck_require__(3334).extractBody)
+    extractBody ??= (__nccwpck_require__(6455).extractBody)
 
     const [bodyStream, contentType] = extractBody(body)
     headers['content-type'] = contentType
@@ -9122,7 +9120,7 @@ module.exports = connectH2
 
 /***/ }),
 
-/***/ 147:
+/***/ 7140:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 // @ts-check
@@ -9132,16 +9130,16 @@ module.exports = connectH2
 const assert = __nccwpck_require__(4589)
 const net = __nccwpck_require__(7030)
 const http = __nccwpck_require__(7067)
-const util = __nccwpck_require__(7198)
-const { channels } = __nccwpck_require__(9344)
-const Request = __nccwpck_require__(1393)
-const DispatcherBase = __nccwpck_require__(5463)
+const util = __nccwpck_require__(8529)
+const { channels } = __nccwpck_require__(1509)
+const Request = __nccwpck_require__(6540)
+const DispatcherBase = __nccwpck_require__(6870)
 const {
   InvalidArgumentError,
   InformationalError,
   ClientDestroyedError
-} = __nccwpck_require__(5581)
-const buildConnector = __nccwpck_require__(1646)
+} = __nccwpck_require__(9934)
+const buildConnector = __nccwpck_require__(951)
 const {
   kUrl,
   kServerName,
@@ -9183,9 +9181,9 @@ const {
   kHTTPContext,
   kMaxConcurrentStreams,
   kResume
-} = __nccwpck_require__(8573)
-const connectH1 = __nccwpck_require__(7711)
-const connectH2 = __nccwpck_require__(914)
+} = __nccwpck_require__(5424)
+const connectH1 = __nccwpck_require__(3010)
+const connectH2 = __nccwpck_require__(1967)
 let deprecatedInterceptorWarned = false
 
 const kClosedResolve = Symbol('kClosedResolve')
@@ -9234,9 +9232,10 @@ class Client extends DispatcherBase {
     // h2
     maxConcurrentStreams,
     allowH2,
-    webSocket
+    webSocket,
+    eventSource
   } = {}) {
-    super({ webSocket })
+    super({ webSocket, eventSource })
 
     if (keepAlive !== undefined) {
       throw new InvalidArgumentError('unsupported keepAlive, use pipelining=0 instead')
@@ -9492,7 +9491,7 @@ class Client extends DispatcherBase {
   }
 }
 
-const createRedirectInterceptor = __nccwpck_require__(5766)
+const createRedirectInterceptor = __nccwpck_require__(7327)
 
 function onError (client, err) {
   if (
@@ -9752,23 +9751,25 @@ module.exports = Client
 
 /***/ }),
 
-/***/ 5463:
+/***/ 6870:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const Dispatcher = __nccwpck_require__(8789)
+const buffer = __nccwpck_require__(4573)
+const Dispatcher = __nccwpck_require__(5030)
 const {
   ClientDestroyedError,
   ClientClosedError,
   InvalidArgumentError
-} = __nccwpck_require__(5581)
-const { kDestroy, kClose, kClosed, kDestroyed, kDispatch, kInterceptors } = __nccwpck_require__(8573)
+} = __nccwpck_require__(9934)
+const { kDestroy, kClose, kClosed, kDestroyed, kDispatch, kInterceptors } = __nccwpck_require__(5424)
 
 const kOnDestroyed = Symbol('onDestroyed')
 const kOnClosed = Symbol('onClosed')
 const kInterceptedDispatch = Symbol('Intercepted Dispatch')
 const kWebSocketOptions = Symbol('webSocketOptions')
+const kEventSourceOptions = Symbol('eventSourceOptions')
 
 class DispatcherBase extends Dispatcher {
   constructor (opts) {
@@ -9779,12 +9780,19 @@ class DispatcherBase extends Dispatcher {
     this[kClosed] = false
     this[kOnClosed] = []
     this[kWebSocketOptions] = opts?.webSocket ?? {}
+    this[kEventSourceOptions] = opts?.eventSource ?? {}
   }
 
   get webSocketOptions () {
     return {
       maxFragments: this[kWebSocketOptions].maxFragments ?? 131072,
       maxPayloadSize: this[kWebSocketOptions].maxPayloadSize ?? 128 * 1024 * 1024
+    }
+  }
+
+  get eventSourceOptions () {
+    return {
+      maxEventSize: this[kEventSourceOptions].maxEventSize ?? buffer.kStringMaxLength
     }
   }
 
@@ -9958,7 +9966,7 @@ module.exports = DispatcherBase
 
 /***/ }),
 
-/***/ 8789:
+/***/ 5030:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -10030,15 +10038,15 @@ module.exports = Dispatcher
 
 /***/ }),
 
-/***/ 6375:
+/***/ 6920:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const DispatcherBase = __nccwpck_require__(5463)
-const { kClose, kDestroy, kClosed, kDestroyed, kDispatch, kNoProxyAgent, kHttpProxyAgent, kHttpsProxyAgent } = __nccwpck_require__(8573)
-const ProxyAgent = __nccwpck_require__(874)
-const Agent = __nccwpck_require__(591)
+const DispatcherBase = __nccwpck_require__(6870)
+const { kClose, kDestroy, kClosed, kDestroyed, kDispatch, kNoProxyAgent, kHttpProxyAgent, kHttpsProxyAgent } = __nccwpck_require__(5424)
+const ProxyAgent = __nccwpck_require__(3747)
+const Agent = __nccwpck_require__(4586)
 
 const DEFAULT_PORTS = {
   'http:': 80,
@@ -10197,7 +10205,7 @@ module.exports = EnvHttpProxyAgent
 
 /***/ }),
 
-/***/ 5930:
+/***/ 4007:
 /***/ ((module) => {
 
 /* eslint-disable */
@@ -10321,15 +10329,15 @@ module.exports = class FixedQueue {
 
 /***/ }),
 
-/***/ 8594:
+/***/ 627:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const DispatcherBase = __nccwpck_require__(5463)
-const FixedQueue = __nccwpck_require__(5930)
-const { kConnected, kSize, kRunning, kPending, kQueued, kBusy, kFree, kUrl, kClose, kDestroy, kDispatch } = __nccwpck_require__(8573)
-const PoolStats = __nccwpck_require__(6388)
+const DispatcherBase = __nccwpck_require__(6870)
+const FixedQueue = __nccwpck_require__(4007)
+const { kConnected, kSize, kRunning, kPending, kQueued, kBusy, kFree, kUrl, kClose, kDestroy, kDispatch } = __nccwpck_require__(5424)
+const PoolStats = __nccwpck_require__(5871)
 
 const kClients = Symbol('clients')
 const kNeedDrain = Symbol('needDrain')
@@ -10522,10 +10530,10 @@ module.exports = {
 
 /***/ }),
 
-/***/ 6388:
+/***/ 5871:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const { kFree, kConnected, kPending, kQueued, kRunning, kSize } = __nccwpck_require__(8573)
+const { kFree, kConnected, kPending, kQueued, kRunning, kSize } = __nccwpck_require__(5424)
 const kPool = Symbol('pool')
 
 class PoolStats {
@@ -10563,7 +10571,7 @@ module.exports = PoolStats
 
 /***/ }),
 
-/***/ 5530:
+/***/ 2921:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -10574,14 +10582,14 @@ const {
   kNeedDrain,
   kAddClient,
   kGetDispatcher
-} = __nccwpck_require__(8594)
-const Client = __nccwpck_require__(147)
+} = __nccwpck_require__(627)
+const Client = __nccwpck_require__(7140)
 const {
   InvalidArgumentError
-} = __nccwpck_require__(5581)
-const util = __nccwpck_require__(7198)
-const { kUrl, kInterceptors } = __nccwpck_require__(8573)
-const buildConnector = __nccwpck_require__(1646)
+} = __nccwpck_require__(9934)
+const util = __nccwpck_require__(8529)
+const { kUrl, kInterceptors } = __nccwpck_require__(5424)
+const buildConnector = __nccwpck_require__(951)
 
 const kOptions = Symbol('options')
 const kConnections = Symbol('connections')
@@ -10677,19 +10685,19 @@ module.exports = Pool
 
 /***/ }),
 
-/***/ 874:
+/***/ 3747:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { kProxy, kClose, kDestroy, kDispatch, kInterceptors } = __nccwpck_require__(8573)
+const { kProxy, kClose, kDestroy, kDispatch, kInterceptors } = __nccwpck_require__(5424)
 const { URL } = __nccwpck_require__(3136)
-const Agent = __nccwpck_require__(591)
-const Pool = __nccwpck_require__(5530)
-const DispatcherBase = __nccwpck_require__(5463)
-const { InvalidArgumentError, RequestAbortedError, SecureProxyConnectionError } = __nccwpck_require__(5581)
-const buildConnector = __nccwpck_require__(1646)
-const Client = __nccwpck_require__(147)
+const Agent = __nccwpck_require__(4586)
+const Pool = __nccwpck_require__(2921)
+const DispatcherBase = __nccwpck_require__(6870)
+const { InvalidArgumentError, RequestAbortedError, SecureProxyConnectionError } = __nccwpck_require__(9934)
+const buildConnector = __nccwpck_require__(951)
+const Client = __nccwpck_require__(7140)
 
 const kAgent = Symbol('proxy agent')
 const kClient = Symbol('proxy client')
@@ -10958,13 +10966,13 @@ module.exports = ProxyAgent
 
 /***/ }),
 
-/***/ 1052:
+/***/ 9089:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const Dispatcher = __nccwpck_require__(8789)
-const RetryHandler = __nccwpck_require__(6378)
+const Dispatcher = __nccwpck_require__(5030)
+const RetryHandler = __nccwpck_require__(7877)
 
 class RetryAgent extends Dispatcher {
   #agent = null
@@ -11000,7 +11008,7 @@ module.exports = RetryAgent
 
 /***/ }),
 
-/***/ 931:
+/***/ 4498:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -11008,8 +11016,8 @@ module.exports = RetryAgent
 // We include a version number for the Dispatcher API. In case of breaking changes,
 // this version number must be increased to avoid conflicts.
 const globalDispatcher = Symbol.for('undici.globalDispatcher.1')
-const { InvalidArgumentError } = __nccwpck_require__(5581)
-const Agent = __nccwpck_require__(591)
+const { InvalidArgumentError } = __nccwpck_require__(9934)
+const Agent = __nccwpck_require__(4586)
 
 if (getGlobalDispatcher() === undefined) {
   setGlobalDispatcher(new Agent())
@@ -11039,7 +11047,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 3457:
+/***/ 4606:
 /***/ ((module) => {
 
 
@@ -11090,15 +11098,15 @@ module.exports = class DecoratorHandler {
 
 /***/ }),
 
-/***/ 2636:
+/***/ 3669:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const util = __nccwpck_require__(7198)
-const { kBodyUsed } = __nccwpck_require__(8573)
+const util = __nccwpck_require__(8529)
+const { kBodyUsed } = __nccwpck_require__(5424)
 const assert = __nccwpck_require__(4589)
-const { InvalidArgumentError } = __nccwpck_require__(5581)
+const { InvalidArgumentError } = __nccwpck_require__(9934)
 const EE = __nccwpck_require__(8474)
 
 const redirectableStatusCodes = [300, 301, 302, 303, 307, 308]
@@ -11329,20 +11337,20 @@ module.exports = RedirectHandler
 
 /***/ }),
 
-/***/ 6378:
+/***/ 7877:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 const assert = __nccwpck_require__(4589)
 
-const { kRetryHandlerDefaultRetry } = __nccwpck_require__(8573)
-const { RequestRetryError } = __nccwpck_require__(5581)
+const { kRetryHandlerDefaultRetry } = __nccwpck_require__(5424)
+const { RequestRetryError } = __nccwpck_require__(9934)
 const {
   isDisturbed,
   parseHeaders,
   parseRangeHeader,
   wrapRequestBody
-} = __nccwpck_require__(7198)
+} = __nccwpck_require__(8529)
 
 function calculateRetryAfterHeader (retryAfter) {
   const current = Date.now()
@@ -11773,14 +11781,14 @@ module.exports = RetryHandler
 
 /***/ }),
 
-/***/ 8897:
+/***/ 6814:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 const { isIP } = __nccwpck_require__(7030)
 const { lookup } = __nccwpck_require__(610)
-const DecoratorHandler = __nccwpck_require__(3457)
-const { InvalidArgumentError, InformationalError } = __nccwpck_require__(5581)
+const DecoratorHandler = __nccwpck_require__(4606)
+const { InvalidArgumentError, InformationalError } = __nccwpck_require__(9934)
 const maxInt = Math.pow(2, 31) - 1
 
 class DNSInstance {
@@ -12155,14 +12163,14 @@ module.exports = interceptorOpts => {
 
 /***/ }),
 
-/***/ 9414:
+/***/ 7407:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const util = __nccwpck_require__(7198)
-const { InvalidArgumentError, RequestAbortedError } = __nccwpck_require__(5581)
-const DecoratorHandler = __nccwpck_require__(3457)
+const util = __nccwpck_require__(8529)
+const { InvalidArgumentError, RequestAbortedError } = __nccwpck_require__(9934)
+const DecoratorHandler = __nccwpck_require__(4606)
 
 class DumpHandler extends DecoratorHandler {
   #maxSize = 1024 * 1024
@@ -12285,12 +12293,12 @@ module.exports = createDumpInterceptor
 
 /***/ }),
 
-/***/ 5766:
+/***/ 7327:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const RedirectHandler = __nccwpck_require__(2636)
+const RedirectHandler = __nccwpck_require__(3669)
 
 function createRedirectInterceptor ({ maxRedirections: defaultMaxRedirections }) {
   return (dispatch) => {
@@ -12313,11 +12321,11 @@ module.exports = createRedirectInterceptor
 
 /***/ }),
 
-/***/ 5008:
+/***/ 910:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
-const RedirectHandler = __nccwpck_require__(2636)
+const RedirectHandler = __nccwpck_require__(3669)
 
 module.exports = opts => {
   const globalMaxRedirections = opts?.maxRedirections
@@ -12344,11 +12352,11 @@ module.exports = opts => {
 
 /***/ }),
 
-/***/ 2480:
+/***/ 2503:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
-const RetryHandler = __nccwpck_require__(6378)
+const RetryHandler = __nccwpck_require__(7877)
 
 module.exports = globalOpts => {
   return dispatch => {
@@ -12370,13 +12378,13 @@ module.exports = globalOpts => {
 
 /***/ }),
 
-/***/ 7214:
+/***/ 2811:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SPECIAL_HEADERS = exports.HEADER_STATE = exports.MINOR = exports.MAJOR = exports.CONNECTION_TOKEN_CHARS = exports.HEADER_CHARS = exports.TOKEN = exports.STRICT_TOKEN = exports.HEX = exports.URL_CHAR = exports.STRICT_URL_CHAR = exports.USERINFO_CHARS = exports.MARK = exports.ALPHANUM = exports.NUM = exports.HEX_MAP = exports.NUM_MAP = exports.ALPHA = exports.FINISH = exports.H_METHOD_MAP = exports.METHOD_MAP = exports.METHODS_RTSP = exports.METHODS_ICE = exports.METHODS_HTTP = exports.METHODS = exports.LENIENT_FLAGS = exports.FLAGS = exports.TYPE = exports.ERROR = void 0;
-const utils_1 = __nccwpck_require__(2598);
+const utils_1 = __nccwpck_require__(6683);
 // C headers
 var ERROR;
 (function (ERROR) {
@@ -12654,7 +12662,7 @@ exports.SPECIAL_HEADERS = {
 
 /***/ }),
 
-/***/ 9076:
+/***/ 5381:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -12666,7 +12674,7 @@ module.exports = Buffer.from('AGFzbQEAAAABJwdgAX8Bf2ADf39/AX9gAX8AYAJ/fwBgBH9/f3
 
 /***/ }),
 
-/***/ 7388:
+/***/ 4823:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -12678,7 +12686,7 @@ module.exports = Buffer.from('AGFzbQEAAAABJwdgAX8Bf2ADf39/AX9gAX8AYAJ/fwBgBH9/f3
 
 /***/ }),
 
-/***/ 2598:
+/***/ 6683:
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -12699,13 +12707,13 @@ exports.enumToMap = enumToMap;
 
 /***/ }),
 
-/***/ 1647:
+/***/ 8444:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { kClients } = __nccwpck_require__(8573)
-const Agent = __nccwpck_require__(591)
+const { kClients } = __nccwpck_require__(5424)
+const Agent = __nccwpck_require__(4586)
 const {
   kAgent,
   kMockAgentSet,
@@ -12716,14 +12724,14 @@ const {
   kGetNetConnect,
   kOptions,
   kFactory
-} = __nccwpck_require__(2775)
-const MockClient = __nccwpck_require__(3635)
-const MockPool = __nccwpck_require__(6490)
-const { matchValue, buildMockOptions } = __nccwpck_require__(6907)
-const { InvalidArgumentError, UndiciError } = __nccwpck_require__(5581)
-const Dispatcher = __nccwpck_require__(8789)
-const Pluralizer = __nccwpck_require__(6963)
-const PendingInterceptorsFormatter = __nccwpck_require__(8120)
+} = __nccwpck_require__(2104)
+const MockClient = __nccwpck_require__(8570)
+const MockPool = __nccwpck_require__(3927)
+const { matchValue, buildMockOptions } = __nccwpck_require__(7532)
+const { InvalidArgumentError, UndiciError } = __nccwpck_require__(9934)
+const Dispatcher = __nccwpck_require__(5030)
+const Pluralizer = __nccwpck_require__(2492)
+const PendingInterceptorsFormatter = __nccwpck_require__(4955)
 
 class MockAgent extends Dispatcher {
   constructor (opts) {
@@ -12866,14 +12874,14 @@ module.exports = MockAgent
 
 /***/ }),
 
-/***/ 3635:
+/***/ 8570:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 const { promisify } = __nccwpck_require__(7975)
-const Client = __nccwpck_require__(147)
-const { buildMockDispatch } = __nccwpck_require__(6907)
+const Client = __nccwpck_require__(7140)
+const { buildMockDispatch } = __nccwpck_require__(7532)
 const {
   kDispatches,
   kMockAgent,
@@ -12882,10 +12890,10 @@ const {
   kOrigin,
   kOriginalDispatch,
   kConnected
-} = __nccwpck_require__(2775)
-const { MockInterceptor } = __nccwpck_require__(917)
-const Symbols = __nccwpck_require__(8573)
-const { InvalidArgumentError } = __nccwpck_require__(5581)
+} = __nccwpck_require__(2104)
+const { MockInterceptor } = __nccwpck_require__(9478)
+const Symbols = __nccwpck_require__(5424)
+const { InvalidArgumentError } = __nccwpck_require__(9934)
 
 /**
  * MockClient provides an API that extends the Client to influence the mockDispatches.
@@ -12932,12 +12940,12 @@ module.exports = MockClient
 
 /***/ }),
 
-/***/ 8159:
+/***/ 9654:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { UndiciError } = __nccwpck_require__(5581)
+const { UndiciError } = __nccwpck_require__(9934)
 
 const kMockNotMatchedError = Symbol.for('undici.error.UND_MOCK_ERR_MOCK_NOT_MATCHED')
 
@@ -12967,12 +12975,12 @@ module.exports = {
 
 /***/ }),
 
-/***/ 917:
+/***/ 9478:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { getResponseData, buildKey, addMockDispatch } = __nccwpck_require__(6907)
+const { getResponseData, buildKey, addMockDispatch } = __nccwpck_require__(7532)
 const {
   kDispatches,
   kDispatchKey,
@@ -12980,9 +12988,9 @@ const {
   kDefaultTrailers,
   kContentLength,
   kMockDispatch
-} = __nccwpck_require__(2775)
-const { InvalidArgumentError } = __nccwpck_require__(5581)
-const { buildURL } = __nccwpck_require__(7198)
+} = __nccwpck_require__(2104)
+const { InvalidArgumentError } = __nccwpck_require__(9934)
+const { buildURL } = __nccwpck_require__(8529)
 
 /**
  * Defines the scope API for an interceptor reply
@@ -13181,14 +13189,14 @@ module.exports.MockScope = MockScope
 
 /***/ }),
 
-/***/ 6490:
+/***/ 3927:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 const { promisify } = __nccwpck_require__(7975)
-const Pool = __nccwpck_require__(5530)
-const { buildMockDispatch } = __nccwpck_require__(6907)
+const Pool = __nccwpck_require__(2921)
+const { buildMockDispatch } = __nccwpck_require__(7532)
 const {
   kDispatches,
   kMockAgent,
@@ -13197,10 +13205,10 @@ const {
   kOrigin,
   kOriginalDispatch,
   kConnected
-} = __nccwpck_require__(2775)
-const { MockInterceptor } = __nccwpck_require__(917)
-const Symbols = __nccwpck_require__(8573)
-const { InvalidArgumentError } = __nccwpck_require__(5581)
+} = __nccwpck_require__(2104)
+const { MockInterceptor } = __nccwpck_require__(9478)
+const Symbols = __nccwpck_require__(5424)
+const { InvalidArgumentError } = __nccwpck_require__(9934)
 
 /**
  * MockPool provides an API that extends the Pool to influence the mockDispatches.
@@ -13247,7 +13255,7 @@ module.exports = MockPool
 
 /***/ }),
 
-/***/ 2775:
+/***/ 2104:
 /***/ ((module) => {
 
 
@@ -13277,20 +13285,20 @@ module.exports = {
 
 /***/ }),
 
-/***/ 6907:
+/***/ 7532:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { MockNotMatchedError } = __nccwpck_require__(8159)
+const { MockNotMatchedError } = __nccwpck_require__(9654)
 const {
   kDispatches,
   kMockAgent,
   kOriginalDispatch,
   kOrigin,
   kGetNetConnect
-} = __nccwpck_require__(2775)
-const { buildURL } = __nccwpck_require__(7198)
+} = __nccwpck_require__(2104)
+const { buildURL } = __nccwpck_require__(8529)
 const { STATUS_CODES } = __nccwpck_require__(7067)
 const {
   types: {
@@ -13651,7 +13659,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 8120:
+/***/ 4955:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -13701,7 +13709,7 @@ module.exports = class PendingInterceptorsFormatter {
 
 /***/ }),
 
-/***/ 6963:
+/***/ 2492:
 /***/ ((module) => {
 
 
@@ -13737,7 +13745,7 @@ module.exports = class Pluralizer {
 
 /***/ }),
 
-/***/ 21:
+/***/ 4486:
 /***/ ((module) => {
 
 
@@ -14167,20 +14175,20 @@ module.exports = {
 
 /***/ }),
 
-/***/ 872:
+/***/ 9419:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { kConstruct } = __nccwpck_require__(291)
-const { urlEquals, getFieldValues } = __nccwpck_require__(4888)
-const { kEnumerableProperty, isDisturbed } = __nccwpck_require__(7198)
-const { webidl } = __nccwpck_require__(5911)
-const { Response, cloneResponse, fromInnerResponse } = __nccwpck_require__(9753)
-const { Request, fromInnerRequest } = __nccwpck_require__(1565)
-const { kState } = __nccwpck_require__(7361)
-const { fetching } = __nccwpck_require__(5120)
-const { urlIsHttpHttpsScheme, createDeferredPromise, readAllBytes } = __nccwpck_require__(9402)
+const { kConstruct } = __nccwpck_require__(8404)
+const { urlEquals, getFieldValues } = __nccwpck_require__(6893)
+const { kEnumerableProperty, isDisturbed } = __nccwpck_require__(8529)
+const { webidl } = __nccwpck_require__(5162)
+const { Response, cloneResponse, fromInnerResponse } = __nccwpck_require__(1328)
+const { Request, fromInnerRequest } = __nccwpck_require__(6398)
+const { kState } = __nccwpck_require__(6602)
+const { fetching } = __nccwpck_require__(8263)
+const { urlIsHttpHttpsScheme, createDeferredPromise, readAllBytes } = __nccwpck_require__(3095)
 const assert = __nccwpck_require__(4589)
 
 /**
@@ -15033,15 +15041,15 @@ module.exports = {
 
 /***/ }),
 
-/***/ 7351:
+/***/ 2118:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { kConstruct } = __nccwpck_require__(291)
-const { Cache } = __nccwpck_require__(872)
-const { webidl } = __nccwpck_require__(5911)
-const { kEnumerableProperty } = __nccwpck_require__(7198)
+const { kConstruct } = __nccwpck_require__(8404)
+const { Cache } = __nccwpck_require__(9419)
+const { webidl } = __nccwpck_require__(5162)
+const { kEnumerableProperty } = __nccwpck_require__(8529)
 
 class CacheStorage {
   /**
@@ -15192,26 +15200,26 @@ module.exports = {
 
 /***/ }),
 
-/***/ 291:
+/***/ 8404:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 module.exports = {
-  kConstruct: (__nccwpck_require__(8573).kConstruct)
+  kConstruct: (__nccwpck_require__(5424).kConstruct)
 }
 
 
 /***/ }),
 
-/***/ 4888:
+/***/ 6893:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 const assert = __nccwpck_require__(4589)
-const { URLSerializer } = __nccwpck_require__(5610)
-const { isValidHeaderName } = __nccwpck_require__(9402)
+const { URLSerializer } = __nccwpck_require__(5192)
+const { isValidHeaderName } = __nccwpck_require__(3095)
 
 /**
  * @see https://url.spec.whatwg.org/#concept-url-equals
@@ -15256,7 +15264,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 8966:
+/***/ 9265:
 /***/ ((module) => {
 
 
@@ -15275,15 +15283,15 @@ module.exports = {
 
 /***/ }),
 
-/***/ 5171:
+/***/ 6748:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { parseSetCookie } = __nccwpck_require__(5340)
-const { stringify } = __nccwpck_require__(427)
-const { webidl } = __nccwpck_require__(5911)
-const { Headers } = __nccwpck_require__(3810)
+const { parseSetCookie } = __nccwpck_require__(2351)
+const { stringify } = __nccwpck_require__(190)
+const { webidl } = __nccwpck_require__(5162)
+const { Headers } = __nccwpck_require__(3257)
 
 /**
  * @typedef {Object} Cookie
@@ -15466,14 +15474,14 @@ module.exports = {
 
 /***/ }),
 
-/***/ 5340:
+/***/ 2351:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { maxNameValuePairSize, maxAttributeValueSize } = __nccwpck_require__(8966)
-const { isCTLExcludingHtab } = __nccwpck_require__(427)
-const { collectASequenceOfCodePointsFast } = __nccwpck_require__(5610)
+const { maxNameValuePairSize, maxAttributeValueSize } = __nccwpck_require__(9265)
+const { isCTLExcludingHtab } = __nccwpck_require__(190)
+const { collectASequenceOfCodePointsFast } = __nccwpck_require__(5192)
 const assert = __nccwpck_require__(4589)
 
 /**
@@ -15783,7 +15791,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 427:
+/***/ 190:
 /***/ ((module) => {
 
 
@@ -16142,12 +16150,13 @@ module.exports = {
 
 /***/ }),
 
-/***/ 6393:
+/***/ 2900:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
+const buffer = __nccwpck_require__(4573)
 const { Transform } = __nccwpck_require__(7075)
-const { isASCIINumber, isValidLastEventId } = __nccwpck_require__(8805)
+const { isASCIINumber, isValidLastEventId } = __nccwpck_require__(1048)
 
 /**
  * @type {number[]} BOM
@@ -16170,10 +16179,18 @@ const COLON = 0x3A
  */
 const SPACE = 0x20
 
+const defaultMaxEventSize = buffer.kStringMaxLength
+
 const DATA = Buffer.from('data')
 const EVENT = Buffer.from('event')
 const ID = Buffer.from('id')
 const RETRY = Buffer.from('retry')
+
+// Each data field creates a string node, and each unconsumed input chunk keeps
+// a Buffer wrapper. The absolute ceiling protects the large default byte limit.
+const minParserItems = 1024
+const maxParserItems = 131072
+const bytesPerParserItem = 128
 
 function isASCIINumberBytes (buffer, start) {
   if (start >= buffer.length) {
@@ -16211,6 +16228,12 @@ function isFieldName (line, length, field) {
   }
 
   return true
+}
+
+function createMaxEventSizeExceededError () {
+  const error = new Error('EventSource message size exceeded')
+  error.aborted = false
+  return error
 }
 
 /**
@@ -16261,6 +16284,13 @@ class EventSourceStream extends Transform {
   pos = 0
   lineChunkIndex = 0
   linePos = 0
+  lineLength = 0
+  eventSize = 0
+  eventFieldSizes = { data: 0, event: 0, id: 0, retry: 0 }
+  dataLineCount = 0
+  maxEventSize
+  maxDataLines
+  maxBufferedChunks
 
   event = {
     data: undefined,
@@ -16271,6 +16301,7 @@ class EventSourceStream extends Transform {
 
   /**
    * @param {object} options
+   * @param {number} [options.maxEventSize]
    * @param {eventSourceSettings} options.eventSourceSettings
    * @param {Function} [options.push]
    */
@@ -16282,6 +16313,12 @@ class EventSourceStream extends Transform {
     super(options)
 
     this.state = options.eventSourceSettings || {}
+    this.maxEventSize = options.maxEventSize ?? defaultMaxEventSize
+    const parserItemLimit = this.maxEventSize > 0
+      ? Math.min(maxParserItems, Math.max(minParserItems, Math.floor(this.maxEventSize / bytesPerParserItem)))
+      : 0
+    this.maxDataLines = parserItemLimit
+    this.maxBufferedChunks = parserItemLimit
     if (options.push) {
       this.push = options.push
     }
@@ -16299,6 +16336,14 @@ class EventSourceStream extends Transform {
       return
     }
 
+    // A leading line ending can immediately release the currently buffered
+    // line, even when it uses the final allowed chunk slot.
+    if (this.maxEventSize > 0 &&
+        this.chunks.length >= this.maxBufferedChunks &&
+        chunk[0] !== LF && chunk[0] !== CR) {
+      callback(createMaxEventSizeExceededError())
+      return
+    }
     this.chunks.push(chunk)
 
     // Strip leading byte-order-mark if we opened the stream and started
@@ -16377,7 +16422,12 @@ class EventSourceStream extends Transform {
 
         // In any case, we can process the line as we reached an
         // end-of-line character
-        this.parseLine(this.readLine(), this.event)
+        try {
+          this.parseLine(this.readLine(), this.event)
+        } catch (error) {
+          callback(error)
+          return
+        }
         this.consumeCurrentByte()
         // A line was processed and this could be the end of the event. We need
         // to check if the next line is empty to determine if the event is
@@ -16386,15 +16436,28 @@ class EventSourceStream extends Transform {
         continue
       }
 
+      // readLine() is only called after CR or LF. Reject an unfinished line
+      // before it can retain an unbounded number of decoded chunks. The seven
+      // extra bytes allow the longest field prefix ("event: " or "retry: ").
+      if (this.maxEventSize > 0 && ++this.lineLength > this.maxEventSize + 7) {
+        callback(createMaxEventSizeExceededError())
+        return
+      }
       this.advanceCursor()
     }
 
     callback()
   }
 
+  _destroy (error, callback) {
+    this.chunks.length = 0
+    this.clearEvent()
+    super._destroy(error, callback)
+  }
+
   /**
    * @param {Buffer} line
-   * @param {EventStreamEvent} event
+   * @param {EventSourceStreamEvent} event
    */
   parseLine (line, event) {
     // If the line is empty (a blank line)
@@ -16428,6 +16491,13 @@ class EventSourceStream extends Transform {
     }
 
     if (isFieldName(line, fieldLength, DATA)) {
+      if (this.maxEventSize > 0 && this.dataLineCount >= this.maxDataLines) {
+        throw createMaxEventSizeExceededError()
+      }
+      const valueBytes = line.length - valueStart
+      const dataSize = this.eventFieldSizes.data + (event.data === undefined ? 0 : 1) + valueBytes
+      this.setEventFieldSize('data', dataSize)
+
       const value = line.toString('utf8', valueStart)
 
       if (event.data === undefined) {
@@ -16435,11 +16505,13 @@ class EventSourceStream extends Transform {
       } else {
         event.data += `\n${value}`
       }
+      this.dataLineCount++
       return
     }
 
     if (isFieldName(line, fieldLength, RETRY)) {
       if (isASCIINumberBytes(line, valueStart)) {
+        this.setEventFieldSize('retry', line.length - valueStart)
         event.retry = line.toString('utf8', valueStart)
       }
       return
@@ -16447,18 +16519,27 @@ class EventSourceStream extends Transform {
 
     if (isFieldName(line, fieldLength, ID)) {
       if (isValidLastEventIdBytes(line, valueStart)) {
+        this.setEventFieldSize('id', line.length - valueStart)
         event.id = line.toString('utf8', valueStart)
       }
       return
     }
 
     if (isFieldName(line, fieldLength, EVENT)) {
-      const value = line.toString('utf8', valueStart)
-
-      if (value.length > 0) {
-        event.event = value
+      if (valueStart < line.length) {
+        this.setEventFieldSize('event', line.length - valueStart)
+        event.event = line.toString('utf8', valueStart)
       }
     }
+  }
+
+  setEventFieldSize (field, size) {
+    const eventSize = this.eventSize - this.eventFieldSizes[field] + size
+    if (this.maxEventSize > 0 && eventSize > this.maxEventSize) {
+      throw createMaxEventSizeExceededError()
+    }
+    this.eventSize = eventSize
+    this.eventFieldSizes[field] = size
   }
 
   /**
@@ -16491,6 +16572,12 @@ class EventSourceStream extends Transform {
     this.event.event = undefined
     this.event.id = undefined
     this.event.retry = undefined
+    this.eventSize = 0
+    this.dataLineCount = 0
+    this.eventFieldSizes.data = 0
+    this.eventFieldSizes.event = 0
+    this.eventFieldSizes.id = 0
+    this.eventFieldSizes.retry = 0
   }
 
   hasPendingEvent () {
@@ -16526,14 +16613,16 @@ class EventSourceStream extends Transform {
   syncLineStartToCursor () {
     this.lineChunkIndex = this.chunkIndex
     this.linePos = this.pos
+    this.lineLength = 0
     this.dropConsumedChunks()
   }
 
   dropConsumedChunks () {
-    while (this.lineChunkIndex > 0) {
-      this.chunks.shift()
-      this.lineChunkIndex--
-      this.chunkIndex--
+    if (this.lineChunkIndex > 0) {
+      const consumed = this.lineChunkIndex
+      this.chunks.splice(0, consumed)
+      this.lineChunkIndex = 0
+      this.chunkIndex -= consumed
     }
 
     if (this.chunkIndex === this.chunks.length) {
@@ -16642,22 +16731,23 @@ module.exports = {
 
 /***/ }),
 
-/***/ 5100:
+/***/ 9207:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 const { pipeline } = __nccwpck_require__(7075)
-const { fetching } = __nccwpck_require__(5120)
-const { makeRequest } = __nccwpck_require__(1565)
-const { webidl } = __nccwpck_require__(5911)
-const { EventSourceStream } = __nccwpck_require__(6393)
-const { parseMIMEType } = __nccwpck_require__(5610)
-const { createFastMessageEvent } = __nccwpck_require__(9770)
-const { isNetworkError } = __nccwpck_require__(9753)
-const { delay } = __nccwpck_require__(8805)
-const { kEnumerableProperty } = __nccwpck_require__(7198)
-const { environmentSettingsObject } = __nccwpck_require__(9402)
+const { fetching } = __nccwpck_require__(8263)
+const { makeRequest } = __nccwpck_require__(6398)
+const { webidl } = __nccwpck_require__(5162)
+const { EventSourceStream } = __nccwpck_require__(2900)
+const { parseMIMEType } = __nccwpck_require__(5192)
+const { createFastMessageEvent } = __nccwpck_require__(659)
+const { isNetworkError } = __nccwpck_require__(1328)
+const { delay } = __nccwpck_require__(1048)
+const { kEnumerableProperty } = __nccwpck_require__(8529)
+const { environmentSettingsObject } = __nccwpck_require__(3095)
+const { getGlobalDispatcher } = __nccwpck_require__(4498)
 
 let experimentalWarned = false
 
@@ -16939,6 +17029,7 @@ class EventSource extends EventTarget {
 
       const eventSourceStream = new EventSourceStream({
         eventSourceSettings: this.#state,
+        maxEventSize: this.#dispatcher.eventSourceOptions?.maxEventSize,
         push: (event) => {
           this.dispatchEvent(createFastMessageEvent(
             event.type,
@@ -17117,7 +17208,8 @@ webidl.converters.EventSourceInitDict = webidl.dictionaryConverter([
   },
   {
     key: 'dispatcher', // undici only
-    converter: webidl.converters.any
+    converter: webidl.converters.any,
+    defaultValue: () => getGlobalDispatcher()
   }
 ])
 
@@ -17129,7 +17221,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 8805:
+/***/ 1048:
 /***/ ((module) => {
 
 
@@ -17173,12 +17265,12 @@ module.exports = {
 
 /***/ }),
 
-/***/ 3334:
+/***/ 6455:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const util = __nccwpck_require__(7198)
+const util = __nccwpck_require__(8529)
 const {
   ReadableStreamFrom,
   isBlobLike,
@@ -17188,16 +17280,16 @@ const {
   fullyReadBody,
   extractMimeType,
   utf8DecodeBytes
-} = __nccwpck_require__(9402)
-const { FormData } = __nccwpck_require__(3732)
-const { kState } = __nccwpck_require__(7361)
-const { webidl } = __nccwpck_require__(5911)
+} = __nccwpck_require__(3095)
+const { FormData } = __nccwpck_require__(7653)
+const { kState } = __nccwpck_require__(6602)
+const { webidl } = __nccwpck_require__(5162)
 const { Blob } = __nccwpck_require__(4573)
 const assert = __nccwpck_require__(4589)
 const { isErrored, isDisturbed } = __nccwpck_require__(7075)
 const { isArrayBuffer } = __nccwpck_require__(3429)
-const { serializeAMimeType } = __nccwpck_require__(5610)
-const { multipartFormDataParser } = __nccwpck_require__(8922)
+const { serializeAMimeType } = __nccwpck_require__(5192)
+const { multipartFormDataParser } = __nccwpck_require__(6701)
 let random
 
 try {
@@ -17709,7 +17801,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 5045:
+/***/ 5706:
 /***/ ((module) => {
 
 
@@ -17840,7 +17932,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 5610:
+/***/ 5192:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -18591,12 +18683,12 @@ module.exports = {
 
 /***/ }),
 
-/***/ 9003:
+/***/ 3090:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { kConnected, kSize } = __nccwpck_require__(8573)
+const { kConnected, kSize } = __nccwpck_require__(5424)
 
 class CompatWeakRef {
   constructor (value) {
@@ -18644,14 +18736,14 @@ module.exports = function () {
 
 /***/ }),
 
-/***/ 6944:
+/***/ 5733:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 const { Blob, File } = __nccwpck_require__(4573)
-const { kState } = __nccwpck_require__(7361)
-const { webidl } = __nccwpck_require__(5911)
+const { kState } = __nccwpck_require__(6602)
+const { webidl } = __nccwpck_require__(5162)
 
 // TODO(@KhafraDev): remove
 class FileLike {
@@ -18777,16 +18869,16 @@ module.exports = { FileLike, isFileLike }
 
 /***/ }),
 
-/***/ 8922:
+/***/ 6701:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { isUSVString, bufferToLowerCasedHeaderName } = __nccwpck_require__(7198)
-const { utf8DecodeBytes } = __nccwpck_require__(9402)
-const { HTTP_TOKEN_CODEPOINTS, isomorphicDecode } = __nccwpck_require__(5610)
-const { isFileLike } = __nccwpck_require__(6944)
-const { makeEntry } = __nccwpck_require__(3732)
+const { isUSVString, bufferToLowerCasedHeaderName } = __nccwpck_require__(8529)
+const { utf8DecodeBytes } = __nccwpck_require__(3095)
+const { HTTP_TOKEN_CODEPOINTS, isomorphicDecode } = __nccwpck_require__(5192)
+const { isFileLike } = __nccwpck_require__(5733)
+const { makeEntry } = __nccwpck_require__(7653)
 const assert = __nccwpck_require__(4589)
 const { File: NodeFile } = __nccwpck_require__(4573)
 
@@ -19258,16 +19350,16 @@ module.exports = {
 
 /***/ }),
 
-/***/ 3732:
+/***/ 7653:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { isBlobLike, iteratorMixin } = __nccwpck_require__(9402)
-const { kState } = __nccwpck_require__(7361)
-const { kEnumerableProperty } = __nccwpck_require__(7198)
-const { FileLike, isFileLike } = __nccwpck_require__(6944)
-const { webidl } = __nccwpck_require__(5911)
+const { isBlobLike, iteratorMixin } = __nccwpck_require__(3095)
+const { kState } = __nccwpck_require__(6602)
+const { kEnumerableProperty } = __nccwpck_require__(8529)
+const { FileLike, isFileLike } = __nccwpck_require__(5733)
+const { webidl } = __nccwpck_require__(5162)
 const { File: NativeFile } = __nccwpck_require__(4573)
 const nodeUtil = __nccwpck_require__(7975)
 
@@ -19517,7 +19609,7 @@ module.exports = { FormData, makeEntry }
 
 /***/ }),
 
-/***/ 6537:
+/***/ 8712:
 /***/ ((module) => {
 
 
@@ -19564,21 +19656,21 @@ module.exports = {
 
 /***/ }),
 
-/***/ 3810:
+/***/ 3257:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 // https://github.com/Ethan-Arrowood/undici-fetch
 
 
 
-const { kConstruct } = __nccwpck_require__(8573)
-const { kEnumerableProperty } = __nccwpck_require__(7198)
+const { kConstruct } = __nccwpck_require__(5424)
+const { kEnumerableProperty } = __nccwpck_require__(8529)
 const {
   iteratorMixin,
   isValidHeaderName,
   isValidHeaderValue
-} = __nccwpck_require__(9402)
-const { webidl } = __nccwpck_require__(5911)
+} = __nccwpck_require__(3095)
+const { webidl } = __nccwpck_require__(5162)
 const assert = __nccwpck_require__(4589)
 const util = __nccwpck_require__(7975)
 
@@ -20258,7 +20350,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 5120:
+/***/ 8263:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 // https://github.com/Ethan-Arrowood/undici-fetch
@@ -20271,9 +20363,9 @@ const {
   filterResponse,
   makeResponse,
   fromInnerResponse
-} = __nccwpck_require__(9753)
-const { HeadersList } = __nccwpck_require__(3810)
-const { Request, cloneRequest } = __nccwpck_require__(1565)
+} = __nccwpck_require__(1328)
+const { HeadersList } = __nccwpck_require__(3257)
+const { Request, cloneRequest } = __nccwpck_require__(6398)
 const zlib = __nccwpck_require__(8522)
 const {
   bytesMatch,
@@ -20309,23 +20401,23 @@ const {
   buildContentRange,
   createInflate,
   extractMimeType
-} = __nccwpck_require__(9402)
-const { kState, kDispatcher } = __nccwpck_require__(7361)
+} = __nccwpck_require__(3095)
+const { kState, kDispatcher } = __nccwpck_require__(6602)
 const assert = __nccwpck_require__(4589)
-const { safelyExtractBody, extractBody } = __nccwpck_require__(3334)
+const { safelyExtractBody, extractBody } = __nccwpck_require__(6455)
 const {
   redirectStatusSet,
   nullBodyStatus,
   safeMethodsSet,
   requestBodyHeader,
   subresourceSet
-} = __nccwpck_require__(5045)
+} = __nccwpck_require__(5706)
 const EE = __nccwpck_require__(8474)
 const { Readable, pipeline, finished } = __nccwpck_require__(7075)
-const { addAbortListener, isErrored, isReadable, bufferToLowerCasedHeaderName } = __nccwpck_require__(7198)
-const { dataURLProcessor, serializeAMimeType, minimizeSupportedMimeType } = __nccwpck_require__(5610)
-const { getGlobalDispatcher } = __nccwpck_require__(931)
-const { webidl } = __nccwpck_require__(5911)
+const { addAbortListener, isErrored, isReadable, bufferToLowerCasedHeaderName } = __nccwpck_require__(8529)
+const { dataURLProcessor, serializeAMimeType, minimizeSupportedMimeType } = __nccwpck_require__(5192)
+const { getGlobalDispatcher } = __nccwpck_require__(4498)
+const { webidl } = __nccwpck_require__(5162)
 const { STATUS_CODES } = __nccwpck_require__(7067)
 const GET_OR_HEAD = ['GET', 'HEAD']
 
@@ -22213,8 +22305,10 @@ async function httpNetworkFetch (
   // 19. Run these steps in parallel:
 
   //    1. Run these steps, but abort when fetchParams is canceled:
-  fetchParams.controller.onAborted = onAborted
-  fetchParams.controller.on('terminated', onAborted)
+  if (!fetchParams.controller.resume) {
+    fetchParams.controller.on('terminated', onAborted)
+  }
+
   fetchParams.controller.resume = async () => {
     // 1. While true
     while (true) {
@@ -22383,8 +22477,6 @@ async function httpNetworkFetch (
           }
           location = headersList.get('location', true)
 
-          this.body = new Readable({ read: resume })
-
           const decoders = []
 
           const willFollow = location && request.redirect === 'follow' &&
@@ -22402,7 +22494,7 @@ async function httpNetworkFetch (
             // CVE fix similar to urllib3 (GHSA-gm62-xv2j-4w53) and curl (CVE-2022-32206).
             const maxContentEncodings = 5
             if (codings.length > maxContentEncodings) {
-              reject(new Error(`too many content-encodings in response: ${codings.length}, maximum allowed is ${maxContentEncodings}`))
+              this.abort(new Error(`too many content-encodings in response: ${codings.length}, maximum allowed is ${maxContentEncodings}`))
               return true
             }
 
@@ -22434,6 +22526,8 @@ async function httpNetworkFetch (
               }
             }
           }
+
+          this.body = new Readable({ read: resume })
 
           const onError = this.onError.bind(this)
 
@@ -22479,10 +22573,6 @@ async function httpNetworkFetch (
         onComplete () {
           if (this.abort) {
             fetchParams.controller.off('terminated', this.abort)
-          }
-
-          if (fetchParams.controller.onAborted) {
-            fetchParams.controller.off('terminated', fetchParams.controller.onAborted)
           }
 
           fetchParams.controller.ended = true
@@ -22537,23 +22627,23 @@ module.exports = {
 
 /***/ }),
 
-/***/ 1565:
+/***/ 6398:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 /* globals AbortController */
 
 
 
-const { extractBody, mixinBody, cloneBody, bodyUnusable } = __nccwpck_require__(3334)
-const { Headers, fill: fillHeaders, HeadersList, setHeadersGuard, getHeadersGuard, setHeadersList, getHeadersList } = __nccwpck_require__(3810)
-const { FinalizationRegistry } = __nccwpck_require__(9003)()
-const util = __nccwpck_require__(7198)
+const { extractBody, mixinBody, cloneBody, bodyUnusable } = __nccwpck_require__(6455)
+const { Headers, fill: fillHeaders, HeadersList, setHeadersGuard, getHeadersGuard, setHeadersList, getHeadersList } = __nccwpck_require__(3257)
+const { FinalizationRegistry } = __nccwpck_require__(3090)()
+const util = __nccwpck_require__(8529)
 const nodeUtil = __nccwpck_require__(7975)
 const {
   isValidHTTPToken,
   sameOrigin,
   environmentSettingsObject
-} = __nccwpck_require__(9402)
+} = __nccwpck_require__(3095)
 const {
   forbiddenMethodsSet,
   corsSafeListedMethodsSet,
@@ -22563,12 +22653,12 @@ const {
   requestCredentials,
   requestCache,
   requestDuplex
-} = __nccwpck_require__(5045)
+} = __nccwpck_require__(5706)
 const { kEnumerableProperty, normalizedMethodRecordsBase, normalizedMethodRecords } = util
-const { kHeaders, kSignal, kState, kDispatcher } = __nccwpck_require__(7361)
-const { webidl } = __nccwpck_require__(5911)
-const { URLSerializer } = __nccwpck_require__(5610)
-const { kConstruct } = __nccwpck_require__(8573)
+const { kHeaders, kSignal, kState, kDispatcher } = __nccwpck_require__(6602)
+const { webidl } = __nccwpck_require__(5162)
+const { URLSerializer } = __nccwpck_require__(5192)
+const { kConstruct } = __nccwpck_require__(5424)
 const assert = __nccwpck_require__(4589)
 const { getMaxListeners, setMaxListeners, getEventListeners, defaultMaxListeners } = __nccwpck_require__(8474)
 
@@ -23581,14 +23671,14 @@ module.exports = { Request, makeRequest, fromInnerRequest, cloneRequest }
 
 /***/ }),
 
-/***/ 9753:
+/***/ 1328:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { Headers, HeadersList, fill, getHeadersGuard, setHeadersGuard, setHeadersList } = __nccwpck_require__(3810)
-const { extractBody, cloneBody, mixinBody, hasFinalizationRegistry, streamRegistry, bodyUnusable } = __nccwpck_require__(3334)
-const util = __nccwpck_require__(7198)
+const { Headers, HeadersList, fill, getHeadersGuard, setHeadersGuard, setHeadersList } = __nccwpck_require__(3257)
+const { extractBody, cloneBody, mixinBody, hasFinalizationRegistry, streamRegistry, bodyUnusable } = __nccwpck_require__(6455)
+const util = __nccwpck_require__(8529)
 const nodeUtil = __nccwpck_require__(7975)
 const { kEnumerableProperty } = util
 const {
@@ -23600,16 +23690,16 @@ const {
   isErrorLike,
   isomorphicEncode,
   environmentSettingsObject: relevantRealm
-} = __nccwpck_require__(9402)
+} = __nccwpck_require__(3095)
 const {
   redirectStatusSet,
   nullBodyStatus
-} = __nccwpck_require__(5045)
-const { kState, kHeaders } = __nccwpck_require__(7361)
-const { webidl } = __nccwpck_require__(5911)
-const { FormData } = __nccwpck_require__(3732)
-const { URLSerializer } = __nccwpck_require__(5610)
-const { kConstruct } = __nccwpck_require__(8573)
+} = __nccwpck_require__(5706)
+const { kState, kHeaders } = __nccwpck_require__(6602)
+const { webidl } = __nccwpck_require__(5162)
+const { FormData } = __nccwpck_require__(7653)
+const { URLSerializer } = __nccwpck_require__(5192)
+const { kConstruct } = __nccwpck_require__(5424)
 const assert = __nccwpck_require__(4589)
 const { types } = __nccwpck_require__(7975)
 
@@ -24198,7 +24288,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 7361:
+/***/ 6602:
 /***/ ((module) => {
 
 
@@ -24214,21 +24304,21 @@ module.exports = {
 
 /***/ }),
 
-/***/ 9402:
+/***/ 3095:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 const { Transform } = __nccwpck_require__(7075)
 const zlib = __nccwpck_require__(8522)
-const { redirectStatusSet, referrerPolicySet: referrerPolicyTokens, badPortsSet } = __nccwpck_require__(5045)
-const { getGlobalOrigin } = __nccwpck_require__(6537)
-const { collectASequenceOfCodePoints, collectAnHTTPQuotedString, removeChars, parseMIMEType } = __nccwpck_require__(5610)
+const { redirectStatusSet, referrerPolicySet: referrerPolicyTokens, badPortsSet } = __nccwpck_require__(5706)
+const { getGlobalOrigin } = __nccwpck_require__(8712)
+const { collectASequenceOfCodePoints, collectAnHTTPQuotedString, removeChars, parseMIMEType } = __nccwpck_require__(5192)
 const { performance } = __nccwpck_require__(643)
-const { isBlobLike, ReadableStreamFrom, isValidHTTPToken, normalizedMethodRecordsBase } = __nccwpck_require__(7198)
+const { isBlobLike, ReadableStreamFrom, isValidHTTPToken, normalizedMethodRecordsBase } = __nccwpck_require__(8529)
 const assert = __nccwpck_require__(4589)
 const { isUint8Array } = __nccwpck_require__(3429)
-const { webidl } = __nccwpck_require__(5911)
+const { webidl } = __nccwpck_require__(5162)
 
 let supportedHashes = []
 
@@ -25853,14 +25943,14 @@ module.exports = {
 
 /***/ }),
 
-/***/ 5911:
+/***/ 5162:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 const { types, inspect } = __nccwpck_require__(7975)
 const { markAsUncloneable } = __nccwpck_require__(5919)
-const { toUSVString } = __nccwpck_require__(7198)
+const { toUSVString } = __nccwpck_require__(8529)
 
 /** @type {import('../../../types/webidl').Webidl} */
 const webidl = {}
@@ -26555,7 +26645,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 6001:
+/***/ 9944:
 /***/ ((module) => {
 
 
@@ -26852,7 +26942,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 6389:
+/***/ 5660:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -26861,16 +26951,16 @@ const {
   staticPropertyDescriptors,
   readOperation,
   fireAProgressEvent
-} = __nccwpck_require__(8192)
+} = __nccwpck_require__(3238)
 const {
   kState,
   kError,
   kResult,
   kEvents,
   kAborted
-} = __nccwpck_require__(2139)
-const { webidl } = __nccwpck_require__(5911)
-const { kEnumerableProperty } = __nccwpck_require__(7198)
+} = __nccwpck_require__(7192)
+const { webidl } = __nccwpck_require__(5162)
+const { kEnumerableProperty } = __nccwpck_require__(8529)
 
 class FileReader extends EventTarget {
   constructor () {
@@ -27203,12 +27293,12 @@ module.exports = {
 
 /***/ }),
 
-/***/ 3495:
+/***/ 4732:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { webidl } = __nccwpck_require__(5911)
+const { webidl } = __nccwpck_require__(5162)
 
 const kState = Symbol('ProgressEvent state')
 
@@ -27288,7 +27378,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 2139:
+/***/ 7192:
 /***/ ((module) => {
 
 
@@ -27305,7 +27395,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 8192:
+/***/ 3238:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -27316,10 +27406,10 @@ const {
   kResult,
   kAborted,
   kLastProgressEventFired
-} = __nccwpck_require__(2139)
-const { ProgressEvent } = __nccwpck_require__(3495)
-const { getEncoding } = __nccwpck_require__(6001)
-const { serializeAMimeType, parseMIMEType } = __nccwpck_require__(5610)
+} = __nccwpck_require__(7192)
+const { ProgressEvent } = __nccwpck_require__(4732)
+const { getEncoding } = __nccwpck_require__(9944)
+const { serializeAMimeType, parseMIMEType } = __nccwpck_require__(5192)
 const { types } = __nccwpck_require__(7975)
 const { StringDecoder } = __nccwpck_require__(3193)
 const { btoa } = __nccwpck_require__(4573)
@@ -27703,27 +27793,27 @@ module.exports = {
 
 /***/ }),
 
-/***/ 8487:
+/***/ 6890:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { uid, states, sentCloseFrameState, emptyBuffer, opcodes } = __nccwpck_require__(958)
+const { uid, states, sentCloseFrameState, emptyBuffer, opcodes } = __nccwpck_require__(6869)
 const {
   kReadyState,
   kSentClose,
   kByteParser,
   kReceivedClose,
   kResponse
-} = __nccwpck_require__(6606)
-const { fireEvent, failWebsocketConnection, isClosing, isClosed, isEstablished, parseExtensions } = __nccwpck_require__(7552)
-const { channels } = __nccwpck_require__(9344)
-const { CloseEvent } = __nccwpck_require__(9770)
-const { makeRequest } = __nccwpck_require__(1565)
-const { fetching } = __nccwpck_require__(5120)
-const { Headers, getHeadersList } = __nccwpck_require__(3810)
-const { getDecodeSplit } = __nccwpck_require__(9402)
-const { WebsocketFrameSend } = __nccwpck_require__(1878)
+} = __nccwpck_require__(5457)
+const { fireEvent, failWebsocketConnection, isClosing, isClosed, isEstablished, parseExtensions } = __nccwpck_require__(1226)
+const { channels } = __nccwpck_require__(1509)
+const { CloseEvent } = __nccwpck_require__(659)
+const { makeRequest } = __nccwpck_require__(6398)
+const { fetching } = __nccwpck_require__(8263)
+const { Headers, getHeadersList } = __nccwpck_require__(3257)
+const { getDecodeSplit } = __nccwpck_require__(3095)
+const { WebsocketFrameSend } = __nccwpck_require__(2129)
 
 /** @type {import('crypto')} */
 let crypto
@@ -28081,7 +28171,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 958:
+/***/ 6869:
 /***/ ((module) => {
 
 
@@ -28154,14 +28244,14 @@ module.exports = {
 
 /***/ }),
 
-/***/ 9770:
+/***/ 659:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { webidl } = __nccwpck_require__(5911)
-const { kEnumerableProperty } = __nccwpck_require__(7198)
-const { kConstruct } = __nccwpck_require__(8573)
+const { webidl } = __nccwpck_require__(5162)
+const { kEnumerableProperty } = __nccwpck_require__(8529)
+const { kConstruct } = __nccwpck_require__(5424)
 const { MessagePort } = __nccwpck_require__(5919)
 
 /**
@@ -28490,12 +28580,12 @@ module.exports = {
 
 /***/ }),
 
-/***/ 1878:
+/***/ 2129:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { maxUnsigned16Bit } = __nccwpck_require__(958)
+const { maxUnsigned16Bit } = __nccwpck_require__(6869)
 
 const BUFFER_SIZE = 16386
 
@@ -28593,14 +28683,14 @@ module.exports = {
 
 /***/ }),
 
-/***/ 563:
+/***/ 7350:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 const { createInflateRaw, Z_DEFAULT_WINDOWBITS } = __nccwpck_require__(8522)
-const { isValidClientWindowBits } = __nccwpck_require__(7552)
-const { MessageSizeExceededError } = __nccwpck_require__(5581)
+const { isValidClientWindowBits } = __nccwpck_require__(1226)
+const { MessageSizeExceededError } = __nccwpck_require__(9934)
 
 const tail = Buffer.from([0x00, 0x00, 0xff, 0xff])
 const kBuffer = Symbol('kBuffer')
@@ -28705,16 +28795,16 @@ module.exports = { PerMessageDeflate }
 
 /***/ }),
 
-/***/ 5270:
+/***/ 5183:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
 const { Writable } = __nccwpck_require__(7075)
 const assert = __nccwpck_require__(4589)
-const { parserStates, opcodes, states, emptyBuffer, sentCloseFrameState } = __nccwpck_require__(958)
-const { kReadyState, kSentClose, kResponse, kReceivedClose } = __nccwpck_require__(6606)
-const { channels } = __nccwpck_require__(9344)
+const { parserStates, opcodes, states, emptyBuffer, sentCloseFrameState } = __nccwpck_require__(6869)
+const { kReadyState, kSentClose, kResponse, kReceivedClose } = __nccwpck_require__(5457)
+const { channels } = __nccwpck_require__(1509)
 const {
   isValidStatusCode,
   isValidOpcode,
@@ -28724,11 +28814,11 @@ const {
   isControlFrame,
   isTextBinaryFrame,
   isContinuationFrame
-} = __nccwpck_require__(7552)
-const { WebsocketFrameSend } = __nccwpck_require__(1878)
-const { closeWebSocketConnection } = __nccwpck_require__(8487)
-const { PerMessageDeflate } = __nccwpck_require__(563)
-const { MessageSizeExceededError } = __nccwpck_require__(5581)
+} = __nccwpck_require__(1226)
+const { WebsocketFrameSend } = __nccwpck_require__(2129)
+const { closeWebSocketConnection } = __nccwpck_require__(6890)
+const { PerMessageDeflate } = __nccwpck_require__(7350)
+const { MessageSizeExceededError } = __nccwpck_require__(9934)
 
 function failWebsocketConnectionWithCode (ws, code, reason) {
   closeWebSocketConnection(ws, code, reason, Buffer.byteLength(reason))
@@ -28959,6 +29049,20 @@ class ByteParser extends Writable {
         if (isControlFrame(this.#info.opcode)) {
           this.#loop = this.parseControlFrame(body)
           this.#state = parserStates.INFO
+
+          // If the automatic PONG/CLOSE reply filled the socket's write buffer,
+          // stop parsing and resume on drain so a PING flood cannot grow the
+          // outbound queue without bound.
+          const socket = this.ws[kResponse].socket
+          if (this.#loop && socket.writableNeedDrain) {
+            this.#loop = false
+            socket.once('drain', () => {
+              if (this.destroyed) return
+              this.#loop = true
+              this.run(callback)
+            })
+            return
+          }
         } else {
           if (!this.#info.compressed) {
             if (!this.writeFragments(body)) {
@@ -29225,14 +29329,14 @@ module.exports = {
 
 /***/ }),
 
-/***/ 9082:
+/***/ 9051:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { WebsocketFrameSend } = __nccwpck_require__(1878)
-const { opcodes, sendHints } = __nccwpck_require__(958)
-const FixedQueue = __nccwpck_require__(5930)
+const { WebsocketFrameSend } = __nccwpck_require__(2129)
+const { opcodes, sendHints } = __nccwpck_require__(6869)
+const FixedQueue = __nccwpck_require__(4007)
 
 /** @type {typeof Uint8Array} */
 const FastBuffer = Buffer[Symbol.species]
@@ -29336,7 +29440,7 @@ module.exports = { SendQueue }
 
 /***/ }),
 
-/***/ 6606:
+/***/ 5457:
 /***/ ((module) => {
 
 
@@ -29355,16 +29459,16 @@ module.exports = {
 
 /***/ }),
 
-/***/ 7552:
+/***/ 1226:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { kReadyState, kController, kResponse, kBinaryType, kWebSocketURL } = __nccwpck_require__(6606)
-const { states, opcodes } = __nccwpck_require__(958)
-const { ErrorEvent, createFastMessageEvent } = __nccwpck_require__(9770)
+const { kReadyState, kController, kResponse, kBinaryType, kWebSocketURL } = __nccwpck_require__(5457)
+const { states, opcodes } = __nccwpck_require__(6869)
+const { ErrorEvent, createFastMessageEvent } = __nccwpck_require__(659)
 const { isUtf8 } = __nccwpck_require__(4573)
-const { collectASequenceOfCodePointsFast, removeHTTPWhitespace } = __nccwpck_require__(5610)
+const { collectASequenceOfCodePointsFast, removeHTTPWhitespace } = __nccwpck_require__(5192)
 
 /* globals Blob */
 
@@ -29684,15 +29788,15 @@ module.exports = {
 
 /***/ }),
 
-/***/ 3180:
+/***/ 9708:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
 
-const { webidl } = __nccwpck_require__(5911)
-const { URLSerializer } = __nccwpck_require__(5610)
-const { environmentSettingsObject } = __nccwpck_require__(9402)
-const { staticPropertyDescriptors, states, sentCloseFrameState, sendHints } = __nccwpck_require__(958)
+const { webidl } = __nccwpck_require__(5162)
+const { URLSerializer } = __nccwpck_require__(5192)
+const { environmentSettingsObject } = __nccwpck_require__(3095)
+const { staticPropertyDescriptors, states, sentCloseFrameState, sendHints } = __nccwpck_require__(6869)
 const {
   kWebSocketURL,
   kReadyState,
@@ -29701,21 +29805,21 @@ const {
   kResponse,
   kSentClose,
   kByteParser
-} = __nccwpck_require__(6606)
+} = __nccwpck_require__(5457)
 const {
   isConnecting,
   isEstablished,
   isClosing,
   isValidSubprotocol,
   fireEvent
-} = __nccwpck_require__(7552)
-const { establishWebSocketConnection, closeWebSocketConnection } = __nccwpck_require__(8487)
-const { ByteParser } = __nccwpck_require__(5270)
-const { kEnumerableProperty, isBlobLike } = __nccwpck_require__(7198)
-const { getGlobalDispatcher } = __nccwpck_require__(931)
+} = __nccwpck_require__(1226)
+const { establishWebSocketConnection, closeWebSocketConnection } = __nccwpck_require__(6890)
+const { ByteParser } = __nccwpck_require__(5183)
+const { kEnumerableProperty, isBlobLike } = __nccwpck_require__(8529)
+const { getGlobalDispatcher } = __nccwpck_require__(4498)
 const { types } = __nccwpck_require__(7975)
-const { ErrorEvent, CloseEvent } = __nccwpck_require__(9770)
-const { SendQueue } = __nccwpck_require__(9082)
+const { ErrorEvent, CloseEvent } = __nccwpck_require__(659)
+const { SendQueue } = __nccwpck_require__(9051)
 
 // https://websockets.spec.whatwg.org/#interface-definition
 class WebSocket extends EventTarget {
@@ -30292,7 +30396,7 @@ module.exports = {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8830);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(4678);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(9389);
 
 
 
@@ -30308,7 +30412,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 4678:
+/***/ 9389:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -30983,7 +31087,7 @@ function isPlainObject(value) {
 
 // EXTERNAL MODULE: external "node:url"
 var external_node_url_ = __nccwpck_require__(3136);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/file-url.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/file-url.js
 
 
 // Allow some arguments/options to be either a file path string or a file URL
@@ -31010,15 +31114,23 @@ const isDenoExecPath = file => typeof file !== 'string'
 // Same but also allows other values, e.g. `boolean` for the `shell` option
 const normalizeFileUrl = file => file instanceof URL ? (0,external_node_url_.fileURLToPath)(file) : file;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/parameters.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/parameters.js
 
 
 
 // The command `arguments` and `options` are both optional.
 // This also does basic validation on them and on the command file.
-const normalizeParameters = (rawFile, rawArguments = [], rawOptions = {}) => {
+const normalizeParameters = (rawFile, rawArguments = [], rawOptions, ...rawExtraArguments) => {
+	if (rawExtraArguments.length > 0) {
+		throw new TypeError('Execa accepts at most three arguments: file, arguments, options.');
+	}
+
+	if (rawOptions !== undefined && isPlainObject(rawArguments)) {
+		throw new TypeError('Execa accepts at most one options object. Please merge the second and third arguments.');
+	}
+
 	const filePath = safeNormalizeFileUrl(rawFile, 'First argument');
-	const [commandArguments, options] = isPlainObject(rawArguments)
+	const [commandArguments, options = {}] = isPlainObject(rawArguments)
 		? [[], rawArguments]
 		: [rawArguments, rawOptions];
 
@@ -31044,17 +31156,20 @@ const normalizeParameters = (rawFile, rawArguments = [], rawOptions = {}) => {
 	return [filePath, normalizedArguments, {__proto__: null, ...options}];
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/escape.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/escape.js
 
 
 
 // Compute `result.command` and `result.escapedCommand`
-const joinCommand = (filePath, rawArguments) => {
+const joinCommand = (filePath, rawArguments, shell) => {
 	const fileAndArguments = [filePath, ...rawArguments];
 	const command = fileAndArguments.join(' ');
-	const escapedCommand = fileAndArguments
-		.map(fileAndArgument => quoteString(escapeControlCharacters(fileAndArgument)))
-		.join(' ');
+	// With `shell`, the shell interprets the command, so it must not be quoted
+	const escapedCommand = shell
+		? escapeControlCharacters(command)
+		: fileAndArguments
+			.map(fileAndArgument => quoteString(escapeControlCharacters(fileAndArgument)))
+			.join(' ');
 	return {command, escapedCommand};
 };
 
@@ -31136,7 +31251,7 @@ const NO_ESCAPE_REGEXP = /^[\w\-./]+$/;
 
 ;// CONCATENATED MODULE: external "node:string_decoder"
 const external_node_string_decoder_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:string_decoder");
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/utils/uint-array.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/utils/uint-array.js
 
 
 const {toString: objectToString} = Object.prototype;
@@ -31201,7 +31316,60 @@ const getJoinLength = uint8Arrays => {
 	return joinLength;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/template.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/return/final-error.js
+// When the subprocess fails, this is the error instance being returned.
+// If another error instance is being thrown, it is kept as `error.cause`.
+const getFinalError = (originalError, message, isSync) => {
+	const ErrorClass = isSync ? ExecaSyncError : ExecaError;
+	const options = originalError instanceof DiscardedError ? {} : {cause: originalError};
+	return new ErrorClass(message, options);
+};
+
+// Indicates that the error is used only to interrupt control flow, but not in the return value
+class DiscardedError extends Error {}
+
+// Proper way to set `error.name`: it should be inherited and non-enumerable
+const setErrorName = (ErrorClass, value) => {
+	Object.defineProperties(ErrorClass.prototype, {
+		name: {
+			value,
+			writable: true,
+			enumerable: false,
+			configurable: true,
+		},
+		[execaErrorSymbol]: {
+			value: true,
+			writable: false,
+			enumerable: false,
+			configurable: false,
+		},
+	});
+};
+
+// Unlike `instanceof`, this works across realms
+const isExecaError = error => isErrorInstance(error) && execaErrorSymbol in error;
+
+const execaErrorSymbol = Symbol('isExecaError');
+
+// `instanceof` handles `DOMException` and subclasses with a custom `Symbol.toStringTag`, `Object.prototype.toString()` handles other realms
+const isErrorInstance = value => value instanceof Error || Object.prototype.toString.call(value) === '[object Error]';
+
+// We use two different Error classes for async/sync methods since they have slightly different shape and types
+class ExecaError extends Error {}
+// eslint-disable-next-line unicorn/no-top-level-side-effects -- `error.name` must be set as soon as the class is defined
+setErrorName(ExecaError, ExecaError.name);
+
+class ExecaSyncError extends Error {}
+// eslint-disable-next-line unicorn/no-top-level-side-effects -- `error.name` must be set as soon as the class is defined
+setErrorName(ExecaSyncError, ExecaSyncError.name);
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/utils/type-name.js
+// Like `typeof`, but `null` is reported as `null` instead of `object`, so error messages name the actual value
+const getTypeName = value => value === null ? 'null' : typeof value;
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/template.js
+
+
 
 
 
@@ -31213,15 +31381,18 @@ const isTemplateString = templates => Array.isArray(templates) && Array.isArray(
 // Convert execa`file ...commandArguments` to execa(file, commandArguments)
 const parseTemplates = (templates, expressions) => {
 	let tokens = [];
+	// Whether whitespaces separate the last token from the next one
+	let isSeparated = false;
 
 	for (const [index, template] of templates.entries()) {
-		tokens = parseTemplate({
+		({tokens, isSeparated} = parseTemplate({
 			templates,
 			expressions,
 			tokens,
+			isSeparated,
 			index,
 			template,
-		});
+		}));
 	}
 
 	if (tokens.length === 0) {
@@ -31232,23 +31403,28 @@ const parseTemplates = (templates, expressions) => {
 	return [file, commandArguments, {}];
 };
 
-const parseTemplate = ({templates, expressions, tokens, index, template}) => {
+const parseTemplate = ({templates, expressions, tokens, isSeparated, index, template}) => {
 	if (template === undefined) {
 		throw new TypeError(`Invalid backslash sequence: ${templates.raw[index]}`);
 	}
 
 	const {nextTokens, leadingWhitespaces, trailingWhitespaces} = splitByWhitespaces(template, templates.raw[index]);
-	const newTokens = concatTokens(tokens, nextTokens, leadingWhitespaces);
+	const newTokens = concatTokens(tokens, nextTokens, isSeparated || leadingWhitespaces);
+	// When the template has no tokens, the whitespaces before it still separate the next token, e.g. after an empty array expression
+	const isTemplateSeparated = trailingWhitespaces || (nextTokens.length === 0 && isSeparated);
 
 	if (index === expressions.length) {
-		return newTokens;
+		return {tokens: newTokens, isSeparated: isTemplateSeparated};
 	}
 
 	const expression = expressions[index];
 	const expressionTokens = Array.isArray(expression)
 		? expression.map(expression => parseExpression(expression))
 		: [parseExpression(expression)];
-	return concatTokens(newTokens, expressionTokens, trailingWhitespaces);
+	return {
+		tokens: concatTokens(newTokens, expressionTokens, isTemplateSeparated),
+		isSeparated: expressionTokens.length === 0 && isTemplateSeparated,
+	};
 };
 
 // Like `string.split(/[ \t\r\n]+/)` except newlines and tabs are:
@@ -31334,7 +31510,7 @@ const concatTokens = (tokens, nextTokens, isSeparated) => isSeparated
 
 // Handle `${expression}` inside the template string syntax
 const parseExpression = expression => {
-	const typeOfExpression = typeof expression;
+	const typeOfExpression = getTypeName(expression);
 
 	if (typeOfExpression === 'string') {
 		return expression;
@@ -31344,8 +31520,9 @@ const parseExpression = expression => {
 		return String(expression);
 	}
 
-	// Only own properties are checked: a polluted `Object.prototype.stdout` must not turn any plain object into a subprocess result
-	if (isPlainObject(expression) && (Object.hasOwn(expression, 'stdout') || Object.hasOwn(expression, 'isMaxBuffer'))) {
+	// Only own properties are checked: a polluted `Object.prototype.stdout` must not turn any plain object into a subprocess result.
+	// A failed subprocess result is an error instance instead.
+	if ((isPlainObject(expression) || isExecaError(expression)) && (Object.hasOwn(expression, 'stdout') || Object.hasOwn(expression, 'isMaxBuffer'))) {
 		return getSubprocessResult(expression);
 	}
 
@@ -31372,10 +31549,10 @@ const getSubprocessResult = result => {
 		throw new TypeError('Missing result.stdout in template expression. This is probably due to the previous subprocess\' "stdout" option.');
 	}
 
-	throw new TypeError(`Unexpected "${typeof stdout}" stdout in template expression`);
+	throw new TypeError(`Unexpected "${getTypeName(stdout)}" stdout in template expression`);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/utils/standard-stream.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/utils/standard-stream.js
 
 
 const isStandardStream = stream => STANDARD_STREAMS.includes(stream);
@@ -31389,7 +31566,25 @@ const allStreamSymbol = Symbol('execa.allStream');
 const setAllStream = stream => Object.assign(stream, {[allStreamSymbol]: true});
 const isAllStream = stream => stream?.[allStreamSymbol] === true;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/specific.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/utils/options.js
+// The options of methods like `subprocess.pipe()`, `subprocess.readable()` or `sendMessage()` are kept on a null-prototype object, otherwise a polluted `Object.prototype` would inject option values.
+// Like destructuring them, `null` throws.
+const copyOptions = (options = {}) => {
+	if (options === null) {
+		throw new TypeError('The options must be an object, not `null`.');
+	}
+
+	return {__proto__: null, ...options};
+};
+
+const checkBooleanOption = (value, optionName) => {
+	if (value !== undefined && typeof value !== 'boolean') {
+		throw new TypeError(`The \`${optionName}\` option must use a boolean.`);
+	}
+};
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/specific.js
+
 
 
 
@@ -31419,12 +31614,18 @@ const getStdioLength = ({stdio}) => Array.isArray(stdio)
 	? Math.max(stdio.length, STANDARD_STREAMS_ALIASES.length)
 	: STANDARD_STREAMS_ALIASES.length;
 
-const normalizeFdSpecificValue = (optionValue, optionArray, optionName, stdioLength) => isPlainObject(optionValue)
-	? normalizeOptionObject(optionValue, optionArray, optionName, stdioLength)
-	: optionArray.fill(optionValue);
+const normalizeFdSpecificValue = (optionValue, optionArray, optionName, stdioLength) => {
+	if (isPlainObject(optionValue)) {
+		return normalizeOptionObject(optionValue, optionArray, optionName, stdioLength);
+	}
+
+	validateFdSpecificValue(optionValue, optionName);
+	return optionArray.fill(optionValue);
+};
 
 const normalizeOptionObject = (optionValue, optionArray, optionName, stdioLength) => {
 	for (const fdName of Object.keys(optionValue).sort(compareFdName)) {
+		validateFdSpecificValue(optionValue[fdName], optionName, `${optionName}.${fdName}`);
 		for (const fdNumber of parseFdName(fdName, optionName, stdioLength)) {
 			optionArray[fdNumber] = optionValue[fdName];
 		}
@@ -31485,6 +31686,18 @@ const addDefaultValue = (optionArray, optionName) => optionArray.map(optionValue
 	? DEFAULT_OPTIONS[optionName]
 	: optionValue);
 
+const BOOLEAN_FD_SPECIFIC_OPTIONS = new Set(['lines', 'buffer', 'stripFinalNewline']);
+
+// Wrong types must be reported instead of being silently coerced, e.g. a truthy string enabling the `buffer` option.
+// `undefined` uses the default value.
+const validateFdSpecificValue = (optionValue, optionName, fullOptionName = optionName) => {
+	if (BOOLEAN_FD_SPECIFIC_OPTIONS.has(optionName)) {
+		checkBooleanOption(optionValue, fullOptionName);
+	} else if (optionName === 'maxBuffer' && optionValue !== undefined && (typeof optionValue !== 'number' || Number.isNaN(optionValue))) {
+		throw new TypeError(`The \`${fullOptionName}\` option must use a number.`);
+	}
+};
+
 // Default value for the `verbose` option
 const verboseDefault = (0,external_node_util_.debuglog)('execa').enabled ? 'full' : 'none';
 
@@ -31504,7 +31717,7 @@ const getFdSpecificValue = (optionArray, fdNumber) => fdNumber === 'ipc'
 	? optionArray.at(-1)
 	: optionArray[fdNumber];
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/values.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/values.js
 
 
 // The `verbose` option can have different values for `stdout`/`stderr`
@@ -31978,9 +32191,20 @@ const underlineMagentaBright = format('58;5;13', 59);
 const underlineCyanBright = format('58;5;14', 59);
 const underlineWhiteBright = format('58;5;15', 59);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/default.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/default.js
 
 
+
+
+// `yoctocolors` checks whether the terminal type supports colors, but not whether `stderr`, where this is printed, is a terminal.
+// Like `util.styleText()`, colors are not used when `stderr` is redirected, e.g. to a file, unless `FORCE_COLOR` is set.
+const default_hasColors = external_node_process_namespaceObject.env.FORCE_COLOR !== undefined || external_node_process_namespaceObject.stderr.isTTY === true;
+const identity = string => string;
+const getColor = color => default_hasColors ? color : identity;
+const default_gray = getColor(gray);
+const default_bold = getColor(bold);
+const default_redBright = getColor(redBright);
+const default_yellowBright = getColor(yellowBright);
 
 // Default when `verbose` is not a function
 const defaultVerboseFunction = ({
@@ -31995,7 +32219,7 @@ const defaultVerboseFunction = ({
 	const timestampString = serializeTimestamp(timestamp);
 	const icon = ICONS[type]({failed, reject, piped});
 	const color = COLORS[type]({reject});
-	return `${gray(`[${timestampString}]`)} ${gray(`[${commandId}]`)} ${color(icon)} ${color(message)}`;
+	return `${default_gray(`[${timestampString}]`)} ${default_gray(`[${commandId}]`)} ${color(icon)} ${color(message)}`;
 };
 
 // Prepending the timestamp allows debugging the slow paths of a subprocess
@@ -32019,17 +32243,15 @@ const ICONS = {
 	duration: getFinalIcon,
 };
 
-const identity = string => string;
-
 const COLORS = {
-	command: () => bold,
+	command: () => default_bold,
 	output: () => identity,
 	ipc: () => identity,
-	error: ({reject}) => reject ? redBright : yellowBright,
-	duration: () => gray,
+	error: ({reject}) => reject ? default_redBright : default_yellowBright,
+	duration: () => default_gray,
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/custom.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/custom.js
 
 
 // Apply the `verbose` function on each line
@@ -32057,7 +32279,7 @@ const appendNewline = printedLine => printedLine.endsWith('\n')
 	? printedLine
 	: `${printedLine}\n`;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/log.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/log.js
 
 
 
@@ -32110,7 +32332,7 @@ const serializeVerboseMessage = message => {
 	return escapeLines(messageString);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/start.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/start.js
 
 
 
@@ -32127,7 +32349,7 @@ const logCommand = (escapedCommand, verboseInfo) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/info.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/info.js
 
 
 // Information computed before spawning, used by the `verbose` option
@@ -32168,7 +32390,7 @@ const validateVerbose = verbose => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/return/duration.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/return/duration.js
 
 
 // Start counting time before spawning the subprocess
@@ -32178,7 +32400,7 @@ const getStartTime = () => external_node_process_namespaceObject.hrtime.bigint()
 // Printed by the `verbose` option.
 const getDurationMs = startTime => Number(external_node_process_namespaceObject.hrtime.bigint() - startTime) / 1e6;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/command.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/command.js
 
 
 
@@ -32188,7 +32410,8 @@ const getDurationMs = startTime => Number(external_node_process_namespaceObject.
 // Compute `result.command`, `result.escapedCommand` and `verbose`-related information
 const handleCommand = (filePath, rawArguments, rawOptions) => {
 	const startTime = getStartTime();
-	const {command, escapedCommand} = joinCommand(filePath, rawArguments);
+	// The `node` option ignores `shell`
+	const {command, escapedCommand} = joinCommand(filePath, rawArguments, rawOptions.shell && !rawOptions.node);
 	const verbose = normalizeFdSpecificOption(rawOptions, 'verbose');
 	// Keep the null prototype, otherwise a polluted `Object.prototype` would inject option values
 	const verboseInfo = getVerboseInfo(verbose, escapedCommand, {__proto__: null, ...rawOptions});
@@ -32327,52 +32550,6 @@ const npmRunPathEnv = ({env = external_node_process_namespaceObject.env, ...opti
 
 ;// CONCATENATED MODULE: external "node:timers/promises"
 const promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:timers/promises");
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/return/final-error.js
-// When the subprocess fails, this is the error instance being returned.
-// If another error instance is being thrown, it is kept as `error.cause`.
-const getFinalError = (originalError, message, isSync) => {
-	const ErrorClass = isSync ? ExecaSyncError : ExecaError;
-	const options = originalError instanceof DiscardedError ? {} : {cause: originalError};
-	return new ErrorClass(message, options);
-};
-
-// Indicates that the error is used only to interrupt control flow, but not in the return value
-class DiscardedError extends Error {}
-
-// Proper way to set `error.name`: it should be inherited and non-enumerable
-const setErrorName = (ErrorClass, value) => {
-	Object.defineProperties(ErrorClass.prototype, {
-		name: {
-			value,
-			writable: true,
-			enumerable: false,
-			configurable: true,
-		},
-		[execaErrorSymbol]: {
-			value: true,
-			writable: false,
-			enumerable: false,
-			configurable: false,
-		},
-	});
-};
-
-// Unlike `instanceof`, this works across realms
-const isExecaError = error => isErrorInstance(error) && execaErrorSymbol in error;
-
-const execaErrorSymbol = Symbol('isExecaError');
-
-const isErrorInstance = value => Object.prototype.toString.call(value) === '[object Error]';
-
-// We use two different Error classes for async/sync methods since they have slightly different shape and types
-class ExecaError extends Error {}
-// eslint-disable-next-line unicorn/no-top-level-side-effects -- `error.name` must be set as soon as the class is defined
-setErrorName(ExecaError, ExecaError.name);
-
-class ExecaSyncError extends Error {}
-// eslint-disable-next-line unicorn/no-top-level-side-effects -- `error.name` must be set as soon as the class is defined
-setErrorName(ExecaSyncError, ExecaSyncError.name);
-
 ;// CONCATENATED MODULE: external "node:os"
 const external_node_os_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:os");
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/human-signals@8.0.1/node_modules/human-signals/build/src/realtime.js
@@ -32772,7 +32949,7 @@ return signals.find((signalA)=>signalA.number===number)
 };
 
 const signalsByNumber=getSignalsByNumber();
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/terminate/signal.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/terminate/signal.js
 
 
 
@@ -32844,7 +33021,43 @@ const getAvailableSignalIntegers = () => [...new Set(Object.values(external_node
 // Human-friendly description of a signal
 const getSignalDescription = signal => signalsByName[signal].description;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/terminate/kill.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/terminate/timeout.js
+
+
+
+
+// Validate `timeout` option
+const validateTimeout = ({timeout}) => {
+	if (timeout !== undefined) {
+		validateDelay(timeout, 'timeout');
+	}
+};
+
+// Used by the `timeout` and `forceKillAfterDelay` options.
+// Fractional numbers are excluded since `spawnSync()` requires an integer `timeout`.
+const validateDelay = (delay, optionName) => {
+	if (!Number.isInteger(delay) || delay < 0 || delay > MAX_DELAY) {
+		throw new TypeError(`Expected the \`${optionName}\` option to be a non-negative integer up to ${MAX_DELAY}, got \`${delay}\` (${getTypeName(delay)})`);
+	}
+};
+
+// Timers fire right away when their delay is larger than this
+const MAX_DELAY = (2 ** 31) - 1;
+
+// Fails when the `timeout` option is exceeded
+const throwOnTimeout = (kill, timeout, context, controller) => timeout === 0 || timeout === undefined
+	? []
+	: [killAfterTimeout(kill, timeout, context, controller)];
+
+const killAfterTimeout = async (kill, timeout, context, {signal}) => {
+	await (0,promises_namespaceObject.setTimeout)(timeout, undefined, {signal});
+	context.terminationReason ??= 'timeout';
+	kill();
+	throw new DiscardedError();
+};
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/terminate/kill.js
+
 
 
 
@@ -32859,10 +33072,7 @@ const normalizeForceKillAfterDelay = forceKillAfterDelay => {
 		return DEFAULT_FORCE_KILL_TIMEOUT;
 	}
 
-	if (!Number.isFinite(forceKillAfterDelay) || forceKillAfterDelay < 0) {
-		throw new TypeError(`Expected the \`forceKillAfterDelay\` option to be a non-negative integer, got \`${forceKillAfterDelay}\` (${typeof forceKillAfterDelay})`);
-	}
-
+	validateDelay(forceKillAfterDelay, 'forceKillAfterDelay');
 	return forceKillAfterDelay;
 };
 
@@ -32941,7 +33151,7 @@ const killOnTimeout = async ({kill, forceKillAfterDelay, context, controllerSign
 
 // EXTERNAL MODULE: external "node:events"
 var external_node_events_ = __nccwpck_require__(8474);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/utils/abort-signal.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/utils/abort-signal.js
 
 
 // Combines `util.aborted()` and `events.addAbortListener()`: promise-based and cleaned up with a stop signal
@@ -32951,14 +33161,19 @@ const onAbortedSignal = async (mainSignal, stopSignal) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/terminate/cancel.js
+// Validate the `cancelSignal` and `unpipeSignal` options, so a wrong type fails right away instead of failing later with an unrelated error
+const validateAbortSignal = (signal, optionName) => {
+	if (signal !== undefined && Object.prototype.toString.call(signal) !== '[object AbortSignal]') {
+		throw new TypeError(`The \`${optionName}\` option must be an AbortSignal: ${String(signal)}.`);
+	}
+};
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/terminate/cancel.js
 
 
 // Validate the `cancelSignal` option
 const validateCancelSignal = ({cancelSignal}) => {
-	if (cancelSignal !== undefined && Object.prototype.toString.call(cancelSignal) !== '[object AbortSignal]') {
-		throw new Error(`The \`cancelSignal\` option must be an AbortSignal: ${String(cancelSignal)}`);
-	}
+	validateAbortSignal(cancelSignal, 'cancelSignal');
 };
 
 // The `signal` option was renamed to `cancelSignal`. Validated for every method, otherwise synchronous methods would silently ignore it, since `child_process.spawnSync()` does not support that option either.
@@ -32980,18 +33195,9 @@ const terminateOnCancel = async (kill, cancelSignal, context, {signal}) => {
 	throw cancelSignal.reason;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/utils/options.js
-// The options of methods like `subprocess.pipe()`, `subprocess.readable()` or `sendMessage()` are kept on a null-prototype object, otherwise a polluted `Object.prototype` would inject option values.
-// Like destructuring them, `null` throws.
-const copyOptions = (options = {}) => {
-	if (options === null) {
-		throw new TypeError('The options must be an object, not `null`.');
-	}
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/validation.js
 
-	return {__proto__: null, ...options};
-};
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/validation.js
 // Validate the IPC channel is connected before receiving/sending messages
 const validateIpcMethod = ({methodName, isSubprocess, ipc, isConnected}) => {
 	validateIpcOption(methodName, isSubprocess, ipc);
@@ -33062,7 +33268,16 @@ const handleEpipeError = ({error, methodName, isSubprocess}) => {
 // Works with both `serialization: 'advanced'` and `serialization: 'json'`.
 const handleSerializationError = ({error, methodName, isSubprocess, message}) => {
 	if (isSerializationError(error)) {
-		throw new Error(`${getMethodName(methodName, isSubprocess)}'s argument type is invalid: the message cannot be serialized: ${String(message)}.`, {cause: error});
+		throw new Error(`${getMethodName(methodName, isSubprocess)}'s argument type is invalid: the message cannot be serialized: ${serializeInvalidMessage(message)}.`, {cause: error});
+	}
+};
+
+// `String()` throws with objects that have a `null` prototype or a throwing `toString()` method
+const serializeInvalidMessage = message => {
+	try {
+		return String(message);
+	} catch {
+		return (0,external_node_util_.inspect)(message);
 	}
 };
 
@@ -33104,7 +33319,7 @@ const disconnect = anyProcess => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/utils/deferred.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/utils/deferred.js
 const createDeferred = () => {
 	const methods = {};
 	const promise = new Promise((resolve, reject) => {
@@ -33113,7 +33328,7 @@ const createDeferred = () => {
 	return Object.assign(promise, methods);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/utils/max-listeners.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/utils/max-listeners.js
 
 
 // Temporarily increase the maximum number of listeners on an eventEmitter
@@ -33129,7 +33344,7 @@ const incrementMaxListeners = (eventEmitter, maxListenersIncrement, signal) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/reference.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/reference.js
 // By default, Node.js keeps the subprocess alive while it has a `message` or `disconnect` listener.
 // We replicate the same logic for the events that we proxy.
 // This ensures the subprocess is kept alive while `getOneMessage()` and `getEachMessage()` are ongoing.
@@ -33179,7 +33394,7 @@ const redoAddedReferences = (channel, isSubprocess) => {
 	addReferenceCount(channel);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/incoming.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/incoming.js
 
 
 
@@ -33267,7 +33482,7 @@ const onDisconnect = async ({anyProcess, channel, isSubprocess, ipcEmitter, boun
 
 const INCOMING_MESSAGES = new WeakMap();
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/forward.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/forward.js
 
 
 
@@ -33283,6 +33498,8 @@ const getIpcEmitter = (anyProcess, channel, isSubprocess) => {
 	// Use an `EventEmitter`, like the `process` that is being proxied
 	// eslint-disable-next-line unicorn/prefer-event-target
 	const ipcEmitter = new external_node_events_.EventEmitter();
+	// Each pending `getOneMessage()` or `getEachMessage()` call adds listeners, which are removed once it ends. Users cannot reach this emitter to increase its maximum number of listeners.
+	ipcEmitter.setMaxListeners(0);
 	ipcEmitter.connected = true;
 	IPC_EMITTERS.set(anyProcess, ipcEmitter);
 	forwardEvents({
@@ -33325,7 +33542,7 @@ const isConnected = anyProcess => {
 		: ipcEmitter.connected;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/strict.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/strict.js
 
 
 
@@ -33356,7 +33573,7 @@ let count = 0;
 // Handles when both processes are calling `sendMessage()` with `strict` at the same time.
 // If neither process is listening, this would create a deadlock. We detect it and throw.
 const validateStrictDeadlock = (outgoingMessages, wrappedMessage) => {
-	if (wrappedMessage?.type !== REQUEST_TYPE || wrappedMessage.hasListeners) {
+	if (!isStrictRequest(wrappedMessage) || wrappedMessage.hasListeners) {
 		return;
 	}
 
@@ -33369,11 +33586,16 @@ const validateStrictDeadlock = (outgoingMessages, wrappedMessage) => {
 
 // The other process then sends the acknowledgment back as a response
 const handleStrictRequest = async ({wrappedMessage, anyProcess, channel, isSubprocess, ipcEmitter}) => {
-	if (wrappedMessage?.type !== REQUEST_TYPE || !anyProcess.connected) {
+	if (!isStrictRequest(wrappedMessage)) {
 		return wrappedMessage;
 	}
 
 	const {id, message} = wrappedMessage;
+	// The acknowledgment cannot be sent anymore, but the message is still delivered
+	if (!anyProcess.connected) {
+		return message;
+	}
+
 	const response = {id, type: RESPONSE_TYPE, message: hasMessageListeners(anyProcess, ipcEmitter)};
 
 	try {
@@ -33384,7 +33606,10 @@ const handleStrictRequest = async ({wrappedMessage, anyProcess, channel, isSubpr
 			ipc: true,
 		}, response);
 	} catch (error) {
-		ipcEmitter.emit('strict:error', error);
+		// When the other process disconnects right after sending the message, it cannot receive the acknowledgment anymore. Like above, the message is still delivered.
+		if (error.cause?.code !== 'EPIPE') {
+			ipcEmitter.emit('strict:error', error);
+		}
 	}
 
 	return message;
@@ -33408,10 +33633,6 @@ const handleStrictResponse = (wrappedMessage, anyProcess) => {
 
 // Wait for the other process to receive the message from `sendMessage()`
 const waitForStrictResponse = async (wrappedMessage, anyProcess, isSubprocess) => {
-	if (wrappedMessage?.type !== REQUEST_TYPE) {
-		return;
-	}
-
 	const deferred = createDeferred();
 	STRICT_RESPONSES[wrappedMessage.id] = {deferred, anyProcess};
 	const controller = new AbortController();
@@ -33446,7 +33667,13 @@ const throwOnDisconnect = async (anyProcess, isSubprocess, {signal}) => {
 const REQUEST_TYPE = 'execa:ipc:request';
 const RESPONSE_TYPE = 'execa:ipc:response';
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/outgoing.js
+// `id` and `hasListeners` are always defined in messages sent by `sendMessage()` with the `strict` option.
+// Messages with the same `type` but without them are user messages, which must be delivered as is.
+const isStrictRequest = wrappedMessage => wrappedMessage?.type === REQUEST_TYPE
+	&& Number.isInteger(wrappedMessage.id)
+	&& typeof wrappedMessage.hasListeners === 'boolean';
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/outgoing.js
 
 
 
@@ -33501,7 +33728,7 @@ const getMinListenerCount = anyProcess => getOptions(anyProcess) !== undefined
 
 const getOptions = anyProcess => IPC_SUBPROCESS_OPTIONS.get(anyProcess);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/send.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/send.js
 
 
 
@@ -33514,6 +33741,7 @@ const getOptions = anyProcess => IPC_SUBPROCESS_OPTIONS.get(anyProcess);
 // Also, this would prevent `unhandledRejection` event from being emitted, making it silent.
 const sendMessage = ({anyProcess, channel, isSubprocess, ipc}, message, options) => {
 	const {strict = false} = copyOptions(options);
+	checkBooleanOption(strict, 'strict');
 	const methodName = 'sendMessage';
 	validateIpcMethod({
 		methodName,
@@ -33548,6 +33776,7 @@ const sendMessageAsync = async ({anyProcess, channel, methodName, isSubprocess, 
 			isSubprocess,
 			wrappedMessage,
 			message,
+			strict,
 		});
 	} catch (error) {
 		disconnect(anyProcess);
@@ -33558,12 +33787,13 @@ const sendMessageAsync = async ({anyProcess, channel, methodName, isSubprocess, 
 };
 
 // Used internally by `cancelSignal`
-const sendOneMessage = async ({anyProcess, methodName, isSubprocess, wrappedMessage, message}) => {
+const sendOneMessage = async ({anyProcess, methodName, isSubprocess, wrappedMessage, message, strict = false}) => {
 	const sendMethod = getSendMethod(anyProcess);
 
 	try {
 		await Promise.all([
-			waitForStrictResponse(wrappedMessage, anyProcess, isSubprocess),
+			// Only messages sent with the `strict` option wait for an acknowledgment response
+			strict ? waitForStrictResponse(wrappedMessage, anyProcess, isSubprocess) : undefined,
 			sendMethod(wrappedMessage),
 		]);
 	} catch (error) {
@@ -33591,7 +33821,7 @@ const getSendMethod = anyProcess => {
 
 const PROCESS_SEND_METHODS = new WeakMap();
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/graceful.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/graceful.js
 
 
 
@@ -33635,7 +33865,8 @@ const startIpc = async ({anyProcess, channel, isSubprocess, ipc}) => {
 
 	isCancelListening = true;
 
-	if (channel === null) {
+	// `channel` is retrieved when Execa is imported, so the current process might have disconnected since then
+	if (!anyProcess.connected) {
 		abortOnDisconnect();
 		return;
 	}
@@ -33666,7 +33897,7 @@ const abortOnDisconnect = () => {
 
 const cancelController = new AbortController();
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/terminate/graceful.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/terminate/graceful.js
 
 
 
@@ -33741,30 +33972,7 @@ const getReason = ({reason}) => {
 	return error;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/terminate/timeout.js
-
-
-
-// Validate `timeout` option
-const validateTimeout = ({timeout}) => {
-	if (timeout !== undefined && (!Number.isFinite(timeout) || timeout < 0)) {
-		throw new TypeError(`Expected the \`timeout\` option to be a non-negative integer, got \`${timeout}\` (${typeof timeout})`);
-	}
-};
-
-// Fails when the `timeout` option is exceeded
-const throwOnTimeout = (kill, timeout, context, controller) => timeout === 0 || timeout === undefined
-	? []
-	: [killAfterTimeout(kill, timeout, context, controller)];
-
-const killAfterTimeout = async (kill, timeout, context, {signal}) => {
-	await (0,promises_namespaceObject.setTimeout)(timeout, undefined, {signal});
-	context.terminationReason ??= 'timeout';
-	kill();
-	throw new DiscardedError();
-};
-
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/node.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/node.js
 
 
 
@@ -33778,19 +33986,46 @@ const mapNode = ({options}) => {
 	return {options: {__proto__: null, ...options, node: true}};
 };
 
+// The subprocess must not reuse the current process' `--inspect` port.
+// It must not run the current process' `node --eval` or `node --print` code either, instead of its file. Like `child_process.fork()`, this prevents fork bombs.
+const getDefaultNodeOptions = () => {
+	const nodeOptions = [];
+	for (let index = 0; index < external_node_process_namespaceObject.execArgv.length; index += 1) {
+		const nodeOption = external_node_process_namespaceObject.execArgv[index];
+		if (REMOVED_OPTIONS_WITH_VALUE.has(nodeOption)) {
+			// `-p` and `--print` do not take a value when followed by another flag, e.g. `node -p -e code`. With the other options, Node.js fails when their value starts with `-`.
+			if (!external_node_process_namespaceObject.execArgv[index + 1]?.startsWith('-')) {
+				index += 1;
+			}
+		} else if (!IGNORED_OPTIONS_REGEXP.test(nodeOption)) {
+			nodeOptions.push(nodeOption);
+		}
+	}
+
+	return nodeOptions;
+};
+
+// Those options are followed by a separate value, which is removed too
+const REMOVED_OPTIONS_WITH_VALUE = new Set(['-e', '--eval', '-p', '--print', '-pe', '--input-type', '--inspect-port']);
+const IGNORED_OPTIONS_REGEXP = /^--(?:inspect|eval=|input-type=)/;
+
 // Applies the `node: true` option, and the related `nodePath`/`nodeOptions` options.
 // Modifies the file commands/arguments to ensure the same Node binary and flags are re-used.
 // Also adds `ipc: true` and `shell: false`.
 const handleNodeOption = (file, commandArguments, {
 	node: shouldHandleNode = false,
 	nodePath = external_node_process_namespaceObject.execPath,
-	nodeOptions = external_node_process_namespaceObject.execArgv.filter(nodeOption => !nodeOption.startsWith('--inspect')),
+	nodeOptions = getDefaultNodeOptions(),
 	cwd,
 	execPath: formerNodePath,
 	...options
 }) => {
 	if (formerNodePath !== undefined) {
 		throw new TypeError('The "execPath" option has been removed. Please use the "nodePath" option instead.');
+	}
+
+	if (!Array.isArray(nodeOptions) || nodeOptions.some(nodeOption => typeof nodeOption !== 'string')) {
+		throw new TypeError('The "nodeOptions" option must be an array of strings.');
 	}
 
 	const normalizedNodePath = safeNormalizeFileUrl(nodePath, 'The "nodePath" option');
@@ -33822,8 +34057,9 @@ const handleNodeOption = (file, commandArguments, {
 		],
 		{
 			__proto__: null,
-			ipc: true,
 			...newOptions,
+			// Like other options, `undefined` uses the default value
+			ipc: newOptions.ipc === undefined ? true : newOptions.ipc,
 			shell: false,
 		},
 	];
@@ -33831,7 +34067,7 @@ const handleNodeOption = (file, commandArguments, {
 
 ;// CONCATENATED MODULE: external "node:v8"
 const external_node_v8_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:v8");
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/ipc-input.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/ipc-input.js
 
 
 
@@ -33888,7 +34124,7 @@ const sendIpcInput = async (subprocess, ipcInput, ipc) => {
 	}, ipcInput);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/encoding-option.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/encoding-option.js
 // Validate `encoding` option
 const validateEncoding = ({encoding}) => {
 	if (ENCODINGS.has(encoding)) {
@@ -34129,7 +34365,7 @@ function whichCommandAllSync(command, options = {}) {
 	return [...new Set(found)];
 }
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/command-file.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/command-file.js
 
 
 
@@ -34364,7 +34600,7 @@ const shouldQuoteArgument = argument => argument === ''
 	|| argument.endsWith('\\')
 	|| quotedCharacterRegExp.test(argument);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/cwd.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/cwd.js
 
 
 
@@ -34409,7 +34645,8 @@ const fixCwdError = (originalMessage, cwd) => {
 	return cwdStat.isDirectory() ? originalMessage : `The "cwd" option is not a directory: ${cwd}.\n${originalMessage}`;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/options.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/options.js
+
 
 
 
@@ -34437,6 +34674,8 @@ const normalizeOptions = (filePath, rawArguments, rawOptions) => {
 	const [processedFile, processedArguments, processedOptions] = handleNodeOption(filePath, rawArguments, sanitizedOptions);
 	const fdOptions = normalizeFdSpecificOptions(processedOptions);
 	const options = addDefaultOptions(fdOptions);
+	validateBooleanOptions(options);
+	validateEnv(options);
 	options.env = getEnv(options);
 
 	const {file, commandArguments} = parseCommandFile(processedFile, processedArguments, options);
@@ -34459,6 +34698,32 @@ const normalizeOptions = (filePath, rawArguments, rawOptions) => {
 	}
 
 	return {file, commandArguments, options};
+};
+
+const BOOLEAN_OPTIONS = [
+	'extendEnv',
+	'preferLocal',
+	'reject',
+	'cleanup',
+	'killDescendants',
+	'all',
+	'gracefulCancel',
+	'ipc',
+	'node',
+];
+
+// Wrong types must be reported instead of being silently coerced, e.g. the string 'false' enabling an option
+const validateBooleanOptions = options => {
+	for (const optionName of BOOLEAN_OPTIONS) {
+		checkBooleanOption(options[optionName], optionName);
+	}
+};
+
+// A non-object `env` would be spread into unrelated properties, e.g. its characters when a string
+const validateEnv = ({env}) => {
+	if (env !== undefined && (typeof env !== 'object' || env === null || Array.isArray(env))) {
+		throw new TypeError(`The \`env\` option must be an object: ${String(env)}.`);
+	}
 };
 
 // Use null prototype to prevent prototype pollution from leaking through
@@ -34526,7 +34791,7 @@ const computeEnv = ({env: envOption, extendEnv, preferLocal, node, localDirector
 };
 
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/shell.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/shell.js
 // When the `shell` option is set, any command argument is concatenated as a single string by Node.js:
 // https://github.com/nodejs/node/blob/e38ce27f3ca0a65f68a31cedd984cddb927d4002/lib/child_process.js#L614-L624
 // However, since Node 24, it also prints a deprecation warning.
@@ -34538,6 +34803,134 @@ const computeEnv = ({env: envOption, extendEnv, preferLocal, node, localDirector
 const concatenateShell = (file, commandArguments, options) => options.shell && commandArguments.length > 0
 	? [[file, ...commandArguments].join(' '), [], options]
 	: [file, commandArguments, options];
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/split.js
+
+
+// Split chunks line-wise for generators passed to the `std*` options
+const getSplitLinesGenerator = (binary, preserveNewlines, skipped, state) => binary || skipped
+	? undefined
+	: initializeSplitLines(preserveNewlines, state);
+
+// Same but for synchronous methods
+const splitLinesSync = (chunk, preserveNewlines, objectMode) => objectMode
+	? chunk.flatMap(item => splitLinesItemSync(item, preserveNewlines))
+	: splitLinesItemSync(chunk, preserveNewlines);
+
+const splitLinesItemSync = (chunk, preserveNewlines) => {
+	const {transform, final} = initializeSplitLines(preserveNewlines, {});
+	return [...transform(chunk), ...final()];
+};
+
+const initializeSplitLines = (preserveNewlines, state) => {
+	state.previousChunks = '';
+	return {
+		transform: splitGenerator.bind(undefined, state, preserveNewlines),
+		final: linesFinal.bind(undefined, state),
+	};
+};
+
+// This imperative logic is much faster than using `String.split()` and uses very low memory.
+const splitGenerator = function * (state, preserveNewlines, chunk) {
+	if (typeof chunk !== 'string') {
+		yield chunk;
+		return;
+	}
+
+	let {previousChunks} = state;
+	let start = -1;
+
+	for (let end = 0; end < chunk.length; end += 1) {
+		if (chunk[end] !== '\n') {
+			continue;
+		}
+
+		// The `\r` of a `\r\n` sequence is stripped further below, once `previousChunks` has been prepended.
+		// Otherwise, a `\r\n` sequence split across two chunks would not be detected.
+		let line = chunk.slice(start + 1, preserveNewlines ? end + 1 : end);
+
+		if (previousChunks.length > 0) {
+			line = concatString(previousChunks, line);
+			previousChunks = '';
+		}
+
+		yield preserveNewlines ? line : stripCarriageReturn(line, state);
+		start = end;
+	}
+
+	if (start !== chunk.length - 1) {
+		previousChunks = concatString(previousChunks, chunk.slice(start + 1));
+	}
+
+	state.previousChunks = previousChunks;
+};
+
+const stripCarriageReturn = (line, state) => {
+	state.isWindowsNewline = line.endsWith('\r');
+	return state.isWindowsNewline ? line.slice(0, -1) : line;
+};
+
+const linesFinal = function * ({previousChunks}) {
+	if (previousChunks.length > 0) {
+		yield previousChunks;
+	}
+};
+
+// Unless `preserveNewlines: true` is used, we strip the newline of each line.
+// This re-adds them after the user `transform` code has run.
+// The re-added newline must be encoded with the `encoding` option when the chunk is bytes: a UTF-8 newline would misalign `utf16le` bytes.
+const getAppendNewlineGenerator = ({binary, preserveNewlines, readableObjectMode, state, encoding}) => binary || preserveNewlines || readableObjectMode
+	? undefined
+	: {transform: appendNewlineGenerator.bind(undefined, state, getStringEncoding(binary, encoding))};
+
+const appendNewlineGenerator = function * ({isWindowsNewline = false}, stringEncoding, chunk) {
+	const {unixNewline, windowsNewline, concat} = typeof chunk === 'string'
+		? linesStringInfo
+		: LINES_BYTES_INFO[stringEncoding];
+
+	if (endsWithNewline(chunk, unixNewline)) {
+		yield chunk;
+		return;
+	}
+
+	const newline = isWindowsNewline ? windowsNewline : unixNewline;
+	yield concat(chunk, newline);
+};
+
+const endsWithNewline = (chunk, unixNewline) => typeof chunk === 'string'
+	? chunk.endsWith(unixNewline)
+	: chunk.length >= unixNewline.length
+		&& chunk.subarray(-unixNewline.length).every((byte, index) => byte === unixNewline[index]);
+
+const concatString = (firstChunk, secondChunk) => `${firstChunk}${secondChunk}`;
+
+const linesStringInfo = {
+	windowsNewline: '\r\n',
+	unixNewline: '\n',
+	concat: concatString,
+};
+
+const concatUint8Array = (firstChunk, secondChunk) => {
+	const chunk = new Uint8Array(firstChunk.length + secondChunk.length);
+	chunk.set(firstChunk, 0);
+	chunk.set(secondChunk, firstChunk.length);
+	return chunk;
+};
+
+// Only indexed with text encodings, since the `binary` option and binary encodings disable this generator
+const LINES_BYTES_INFO = {
+	__proto__: null,
+	utf8: {
+		windowsNewline: new Uint8Array([0x0D, 0x0A]),
+		unixNewline: new Uint8Array([0x0A]),
+		concat: concatUint8Array,
+	},
+	utf16le: {
+		windowsNewline: new Uint8Array([0x0D, 0x00, 0x0A, 0x00]),
+		unixNewline: new Uint8Array([0x0A, 0x00]),
+		concat: concatUint8Array,
+	},
+};
 
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/strip-final-newline@4.0.0/node_modules/strip-final-newline/index.js
 function strip_final_newline_stripFinalNewline(input) {
@@ -34566,6 +34959,79 @@ const LF = '\n';
 const LF_BINARY = LF.codePointAt(0);
 const CR = '\r';
 const CR_BINARY = CR.codePointAt(0);
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/strip-newline.js
+
+
+// Apply `stripFinalNewline` option, which applies to `result.stdout|stderr|all|stdio[*]`.
+// If the `lines` option is used, it is applied on each line, but using a different function.
+const stripNewline = (value, {stripFinalNewline}, fdNumber, allFds) => value !== undefined && !Array.isArray(value) && getStripFinalNewline(stripFinalNewline, fdNumber, allFds)
+	? strip_final_newline_stripFinalNewline(value)
+	: value;
+
+// Retrieve `stripFinalNewline` option value, including with `subprocess.all`
+// With `subprocess.all`, `allFds` are the file descriptors it actually interleaves. Only those are considered, otherwise a single one would be stripped because another one defaults to being stripped.
+const getStripFinalNewline = (stripFinalNewline, fdNumber, allFds) => fdNumber === 'all'
+	? allFds.some(allFd => stripFinalNewline[allFd])
+	: stripFinalNewline[fdNumber];
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/resolve/all-sync.js
+
+
+
+
+
+// The file descriptors which `result.all` interleaves. Those are the ones with an output, like with the `all` stream.
+const getAllSyncFds = ([, stdout, stderr]) => [
+	...(stdout === undefined ? [] : [1]),
+	...(stderr === undefined ? [] : [2]),
+];
+
+// Retrieve `result.all` with synchronous methods
+const getAllSync = ([, stdout, stderr], allFds, options) => {
+	if (!options.all) {
+		return;
+	}
+
+	if (stdout === undefined) {
+		return splitAllLines(stderr, allFds, options);
+	}
+
+	if (stderr === undefined) {
+		return splitAllLines(stdout, allFds, options);
+	}
+
+	// Like asynchronous methods, `all` is split into lines as soon as the `lines` option applies to either file descriptor.
+	// A file descriptor which uses the `lines` option is already split with its own `stripFinalNewline` value, like `result.stdout` and `result.stderr` are. The other one is split with the `stripFinalNewline` value of `result.all`.
+	// This differs from asynchronous methods, which cannot tell which file descriptor the merged output's last newline belongs to.
+	if (hasLines(options)) {
+		return [splitAllLines(stdout, allFds, options), splitAllLines(stderr, allFds, options)].flat();
+	}
+
+	// Without the `lines` option, arrays can only come from object mode, which does not apply to the other file descriptor.
+	// Like asynchronous methods, that other file descriptor is omitted when it is empty.
+	if (Array.isArray(stdout) || Array.isArray(stderr)) {
+		return [stdout, stderr].filter(value => value.length > 0).flat();
+	}
+
+	if (isUint8Array(stdout) && isUint8Array(stderr)) {
+		return concatUint8Arrays([stdout, stderr]);
+	}
+
+	return BASE64_ENCODINGS.has(options.encoding) ? concatBase64(stdout, stderr, options.encoding) : `${stdout}${stderr}`;
+};
+
+// Unlike other encodings, base64 strings cannot be concatenated, since the first one might end with padding
+const concatBase64 = (stdout, stderr, encoding) => external_node_buffer_.Buffer.concat([external_node_buffer_.Buffer.from(stdout, encoding), external_node_buffer_.Buffer.from(stderr, encoding)]).toString(encoding);
+
+const BASE64_ENCODINGS = new Set(['base64', 'base64url']);
+
+const hasLines = ({lines}) => Boolean(lines[1] || lines[2]);
+
+// Each file descriptor is either already split into lines, or is a string which still needs to be split
+const splitAllLines = (value, allFds, options) => value === undefined || Array.isArray(value) || !hasLines(options)
+	? value
+	: splitLinesSync(value, !getStripFinalNewline(options.stripFinalNewline, 'all', allFds), false);
 
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/is-stream@4.0.1/node_modules/is-stream/index.js
 function isStream(stream, {checkOpen = true} = {}) {
@@ -34890,7 +35356,7 @@ class MaxBufferError extends Error {
 	}
 }
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/max-buffer.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/max-buffer.js
 
 
 
@@ -34994,7 +35460,7 @@ const truncateMaxBufferSync = (result, fdNumber, {maxBuffer, buffer}) => {
 	return buffer[fdNumber] && result.length > maxBufferValue ? result.slice(0, maxBufferValue) : result;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/return/message.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/return/message.js
 
 
 
@@ -35025,7 +35491,7 @@ const createMessages = ({
 	timeout,
 	cwd,
 }) => {
-	const errorCode = originalError?.code;
+	const errorCode = getErrorCode(originalError);
 	const prefix = getErrorPrefix({
 		originalError,
 		timedOut,
@@ -35057,6 +35523,9 @@ const createMessages = ({
 		.join('\n\n');
 	return {originalMessage, shortMessage, message};
 };
+
+// `DOMException`, e.g. the default `cancelSignal` reason, has a legacy numeric `code`, which is not an error code like `ENOENT`
+const getErrorCode = error => typeof error?.code === 'string' ? error.code : undefined;
 
 const getErrorPrefix = ({
 	originalError,
@@ -35122,8 +35591,9 @@ const getOriginalMessage = (originalError, cwd) => {
 		return;
 	}
 
+	// An `ExecaError` has no `originalMessage` when it was not caused by another error, e.g. with a non-zero exit code
 	const originalMessage = isExecaError(originalError)
-		? originalError.originalMessage
+		? originalError.originalMessage ?? ''
 		: String(originalError?.message ?? originalError);
 	const escapedOriginalMessage = escapeLines(fixCwdError(originalMessage, cwd));
 	return escapedOriginalMessage === '' ? undefined : escapedOriginalMessage;
@@ -35133,9 +35603,12 @@ const serializeIpcMessage = ipcMessage => typeof ipcMessage === 'string'
 	? ipcMessage
 	: (0,external_node_util_.inspect)(ipcMessage);
 
+// With the `lines` option, empty lines are kept. Only objects are omitted.
 const serializeMessagePart = messagePart => Array.isArray(messagePart)
-	? messagePart.map(messageItem => strip_final_newline_stripFinalNewline(serializeMessageItem(messageItem))).filter(Boolean).join('\n')
+	? messagePart.filter(messageItem => isTextItem(messageItem)).map(messageItem => strip_final_newline_stripFinalNewline(serializeMessageItem(messageItem))).join('\n')
 	: serializeMessageItem(messagePart);
+
+const isTextItem = messageItem => typeof messageItem === 'string' || isUint8Array(messageItem);
 
 const serializeMessageItem = messageItem => {
 	if (typeof messageItem === 'string') {
@@ -35145,7 +35618,8 @@ const serializeMessageItem = messageItem => {
 	return isUint8Array(messageItem) ? uint8ArrayToString(messageItem) : '';
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/return/result.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/return/result.js
+
 
 
 
@@ -35190,6 +35664,8 @@ const makeEarlyError = ({
 	options,
 	startTime,
 	isSync,
+	stdio = Array.from({length: fileDescriptors.length}),
+	all,
 }) => makeError({
 	error,
 	command,
@@ -35200,11 +35676,32 @@ const makeEarlyError = ({
 	isGracefullyCanceled: false,
 	isMaxBuffer: false,
 	isForcefullyTerminated: false,
-	stdio: Array.from({length: fileDescriptors.length}),
+	stdio,
+	all,
 	ipcOutput: [],
 	options,
 	isSync,
 });
+
+// When the subprocess fails to spawn, its output is empty, with the same shape as when it spawns but prints nothing
+const getEarlyErrorOutput = (fileDescriptors, options) => {
+	const stdio = fileDescriptors.map((fileDescriptor, fdNumber) => getEmptyOutput(fileDescriptor, fdNumber, options));
+	return {stdio, all: getAllSync(stdio, getAllSyncFds(stdio), options)};
+};
+
+const getEmptyOutput = ({direction, objectMode}, fdNumber, {stdio, buffer, lines, encoding}) => {
+	if (direction === 'input' || !PIPED_STDIO.has(stdio[fdNumber]) || !buffer[fdNumber]) {
+		return;
+	}
+
+	if (objectMode || lines[fdNumber]) {
+		return [];
+	}
+
+	return encoding === 'buffer' ? new Uint8Array() : '';
+};
+
+const PIPED_STDIO = new Set(['pipe', 'overlapped']);
 
 // Object returned on subprocess failure
 const makeError = ({
@@ -35313,7 +35810,7 @@ const getErrorProperties = ({
 	exitCode,
 	signal,
 	signalDescription,
-	code: error.cause?.code,
+	code: getErrorCode(error.cause),
 	stdout: stdio[1],
 	stderr: stdio[2],
 	all,
@@ -35532,7 +36029,7 @@ function prettyMilliseconds(milliseconds, options) {
 	return sign + result.join(separator);
 }
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/error.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/error.js
 
 
 // When `verbose` is `short|full|custom`, print each command's error when it fails
@@ -35547,7 +36044,7 @@ const logError = (result, verboseInfo) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/complete.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/complete.js
 
 
 
@@ -35573,7 +36070,7 @@ const logDuration = (result, verboseInfo) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/return/reject.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/return/reject.js
 
 
 // Applies the `reject` option.
@@ -35588,7 +36085,8 @@ const handleResult = (result, verboseInfo, {reject}) => {
 	return result;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/type.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/type.js
+
 
 
 
@@ -35691,12 +36189,6 @@ const getGeneratorObjectType = ({transform, final, binary, objectMode}, optionNa
 	return isAsyncGenerator(transform) || isAsyncGenerator(final) ? 'asyncGenerator' : 'generator';
 };
 
-const checkBooleanOption = (value, optionName) => {
-	if (value !== undefined && typeof value !== 'boolean') {
-		throw new TypeError(`The \`${optionName}\` option must use a boolean.`);
-	}
-};
-
 const isGenerator = value => isAsyncGenerator(value) || isSyncGenerator(value);
 const isAsyncGenerator = value => Object.prototype.toString.call(value) === '[object AsyncGeneratorFunction]';
 const isSyncGenerator = value => Object.prototype.toString.call(value) === '[object GeneratorFunction]';
@@ -35763,7 +36255,7 @@ const TYPE_TO_MESSAGE = {
 	uint8Array: 'a Uint8Array',
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/object-mode.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/object-mode.js
 
 
 /*
@@ -35806,7 +36298,7 @@ const getFdObjectMode = (stdioItems, direction) => {
 		: lastTransform.value.readableObjectMode;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/normalize.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/normalize.js
 
 
 
@@ -35914,7 +36406,7 @@ const normalizeGenerator = ({stdioItem, stdioItem: {value}, index, newTransforms
 
 const sortTransforms = (newTransforms, direction) => direction === 'input' ? newTransforms.reverse() : newTransforms;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/direction.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/direction.js
 
 
 
@@ -36032,13 +36524,14 @@ const getStandardStreamDirection = value => {
 // When the ambiguity remains, we default to `output` since it is the most common use case for additional file descriptors.
 const DEFAULT_DIRECTION = 'output';
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/array.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/array.js
 // The `ipc` option adds an `ipc` item to the `stdio` option
 const normalizeIpcStdioArray = (stdioArray, ipc) => ipc
 	? [...stdioArray, 'ipc']
 	: stdioArray;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/stdio-option.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/stdio-option.js
+
 
 
 
@@ -36081,7 +36574,7 @@ const getStdioArray = (stdio, options) => {
 	}
 
 	if (!Array.isArray(stdio)) {
-		throw new TypeError(`Expected \`stdio\` to be of type \`string\` or \`Array\`, got \`${typeof stdio}\``);
+		throw new TypeError(`Expected \`stdio\` to be of type \`string\` or \`Array\`, got \`${getTypeName(stdio)}\``);
 	}
 
 	const length = Math.max(stdio.length, STANDARD_STREAMS_ALIASES.length);
@@ -36130,7 +36623,7 @@ const isFixedOutputPipe = (fdNumber, input) => input === true && isStandardOutpu
 
 const isStandardOutputFd = fdNumber => fdNumber === 1 || fdNumber === 2;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/arguments/fd-options.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/fd-options.js
 
 
 // Retrieve stream targeted by the `to` option
@@ -36237,7 +36730,7 @@ const serializeOptionValue = value => {
 	return typeof value === 'number' ? `${value}` : 'Stream';
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/native.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/native.js
 
 
 
@@ -36342,7 +36835,7 @@ const getStandardStream = (fdNumber, value, optionName) => {
 	return standardStream;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/input-option.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/input-option.js
 
 
 
@@ -36398,7 +36891,7 @@ const getInputFileType = inputFile => {
 	throw new Error('The `inputFile` option must be a file path string or a file URL.');
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/duplicate.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/duplicate.js
 
 
 
@@ -36524,7 +37017,9 @@ const throwOnDuplicateStream = (stdioItem, optionName, type) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/handle.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/handle.js
+
+
 
 
 
@@ -36597,7 +37092,7 @@ const initializeStdioItems = ({stdioOption, fdNumber, options, optionName}) => {
 	const stdioItems = filterDuplicates(initialStdioItems);
 	const isStdioArray = stdioItems.length > 1;
 	validateStdioArray(stdioItems, isStdioArray, optionName);
-	validateStreams(stdioItems);
+	validateStreams(stdioItems, isStdioArray);
 	return {stdioItems, isStdioArray};
 };
 
@@ -36653,10 +37148,11 @@ const validateStdioArray = (stdioItems, isStdioArray, optionName) => {
 // However, we do allow it if the array has a single item.
 const INVALID_STDIO_ARRAY_OPTIONS = new Set(['ignore']);
 
-const validateStreams = stdioItems => {
+const validateStreams = (stdioItems, isStdioArray) => {
 	for (const stdioItem of stdioItems) {
 		validateFileStdio(stdioItem);
 		validateFileDescriptorStdio(stdioItem);
+		validateNativeStdio(stdioItem, isStdioArray);
 	}
 };
 
@@ -36669,6 +37165,30 @@ const validateFileDescriptorStdio = ({type, value, optionName}) => {
 
 // `node:child_process` converts file descriptors to a 32-bit signed integer, and aborts the process when it cannot
 const MAX_FILE_DESCRIPTOR = (2 ** 31) - 1;
+
+// When passed alone, any unknown value fails when calling `node:child_process`.
+// However, when an array is used, Execa only forwards `pipe` to `node:child_process`, so unknown values would be silently ignored.
+// Valid values are the ones `node:child_process` accepts: known strings, file descriptor integers, Node.js streams and file handles.
+// File handles are the exception: they are valid alone, but Execa's array emulation cannot handle them, so they would be silently ignored.
+const validateNativeStdio = ({type, value, optionName}, isStdioArray) => {
+	if (type !== 'native') {
+		return;
+	}
+
+	if (isFileHandle(value)) {
+		if (isStdioArray) {
+			throw new TypeError(`The \`${optionName}\` option cannot combine file handles with other values.`);
+		}
+
+		return;
+	}
+
+	if (typeof value !== 'string' && typeof value !== 'number' && !isStream(value, {checkOpen: false})) {
+		throw new TypeError(`The \`${optionName}\` option is invalid: ${String(value)} (${typeof value}).`);
+	}
+};
+
+const isFileHandle = value => typeof value?.fd === 'number' && !isStream(value, {checkOpen: false});
 
 const validateFileStdio = ({type, value, optionName}) => {
 	if (isRegularUrl(value)) {
@@ -36731,6 +37251,7 @@ const addFinalFileDescriptor = ({fileDescriptor, fileDescriptors, addProperties,
 			stdioItem,
 			addProperties,
 			direction,
+			objectMode,
 			options,
 			fileDescriptors,
 			isSync,
@@ -36738,7 +37259,7 @@ const addFinalFileDescriptor = ({fileDescriptor, fileDescriptors, addProperties,
 	}
 };
 
-const addStreamProperties = ({stdioItem, addProperties, direction, options, fileDescriptors, isSync}) => {
+const addStreamProperties = ({stdioItem, addProperties, direction, objectMode, options, fileDescriptors, isSync}) => {
 	const duplicateStream = getDuplicateStream({
 		stdioItem,
 		direction,
@@ -36752,7 +37273,7 @@ const addStreamProperties = ({stdioItem, addProperties, direction, options, file
 
 	return {
 		...stdioItem,
-		...addProperties[direction][stdioItem.type](stdioItem, options),
+		...addProperties[direction][stdioItem.type](stdioItem, options, objectMode),
 	};
 };
 
@@ -36785,7 +37306,7 @@ const forwardStdio = stdioItems => {
 	return type === 'native' ? value : 'pipe';
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/handle-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/handle-sync.js
 
 
 
@@ -36816,6 +37337,13 @@ const forbiddenNativeInputIfSync = stdioItem => {
 	return forbiddenNativeIfSync(stdioItem);
 };
 
+// For the same reason, an input transform can only be used with `stdin`, which is fed with the `input` option
+const forbiddenInputTransformIfSync = ({optionName}) => {
+	if (optionName !== 'stdin') {
+		throw new TypeError(`Only the \`stdin\` option, not \`${optionName}\`, can be an input transform with synchronous methods.`);
+	}
+};
+
 const throwInvalidSyncValue = (optionName, value) => {
 	throw new TypeError(`The \`${optionName}\` option cannot be ${value} with synchronous methods.`);
 };
@@ -36836,12 +37364,13 @@ const addProperties = {
 const addPropertiesSync = {
 	input: {
 		...addProperties,
+		generator: forbiddenInputTransformIfSync,
 		native: forbiddenNativeInputIfSync,
-		// Files are read lazily, so that a file which cannot be read is reported like any other early error, instead of being thrown as a raw error
+		// Files and iterables are read lazily, so that a file which cannot be read, or an iterable which throws, is reported like any other early error, instead of being thrown as a raw error
 		fileUrl: ({value}) => ({contents: () => [bufferToUint8Array((0,external_node_fs_namespaceObject.readFileSync)(value))]}),
 		filePath: ({value: {file}}) => ({contents: () => [bufferToUint8Array((0,external_node_fs_namespaceObject.readFileSync)(file))]}),
 		fileNumber: forbiddenIfSync,
-		iterable: ({value}) => ({contents: [...value]}),
+		iterable: ({value}) => ({contents: () => [...value]}),
 		string: ({value}) => ({contents: [value]}),
 		// `contents` is already set when reading from a file descriptor
 		uint8Array: ({value, contents = [value]}) => ({contents}),
@@ -36857,152 +37386,9 @@ const addPropertiesSync = {
 	},
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/strip-newline.js
-
-
-// Apply `stripFinalNewline` option, which applies to `result.stdout|stderr|all|stdio[*]`.
-// If the `lines` option is used, it is applied on each line, but using a different function.
-const stripNewline = (value, {stripFinalNewline}, fdNumber, allFds) => value !== undefined && !Array.isArray(value) && getStripFinalNewline(stripFinalNewline, fdNumber, allFds)
-	? strip_final_newline_stripFinalNewline(value)
-	: value;
-
-// Retrieve `stripFinalNewline` option value, including with `subprocess.all`
-// With `subprocess.all`, `allFds` are the file descriptors it actually interleaves. Only those are considered, otherwise a single one would be stripped because another one defaults to being stripped.
-const getStripFinalNewline = (stripFinalNewline, fdNumber, allFds) => fdNumber === 'all'
-	? allFds.some(allFd => stripFinalNewline[allFd])
-	: stripFinalNewline[fdNumber];
-
 // EXTERNAL MODULE: external "node:stream"
 var external_node_stream_ = __nccwpck_require__(7075);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/split.js
-
-
-// Split chunks line-wise for generators passed to the `std*` options
-const getSplitLinesGenerator = (binary, preserveNewlines, skipped, state) => binary || skipped
-	? undefined
-	: initializeSplitLines(preserveNewlines, state);
-
-// Same but for synchronous methods
-const splitLinesSync = (chunk, preserveNewlines, objectMode) => objectMode
-	? chunk.flatMap(item => splitLinesItemSync(item, preserveNewlines))
-	: splitLinesItemSync(chunk, preserveNewlines);
-
-const splitLinesItemSync = (chunk, preserveNewlines) => {
-	const {transform, final} = initializeSplitLines(preserveNewlines, {});
-	return [...transform(chunk), ...final()];
-};
-
-const initializeSplitLines = (preserveNewlines, state) => {
-	state.previousChunks = '';
-	return {
-		transform: splitGenerator.bind(undefined, state, preserveNewlines),
-		final: linesFinal.bind(undefined, state),
-	};
-};
-
-// This imperative logic is much faster than using `String.split()` and uses very low memory.
-const splitGenerator = function * (state, preserveNewlines, chunk) {
-	if (typeof chunk !== 'string') {
-		yield chunk;
-		return;
-	}
-
-	let {previousChunks} = state;
-	let start = -1;
-
-	for (let end = 0; end < chunk.length; end += 1) {
-		if (chunk[end] !== '\n') {
-			continue;
-		}
-
-		// The `\r` of a `\r\n` sequence is stripped further below, once `previousChunks` has been prepended.
-		// Otherwise, a `\r\n` sequence split across two chunks would not be detected.
-		let line = chunk.slice(start + 1, preserveNewlines ? end + 1 : end);
-
-		if (previousChunks.length > 0) {
-			line = concatString(previousChunks, line);
-			previousChunks = '';
-		}
-
-		yield preserveNewlines ? line : stripCarriageReturn(line, state);
-		start = end;
-	}
-
-	if (start !== chunk.length - 1) {
-		previousChunks = concatString(previousChunks, chunk.slice(start + 1));
-	}
-
-	state.previousChunks = previousChunks;
-};
-
-const stripCarriageReturn = (line, state) => {
-	state.isWindowsNewline = line.endsWith('\r');
-	return state.isWindowsNewline ? line.slice(0, -1) : line;
-};
-
-const linesFinal = function * ({previousChunks}) {
-	if (previousChunks.length > 0) {
-		yield previousChunks;
-	}
-};
-
-// Unless `preserveNewlines: true` is used, we strip the newline of each line.
-// This re-adds them after the user `transform` code has run.
-// The re-added newline must be encoded with the `encoding` option when the chunk is bytes: a UTF-8 newline would misalign `utf16le` bytes.
-const getAppendNewlineGenerator = ({binary, preserveNewlines, readableObjectMode, state, encoding}) => binary || preserveNewlines || readableObjectMode
-	? undefined
-	: {transform: appendNewlineGenerator.bind(undefined, state, getStringEncoding(binary, encoding))};
-
-const appendNewlineGenerator = function * ({isWindowsNewline = false}, stringEncoding, chunk) {
-	const {unixNewline, windowsNewline, concat} = typeof chunk === 'string'
-		? linesStringInfo
-		: LINES_BYTES_INFO[stringEncoding];
-
-	if (endsWithNewline(chunk, unixNewline)) {
-		yield chunk;
-		return;
-	}
-
-	const newline = isWindowsNewline ? windowsNewline : unixNewline;
-	yield concat(chunk, newline);
-};
-
-const endsWithNewline = (chunk, unixNewline) => typeof chunk === 'string'
-	? chunk.endsWith(unixNewline)
-	: chunk.length >= unixNewline.length
-		&& chunk.subarray(-unixNewline.length).every((byte, index) => byte === unixNewline[index]);
-
-const concatString = (firstChunk, secondChunk) => `${firstChunk}${secondChunk}`;
-
-const linesStringInfo = {
-	windowsNewline: '\r\n',
-	unixNewline: '\n',
-	concat: concatString,
-};
-
-const concatUint8Array = (firstChunk, secondChunk) => {
-	const chunk = new Uint8Array(firstChunk.length + secondChunk.length);
-	chunk.set(firstChunk, 0);
-	chunk.set(secondChunk, firstChunk.length);
-	return chunk;
-};
-
-// Only indexed with text encodings, since the `binary` option and binary encodings disable this generator
-const LINES_BYTES_INFO = {
-	__proto__: null,
-	utf8: {
-		windowsNewline: new Uint8Array([0x0D, 0x0A]),
-		unixNewline: new Uint8Array([0x0A]),
-		concat: concatUint8Array,
-	},
-	utf16le: {
-		windowsNewline: new Uint8Array([0x0D, 0x00, 0x0A, 0x00]),
-		unixNewline: new Uint8Array([0x0A, 0x00]),
-		concat: concatUint8Array,
-	},
-};
-
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/validate.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/validate.js
 
 
 
@@ -37047,7 +37433,7 @@ Instead, \`yield\` should either be called with a value, or not be called at all
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/encoding-transform.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/encoding-transform.js
 
 
 
@@ -37115,7 +37501,7 @@ const stringToBytesGenerator = function * (stringEncoding, chunk) {
 	yield typeof chunk === 'string' ? bufferToUint8Array(external_node_buffer_.Buffer.from(chunk, stringEncoding)) : chunk;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/run-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/run-async.js
 
 
 // Applies a series of generator functions asynchronously
@@ -37177,7 +37563,7 @@ const identityGenerator = function * (chunk) {
 	yield chunk;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/run-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/run-sync.js
 // Duplicate the code from `run-async.js` but as synchronous functions
 const pushChunksSync = (getChunksSync, getChunksArguments, transformStream, done) => {
 	try {
@@ -37229,7 +37615,7 @@ const run_sync_identityGenerator = function * (chunk) {
 	yield chunk;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/transform/generator.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/generator.js
 
 
 
@@ -37339,7 +37725,7 @@ const addInternalGenerators = (
 	].filter(Boolean);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/input-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/input-sync.js
 
 
 
@@ -37369,10 +37755,14 @@ const addInputOptionSync = (fileDescriptors, fdNumber, options) => {
 	}
 
 	// All input sources are merged into a single list of chunks, like asynchronous methods merge input streams, so that transforms receive a single stream of data: line splitting spans all sources and `final` runs only once.
-	// Files are read lazily, so that a read failure is reported like any other early error
-	const chunks = allStdioItems.flatMap(({contents}) => typeof contents === 'function' ? contents() : contents);
+	// Files and iterables are read lazily, so that a read failure is reported like any other early error
+	const chunks = allStdioItems.flatMap(({type, contents}) => getChunks(type, typeof contents === 'function' ? contents() : contents));
 	options.input = applyInputGeneratorsSync(chunks, stdioItems, options.encoding);
 };
+
+// Like with asynchronous methods, an empty input is not passed as a chunk, otherwise binary transforms, which do not split lines, would run on it.
+// Iterables are left as is, since each of their items is a chunk.
+const getChunks = (type, chunks) => type === 'iterable' ? chunks : chunks.filter(chunk => chunk.length > 0);
 
 const applyInputGeneratorsSync = (chunks, stdioItems, encoding) => {
 	// Input transforms use UTF-8 with text encodings, since those only apply to the output
@@ -37382,13 +37772,20 @@ const applyInputGeneratorsSync = (chunks, stdioItems, encoding) => {
 };
 
 const validateSerializable = newContents => {
-	const invalidItem = newContents.find(item => typeof item !== 'string' && !isUint8Array(item));
+	const invalidItem = newContents.find(item => !isSerializableInput(item));
 	if (invalidItem !== undefined) {
-		throw new TypeError(`The \`stdin\` option is invalid: when passing objects as input, a transform must be used to serialize them to strings or Uint8Arrays: ${invalidItem}.`);
+		throwOnSerializableInput('stdin', invalidItem);
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/output.js
+// Values written to the subprocess, which is not in object mode
+const isSerializableInput = item => typeof item === 'string' || isUint8Array(item);
+
+const throwOnSerializableInput = (optionName, invalidItem) => {
+	throw new TypeError(`The \`${optionName}\` option is invalid: when passing objects as input, a transform must be used to serialize them to strings or Uint8Arrays: ${invalidItem}.`);
+};
+
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/output.js
 
 
 
@@ -37452,7 +37849,7 @@ const logLine = (line, fdNumber, verboseInfo) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/output-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/output-sync.js
 
 
 
@@ -37614,54 +38011,7 @@ const writeToFiles = (chunks, stdioItems, outputFiles) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/resolve/all-sync.js
-
-
-
-
-// The file descriptors which `result.all` interleaves. Those are the ones with an output, like with the `all` stream.
-const getAllSyncFds = ([, stdout, stderr]) => [
-	...(stdout === undefined ? [] : [1]),
-	...(stderr === undefined ? [] : [2]),
-];
-
-// Retrieve `result.all` with synchronous methods
-const getAllSync = ([, stdout, stderr], allFds, options) => {
-	if (!options.all) {
-		return;
-	}
-
-	if (stdout === undefined) {
-		return splitAllLines(stderr, allFds, options);
-	}
-
-	if (stderr === undefined) {
-		return splitAllLines(stdout, allFds, options);
-	}
-
-	// Like asynchronous methods, `all` is split into lines as soon as the `lines` option applies to either file descriptor.
-	// A file descriptor which uses the `lines` option is already split with its own `stripFinalNewline` value, like `result.stdout` and `result.stderr` are. The other one is split with the `stripFinalNewline` value of `result.all`.
-	// This differs from asynchronous methods, which cannot tell which file descriptor the merged output's last newline belongs to.
-	if (hasLines(options)) {
-		return [splitAllLines(stdout, allFds, options), splitAllLines(stderr, allFds, options)].flat();
-	}
-
-	// Without the `lines` option, arrays can only come from object mode, which does not apply to the other file descriptor
-	if (Array.isArray(stdout) || Array.isArray(stderr)) {
-		return [stdout, stderr].flat();
-	}
-
-	return isUint8Array(stdout) && isUint8Array(stderr) ? concatUint8Arrays([stdout, stderr]) : `${stdout}${stderr}`;
-};
-
-const hasLines = ({lines}) => Boolean(lines[1] || lines[2]);
-
-// Each file descriptor is either already split into lines, or is a string which still needs to be split
-const splitAllLines = (value, allFds, options) => value === undefined || Array.isArray(value) || !hasLines(options)
-	? value
-	: splitLinesSync(value, !getStripFinalNewline(options.stripFinalNewline, 'all', allFds), false);
-
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/resolve/exit-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/resolve/exit-async.js
 
 
 
@@ -37717,7 +38067,7 @@ const isSubprocessErrorExit = (exitCode, signal) => exitCode === undefined && si
 // When the subprocess fails due to a non-0 exit code or to a signal termination
 const isFailedExit = (exitCode, signal) => exitCode !== 0 || signal !== null;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/resolve/exit-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/resolve/exit-sync.js
 
 
 
@@ -37752,7 +38102,7 @@ const getResultError = (error, exitCode, signal) => {
 	return isFailedExit(exitCode, signal) ? new DiscardedError() : undefined;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/main-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/main-sync.js
 
 
 
@@ -37887,6 +38237,7 @@ const runSubprocessSync = ({file, commandArguments, options, command, escapedCom
 			options,
 			startTime,
 			isSync: true,
+			...getEarlyErrorOutput(fileDescriptors, options),
 		});
 	}
 };
@@ -37923,7 +38274,7 @@ const getSyncResult = ({error, exitCode, signal, timedOut, isMaxBuffer, stdio, a
 		isSync: true,
 	});
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/get-one.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/get-one.js
 
 
 
@@ -37968,7 +38319,11 @@ const getOneMessageAsync = async ({anyProcess, channel, isSubprocess, filter, re
 			throwOnStrictError(ipcEmitter, isSubprocess, controller),
 		]);
 	} catch (error) {
-		disconnect(anyProcess);
+		// When the internal `signal` stops the read, e.g. when a `.pipe()` is canceled, the subprocess keeps running and can still use IPC
+		if (!signal?.aborted) {
+			disconnect(anyProcess);
+		}
+
 		throw error;
 	} finally {
 		controller.abort();
@@ -38014,7 +38369,7 @@ const throwOnStrictError = async (ipcEmitter, isSubprocess, {signal}) => {
 	throw getStrictResponseError(error, isSubprocess);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/get-each.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/get-each.js
 
 
 
@@ -38069,6 +38424,7 @@ const loopOnMessages = ({anyProcess, waitProcess = anyProcess, channel, isSubpro
 		controller,
 		state,
 		reference,
+		signal,
 	});
 };
 
@@ -38103,7 +38459,7 @@ const abortOnStrictError = async ({ipcEmitter, isSubprocess, controller, state})
 	} catch {}
 };
 
-const iterateOnMessages = async function * ({anyProcess, waitProcess, channel, ipcEmitter, isSubprocess, shouldAwait, controller, state, reference}) {
+const iterateOnMessages = async function * ({anyProcess, waitProcess, channel, ipcEmitter, isSubprocess, shouldAwait, controller, state, reference, signal}) {
 	try {
 		for await (const [message] of (0,external_node_events_.on)(ipcEmitter, 'message', {signal: controller.signal})) {
 			throwIfStrictError(state);
@@ -38115,7 +38471,8 @@ const iterateOnMessages = async function * ({anyProcess, waitProcess, channel, i
 		controller.abort();
 		removeReference(channel, reference);
 
-		if (!isSubprocess) {
+		// When the internal `signal` stops the iteration, e.g. when a `.pipe()` is canceled, the subprocess keeps running and can still use IPC
+		if (!isSubprocess && !signal?.aborted) {
 			disconnect(anyProcess);
 		}
 
@@ -38131,7 +38488,7 @@ const throwIfStrictError = ({error}) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/methods.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/methods.js
 
 
 
@@ -38183,7 +38540,7 @@ const getIpcMethods = (anyProcess, isSubprocess, ipc, waitProcess = anyProcess) 
 	}),
 });
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/return/early-error.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/return/early-error.js
 
 
 
@@ -38235,8 +38592,11 @@ const createDummyStreams = (subprocess, fileDescriptors) => {
 	return all;
 };
 
+// Writing to an ended stream emits an error, which would crash the current process when the user writes to `subprocess.stdin`.
+// Like when the subprocess exits before reading its input, that input is discarded instead.
 const createDummyStream = () => {
 	const stream = new external_node_stream_.PassThrough();
+	stream.on('error', () => {});
 	stream.end();
 	return stream;
 };
@@ -38290,11 +38650,13 @@ const handleDummyPromise = async ({error, command, escapedCommand, fileDescripto
 		options,
 		startTime,
 		isSync: false,
+		...getEarlyErrorOutput(fileDescriptors, options),
 	});
 	return handleResult(earlyError, verboseInfo, options);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/stdio/handle-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/handle-async.js
+
 
 
 
@@ -38317,14 +38679,42 @@ const handle_async_addProperties = {
 	generator: generatorToStream,
 	asyncGenerator: generatorToStream,
 	nodeStream: ({value}) => ({stream: value}),
-	webTransform({value: {transform, writableObjectMode, readableObjectMode}}) {
-		const objectMode = writableObjectMode || readableObjectMode;
-		const stream = external_node_stream_.Duplex.fromWeb(transform, {objectMode});
-		return {stream};
-	},
+	// `Duplex.fromWeb()` uses the same `objectMode` for both sides
+	webTransform: ({value: {transform, writableObjectMode, readableObjectMode}}) => ({
+		stream: external_node_stream_.Duplex.from({
+			writable: external_node_stream_.Writable.fromWeb(transform.writable, {objectMode: writableObjectMode}),
+			readable: external_node_stream_.Readable.fromWeb(transform.readable, {objectMode: readableObjectMode}),
+		}),
+	}),
 	duplex: ({value: {transform}}) => ({stream: transform}),
 	native() {},
 };
+
+// Without transforms in object mode, iterable values are written to the subprocess, which only accepts strings and Uint8Arrays.
+// `Readable.from()` emits the values of synchronous iterables on a later tick, where `subprocess.stdin.write()` throwing would crash the current process. Throwing while iterating errors the stream instead.
+// Synchronous iterables must stay synchronous, otherwise their order would change when they are combined with other input sources.
+const validateIterable = function * (iterable, optionName) {
+	for (const value of iterable) {
+		validateIterableValue(value, optionName);
+		yield value;
+	}
+};
+
+const validateAsyncIterable = async function * (iterable, optionName) {
+	for await (const value of iterable) {
+		validateIterableValue(value, optionName);
+		yield value;
+	}
+};
+
+const validateIterableValue = (value, optionName) => {
+	if (!isSerializableInput(value)) {
+		throwOnSerializableInput(optionName, value);
+	}
+};
+
+// Empty input is not passed as a chunk, otherwise binary transforms, which do not split lines, would run on it
+const readableFromChunk = chunk => external_node_stream_.Readable.from(chunk.length === 0 ? [] : [chunk]);
 
 // Input transforms use UTF-8 with text encodings, since those only apply to the output
 const generatorToInputStream = (stdioItem, {encoding}) => generatorToStream(stdioItem, {encoding: getInputEncoding(encoding)});
@@ -38337,10 +38727,10 @@ const addPropertiesAsync = {
 		fileUrl: ({value}) => ({stream: (0,external_node_fs_namespaceObject.createReadStream)(value)}),
 		filePath: ({value: {file}}) => ({stream: (0,external_node_fs_namespaceObject.createReadStream)(file)}),
 		webStream: ({value}) => ({stream: external_node_stream_.Readable.fromWeb(value)}),
-		iterable: ({value}) => ({stream: external_node_stream_.Readable.from(value)}),
-		asyncIterable: ({value}) => ({stream: external_node_stream_.Readable.from(value)}),
-		string: ({value}) => ({stream: external_node_stream_.Readable.from(value)}),
-		uint8Array: ({value}) => ({stream: external_node_stream_.Readable.from(external_node_buffer_.Buffer.from(value))}),
+		iterable: ({value, optionName}, options, objectMode) => ({stream: external_node_stream_.Readable.from(objectMode ? value : validateIterable(value, optionName))}),
+		asyncIterable: ({value, optionName}, options, objectMode) => ({stream: external_node_stream_.Readable.from(objectMode ? value : validateAsyncIterable(value, optionName))}),
+		string: ({value}) => ({stream: readableFromChunk(value)}),
+		uint8Array: ({value}) => ({stream: readableFromChunk(external_node_buffer_.Buffer.from(value))}),
 	},
 	output: {
 		...handle_async_addProperties,
@@ -38623,15 +39013,16 @@ const PASSTHROUGH_LISTENERS_COUNT = 2;
 //  - once due to `stream.pipe(passThroughStream)`
 const PASSTHROUGH_LISTENERS_PER_STREAM = 1;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/pipeline.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/pipeline.js
 
 
 
-// Similar to `Stream.pipeline(source, destination)`, but does not destroy standard streams
-const pipeStreams = (source, destination) => {
+// Similar to `Stream.pipeline(source, destination)`, but does not destroy standard streams.
+// `onDestinationEnd` runs when the destination ends, before the source is aborted.
+const pipeStreams = (source, destination, onDestinationEnd) => {
 	source.pipe(destination);
 	onSourceFinish(source, destination);
-	onDestinationFinish(source, destination);
+	onDestinationFinish(source, destination, onDestinationEnd);
 };
 
 // `source.pipe(destination)` makes `destination` end when `source` ends.
@@ -38655,7 +39046,7 @@ const endDestinationStream = destination => {
 };
 
 // We do the same thing in the other direction as well.
-const onDestinationFinish = async (source, destination) => {
+const onDestinationFinish = async (source, destination, onDestinationEnd) => {
 	if (isStandardStream(source) || isStandardStream(destination)) {
 		return;
 	}
@@ -38663,6 +39054,10 @@ const onDestinationFinish = async (source, destination) => {
 	try {
 		await (0,external_node_stream_promises_namespaceObject.finished)(destination, {cleanup: true, readable: false, writable: true});
 	} catch {}
+
+	if (onDestinationEnd !== undefined) {
+		await onDestinationEnd();
+	}
 
 	abortSourceStream(source);
 };
@@ -38673,7 +39068,7 @@ const abortSourceStream = source => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/output-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/output-async.js
 
 
 
@@ -38759,7 +39154,7 @@ const MAX_LISTENERS_INCREMENT = 2;
 
 ;// CONCATENATED MODULE: external "node:path/win32"
 const win32_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path/win32");
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/terminate/kill-descendants.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/terminate/kill-descendants.js
 
 
 
@@ -39172,7 +39567,7 @@ load,
  */
 unload, } = signalExitWrap(processOk(mjs_process) ? new SignalExit(mjs_process) : new SignalExitFallback());
 //# sourceMappingURL=index.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/terminate/cleanup.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/terminate/cleanup.js
 
 
 
@@ -39190,7 +39585,7 @@ const cleanupOnExit = (kill, {cleanup, detached}, {signal}) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/concurrent.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/concurrent.js
 
 
 // When using multiple `.readable()`/`.writable()`/`.duplex()`, `final` and `destroy` should wait for other streams
@@ -39225,7 +39620,7 @@ const waitForConcurrentStreams = async ({resolve, promises}, subprocess) => {
 	return !isSubprocessExit;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/iterate.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/iterate.js
 
 
 
@@ -39337,7 +39732,7 @@ const getGenerators = ({binary, shouldEncode, encoding, shouldSplit, preserveNew
 	getSplitLinesGenerator(binary, preserveNewlines, !shouldSplit, {}),
 ].filter(Boolean);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/iterable.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/iterable.js
 
 
 
@@ -39346,6 +39741,8 @@ const getGenerators = ({binary, shouldEncode, encoding, shouldSplit, preserveNew
 // Convert the subprocess to an async iterable
 const createIterable = (subprocess, encoding, options) => {
 	const {from, binary: binaryOption = false, preserveNewlines = false} = copyOptions(options);
+	checkBooleanOption(binaryOption, 'binary');
+	checkBooleanOption(preserveNewlines, 'preserveNewlines');
 	const binary = binaryOption || BINARY_ENCODINGS.has(encoding);
 	const subprocessStdout = getFromStream(subprocess, from);
 	const onStdoutData = iterateOnSubprocessStream({
@@ -39371,7 +39768,7 @@ const iterateOnStdoutData = async function * (onStdoutData, subprocessStdout, su
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/resolve/wait-stream.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/resolve/wait-stream.js
 
 
 // Wraps `finished(stream)` to handle the following case:
@@ -39396,7 +39793,7 @@ const waitForStream = async (stream, fdNumber, streamInfo, {
 			}),
 		]);
 	} catch (error) {
-		if (!state.stdinCleanedUp) {
+		if (!state.stdinCleanedUp && !isInputTransformAbort(stream, fdNumber, streamInfo, error)) {
 			handleStreamError(error, fdNumber, streamInfo, isSameDirection);
 		}
 	} finally {
@@ -39415,10 +39812,11 @@ const waitForStream = async (stream, fdNumber, streamInfo, {
 // Therefore `.destroy()` might end before or after subprocess exit, based on OS speed and load.
 // The only way to detect this is to spy on `subprocess.stdin._destroy()` by wrapping it.
 // If `subprocess.exitCode` or `subprocess.signalCode` is set, it means `.destroy()` is being called by Node.js itself.
+// With an input transform, `subprocess.stdin` is that transform, so Node.js destroys it instead of the original `stdin`.
 const handleStdinDestroy = (stream, {originalStreams, subprocess}) => {
 	const [originalStdin] = originalStreams;
 	const state = {stdinCleanedUp: false};
-	if (stream === originalStdin) {
+	if (stream === originalStdin || stream === subprocess.stdin) {
 		spyOnStdinDestroy(stream, subprocess, state);
 	}
 
@@ -39437,6 +39835,18 @@ const setStdinCleanedUp = ({exitCode, signalCode}, state) => {
 	if (exitCode !== null || signalCode !== null) {
 		state.stdinCleanedUp = true;
 	}
+};
+
+// An input transform writes to the subprocess' original stream. When that stream is closed first, e.g. when the subprocess exits without reading its input, the transform is aborted.
+// Like `EPIPE` with `stdin: 'pipe'`, this is not an error.
+// When the transform is aborted by the user instead, the original stream is still open at that point.
+const isInputTransformAbort = (stream, fdNumber, streamInfo, error) => {
+	const originalStream = streamInfo.originalStreams[fdNumber];
+	return stream !== originalStream
+		&& isInputFileDescriptor(streamInfo, fdNumber)
+		&& originalStream?.destroyed === true
+		// A `TransformStream` is aborted with an `AbortError`
+		&& (isStreamAbort(error) || error?.code === 'ABORT_ERR');
 };
 
 // We ignore EPIPEs on writable streams and aborts on readable streams since those can happen normally.
@@ -39471,6 +39881,7 @@ const isInputFileDescriptor = ({fileDescriptors}, fdNumber) => fdNumber !== 'all
 // When `stream.destroy()` is called without an `error` argument, stream is aborted.
 // This is the only way to abort a readable stream, which can be useful in some instances.
 // Therefore, we ignore this error on readable streams.
+// Breaking out of `for await (const chunk of subprocess.stdout)` aborts it with an `AbortError` instead. However, that error cannot be told apart from an `AbortError` thrown by a transform, which must make the subprocess fail. So this is not supported, and `subprocess.readable()` or `subprocess.iterable()` should be used instead.
 const isStreamAbort = error => error?.code === 'ERR_STREAM_PREMATURE_CLOSE';
 
 // When `stream.write()` is called but the underlying source has been closed, `EPIPE` is emitted.
@@ -39480,7 +39891,7 @@ const isStreamAbort = error => error?.code === 'ERR_STREAM_PREMATURE_CLOSE';
 // Therefore, we ignore this error on writable streams.
 const isStreamEpipe = error => error?.code === 'EPIPE';
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/shared.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/shared.js
 
 
 
@@ -39512,9 +39923,9 @@ const waitForSubprocessStdout = async subprocessStdout => {
 	await (0,external_node_stream_promises_namespaceObject.finished)(subprocessStdout, {cleanup: true, readable: true, writable: false});
 };
 
-// When `readable` or `writable` aborts/errors, awaits the subprocess, for the reason mentioned above
-const waitForSubprocess = async (subprocess, error) => {
-	await subprocess;
+// When `readable` or `writable` aborts/errors, the caller awaits the subprocess, for the reason mentioned above.
+// Then, the error passed to `stream.destroy(error)` is emitted, including when the subprocess has already ended.
+const throwDestroyError = error => {
 	if (error) {
 		throw error;
 	}
@@ -39528,7 +39939,7 @@ const destroyOtherStream = (stream, isOpen, error) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/readable.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/readable.js
 
 
 
@@ -39542,6 +39953,8 @@ const destroyOtherStream = (stream, isOpen, error) => {
 // Create a `Readable` stream that forwards from `stdout` and awaits the subprocess
 const createReadable = ({subprocess, concurrentStreams, encoding}, options) => {
 	const {from, binary: binaryOption = true, preserveNewlines = true} = copyOptions(options);
+	checkBooleanOption(binaryOption, 'binary');
+	checkBooleanOption(preserveNewlines, 'preserveNewlines');
 	const binary = binaryOption || BINARY_ENCODINGS.has(encoding);
 	const {subprocessStdout, waitReadableDestroy} = getSubprocessStdout(subprocess, from, concurrentStreams);
 	const {readableEncoding, readableObjectMode, readableHighWaterMark} = getReadableOptions(subprocessStdout, binary);
@@ -39644,19 +40057,20 @@ const getPrematureCloseError = async (subprocess, error) => {
 
 // When `readable` aborts/errors, do the same on `subprocess.stdout`
 const onReadableDestroy = async ({subprocessStdout, subprocess, waitReadableDestroy}, error) => {
-	if (!await waitForConcurrentStreams(waitReadableDestroy, subprocess)) {
-		return;
+	if (await waitForConcurrentStreams(waitReadableDestroy, subprocess)) {
+		// Breaking out of `for await (const chunk of readable)` or cancelling `subprocess.readableStream()` destroys `readable` with an `AbortError`. Like `readable.destroy()`, this aborts `subprocess.stdout` instead of making it fail.
+		destroyOtherReadable(subprocessStdout, error?.code === 'ABORT_ERR' ? undefined : error);
+		await subprocess;
 	}
 
-	destroyOtherReadable(subprocessStdout, error);
-	await waitForSubprocess(subprocess, error);
+	throwDestroyError(error);
 };
 
 const destroyOtherReadable = (stream, error) => {
 	destroyOtherStream(stream, stream.readable, error);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/web.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/web.js
 
 
 // Web stream versions of `subprocess.readable()`, `subprocess.writable()` and `subprocess.duplex()`.
@@ -39665,7 +40079,8 @@ const createReadableStream = (subprocess, readableOptions) => external_node_stre
 const createWritableStream = (subprocess, writableOptions) => external_node_stream_.Writable.toWeb(subprocess.writable(writableOptions));
 const createTransformStream = (subprocess, duplexOptions) => external_node_stream_.Duplex.toWeb(subprocess.duplex(duplexOptions));
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/pipe/pipe-arguments.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/pipe/pipe-arguments.js
+
 
 
 
@@ -39685,6 +40100,7 @@ const normalizePipeArguments = ({source, sourcePromise, boundOptions, createNest
 	const {sourceStream, sourceError} = getSourceStream(source, from);
 	const {options: sourceOptions, fileDescriptors} = SUBPROCESS_OPTIONS.get(source);
 	return {
+		source,
 		sourcePromise,
 		sourceStream,
 		sourceOptions,
@@ -39711,6 +40127,7 @@ const getDestinationStream = (boundOptions, createNested, pipeArguments) => {
 
 	try {
 		const {from, to, unpipeSignal} = copyOptions(pipeOptions);
+		validateAbortSignal(unpipeSignal, 'unpipeSignal');
 		const destinationStream = getToStream(destination, to);
 		return {
 			destination,
@@ -39789,7 +40206,7 @@ const getSourceStream = (source, from) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/pipe/throw.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/pipe/throw.js
 
 
 
@@ -39851,7 +40268,7 @@ const createNonCommandError = ({error, fileDescriptors, sourceOptions, startTime
 
 const PIPE_COMMAND_MESSAGE = 'source.pipe(destination)';
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/pipe/sequence.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/pipe/sequence.js
 // Like Bash, we await both subprocesses. This is unlike some other shells which only await the destination subprocess.
 // Like Bash with the `pipefail` option, if either subprocess fails, the whole pipe fails.
 // Like Bash, if both subprocesses fail, we return the failure of the destination.
@@ -39860,10 +40277,11 @@ const waitForBothSubprocesses = async subprocessPromises => {
 	const [
 		{status: sourceStatus, reason: sourceReason, value: sourceResult = sourceReason},
 		{status: destinationStatus, reason: destinationReason, value: destinationResult = destinationReason},
+		{reason: pipedFromReason, value: pipedFromResult = pipedFromReason},
 	] = await subprocessPromises;
 
-	if (!destinationResult.pipedFrom.includes(sourceResult)) {
-		destinationResult.pipedFrom.push(sourceResult);
+	if (!destinationResult.pipedFrom.includes(pipedFromResult)) {
+		destinationResult.pipedFrom.push(pipedFromResult);
 	}
 
 	if (destinationStatus === 'rejected') {
@@ -39877,7 +40295,7 @@ const waitForBothSubprocesses = async subprocessPromises => {
 	return destinationResult;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/pipe/streaming.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/pipe/streaming.js
 
 
 
@@ -39902,7 +40320,8 @@ const pipeSubprocessStream = (sourceStream, destinationStream, maxListenersContr
 // We use `merge-streams` to allow for multiple sources to pipe to the same destination.
 const pipeFirstSubprocessStream = (sourceStream, destinationStream) => {
 	const mergedStream = mergeStreams([sourceStream]);
-	pipeStreams(mergedStream, destinationStream);
+	addMergeSource(mergedStream, sourceStream);
+	pipeStreams(mergedStream, destinationStream, () => unpipeSourcesOnDestinationEnd(mergedStream));
 	MERGED_STREAMS.set(destinationStream, mergedStream);
 	return mergedStream;
 };
@@ -39910,7 +40329,49 @@ const pipeFirstSubprocessStream = (sourceStream, destinationStream) => {
 const pipeMoreSubprocessStream = (sourceStream, destinationStream) => {
 	const mergedStream = MERGED_STREAMS.get(destinationStream);
 	mergedStream.add(sourceStream);
+	addMergeSource(mergedStream, sourceStream);
 	return mergedStream;
+};
+
+/*
+One source stream can be piped to multiple destinations, e.g. `subprocess.pipe(first)` and `subprocess.pipe(second)`.
+When a destination ends, its source must only be aborted when it is its last destination, so the other destinations keep receiving data.
+Sources with several destinations are then only removed from the ended destination's merge stream, instead of being aborted.
+This also holds when a source has been piped to one destination and unpiped from another one.
+*/
+const MERGE_SOURCES = new WeakMap();
+const SOURCE_MERGES = new WeakMap();
+
+const addMergeSource = (mergedStream, sourceStream) => {
+	addToSetMap(MERGE_SOURCES, mergedStream, sourceStream);
+	addToSetMap(SOURCE_MERGES, sourceStream, mergedStream);
+};
+
+const addToSetMap = (map, key, value) => {
+	if (!map.has(key)) {
+		map.set(key, new Set());
+	}
+
+	map.get(key).add(value);
+};
+
+// Stop piping a source into a destination, e.g. with the `unpipeSignal` option
+const unpipeSubprocessStream = async (mergedStream, sourceStream) => {
+	MERGE_SOURCES.get(mergedStream)?.delete(sourceStream);
+	SOURCE_MERGES.get(sourceStream)?.delete(mergedStream);
+	await mergedStream.remove(sourceStream);
+};
+
+const unpipeSourcesOnDestinationEnd = async mergedStream => {
+	for (const sourceStream of MERGE_SOURCES.get(mergedStream)) {
+		const mergedStreams = SOURCE_MERGES.get(sourceStream);
+		mergedStreams.delete(mergedStream);
+		if (mergedStreams.size > 0) {
+			// Other destinations still need that source, so it must not be aborted
+			// eslint-disable-next-line no-await-in-loop
+			await mergedStream.remove(sourceStream);
+		}
+	}
 };
 
 const cleanupMergedStreamsMap = async destinationStream => {
@@ -39930,7 +40391,8 @@ const SOURCE_LISTENERS_PER_PIPE = 2;
 // Those are added by `finished()` in `cleanupMergedStreamsMap()`
 const DESTINATION_LISTENERS_PER_PIPE = 1;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/pipe/abort.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/pipe/abort.js
+
 
 
 
@@ -39942,7 +40404,7 @@ const unpipeOnAbort = (unpipeSignal, unpipeContext) => unpipeSignal === undefine
 
 const unpipeOnSignalAbort = async (unpipeSignal, {sourceStream, mergedStream, fileDescriptors, sourceOptions, startTime}) => {
 	await (0,external_node_util_.aborted)(unpipeSignal, sourceStream);
-	await mergedStream.remove(sourceStream);
+	await unpipeSubprocessStream(mergedStream, sourceStream);
 	const error = new Error('Pipe canceled by `unpipeSignal` option.');
 	throw createNonCommandError({
 		error,
@@ -39952,7 +40414,7 @@ const unpipeOnSignalAbort = async (unpipeSignal, {sourceStream, mergedStream, fi
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/pipe/setup.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/pipe/setup.js
 
 
 
@@ -39974,6 +40436,12 @@ const pipeToSubprocess = (sourceInfo, ...pipeArguments) => {
 			...sourceInfo,
 			boundOptions: {...sourceInfo.boundOptions, ...pipeArguments[0]},
 		});
+	}
+
+	// The previous `.pipe()` failed because of its arguments, so there is no source. Its promise rejects with that error.
+	// The destination is not spawned, since nothing would end its `stdin`.
+	if (sourceInfo.source === undefined) {
+		return sourceInfo.sourcePromise;
 	}
 
 	const {destination, ...normalizedInfo} = normalizePipeArguments(sourceInfo, ...pipeArguments);
@@ -40030,6 +40498,8 @@ const forwardAll = (promise, destination) => {
 		get() {
 			setAllProperty(promise, destination.all);
 			const all = promise.readable({from: 'all'});
+			// Like `subprocess.all`, the pipe's failure is handled by awaiting it, not by listening to the stream's `error` event. Consumers like `text(all)` still fail.
+			all.on('error', () => {});
 			setAllProperty(promise, all);
 			return all;
 		},
@@ -40136,6 +40606,7 @@ const abortOnSignal = (signal, controller) => {
 
 // Asynchronous logic when piping subprocesses
 const handlePipePromise = async ({
+	source,
 	sourcePromise,
 	sourceStream,
 	sourceOptions,
@@ -40150,7 +40621,7 @@ const handlePipePromise = async ({
 }) => {
 	const maxListenersController = new AbortController();
 	try {
-		const subprocessPromises = getSubprocessPromises(sourcePromise, destination);
+		const subprocessPromises = getSubprocessPromises(sourcePromise, destination, source);
 		handlePipeArgumentsError({
 			sourceStream,
 			sourceError,
@@ -40182,7 +40653,8 @@ const handlePipePromise = async ({
 // `.pipe()` awaits the subprocess promises.
 // When invalid arguments are passed to `.pipe()`, we throw an error, which prevents awaiting them.
 // We need to ensure this does not create unhandled rejections.
-const getSubprocessPromises = (sourcePromise, destination) => Promise.allSettled([sourcePromise, destination]);
+// With `source.pipe(destination).pipe(secondDestination)`, the second `sourcePromise` is the first `.pipe()`, which rejects with the error of either subprocess. However, `secondDestination` is only piped from `destination`.
+const getSubprocessPromises = (sourcePromise, destination, source) => Promise.allSettled([sourcePromise, destination, source]);
 
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/get-stream@9.0.1/node_modules/get-stream/source/utils.js
 const utils_identity = value => value;
@@ -40355,7 +40827,7 @@ const stringMethods = {
 	finalize: getContentsProperty,
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/io/contents.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/contents.js
 
 
 
@@ -40470,7 +40942,7 @@ const handleBufferedData = error => isArrayBuffer(error?.bufferedData)
 	? new Uint8Array(error.bufferedData)
 	: error?.bufferedData;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/resolve/stdio.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/resolve/stdio.js
 
 
 
@@ -40520,7 +40992,7 @@ const waitForSubprocessStream = async ({stream, fdNumber, encoding, buffer, maxB
 	return output;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/resolve/all-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/resolve/all-async.js
 
 
 
@@ -40592,7 +41064,7 @@ const getAllMixed = ({stdout, stderr}, all) => all
 	&& stderr
 	&& stdout.readableObjectMode !== stderr.readableObjectMode;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/verbose/ipc.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/ipc.js
 
 
 
@@ -40609,7 +41081,7 @@ const logIpcOutput = (message, verboseInfo) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/ipc/buffer-messages.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/buffer-messages.js
 
 
 
@@ -40668,7 +41140,7 @@ const getBufferedIpcOutput = async (ipcOutputPromise, ipcOutput) => {
 	return ipcOutput;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/resolve/wait-subprocess.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/resolve/wait-subprocess.js
 
 
 
@@ -40822,7 +41294,7 @@ const throwOnSubprocessError = async (subprocess, {signal}) => {
 	throw error;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/writable.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/writable.js
 
 
 
@@ -40898,7 +41370,8 @@ const onStdinFinished = async (subprocessStdin, writable, subprocessStdout, subp
 		}
 	} catch (error) {
 		await safeWaitForSubprocessStdout(subprocessStdout);
-		destroyOtherWritable(writable, await getSubprocessError(subprocess, error));
+		// `writable.writable` is already `false` once `writable.end()` is called, although its pending writes still wait for `stdin`
+		destroyOtherStream(writable, !writable.writableFinished, await getSubprocessError(subprocess, error));
 	}
 };
 
@@ -40916,25 +41389,27 @@ const getSubprocessError = async (subprocess, error) => {
 	return error;
 };
 
+// `EPIPE` happens when the subprocess fails without reading its `stdin`, e.g. when it fails to spawn
 const shouldUseSubprocessError = error => error === undefined
-	|| isStreamAbort(error);
+	|| isStreamAbort(error)
+	|| error.code === 'EPIPE';
 
 // When `writable` aborts/errors, do the same on `subprocess.stdin`
 const onWritableDestroy = async ({subprocessStdin, subprocess, waitWritableFinal, waitWritableDestroy}, error) => {
 	await waitForConcurrentStreams(waitWritableFinal, subprocess);
-	if (!await waitForConcurrentStreams(waitWritableDestroy, subprocess)) {
-		return;
+	if (await waitForConcurrentStreams(waitWritableDestroy, subprocess)) {
+		destroyOtherWritable(subprocessStdin, error);
+		await subprocess;
 	}
 
-	destroyOtherWritable(subprocessStdin, error);
-	await waitForSubprocess(subprocess, error);
+	throwDestroyError(error);
 };
 
 const destroyOtherWritable = (stream, error) => {
 	destroyOtherStream(stream, stream.writable, error);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/duplex.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/duplex.js
 
 
 
@@ -40945,6 +41420,8 @@ const destroyOtherWritable = (stream, error) => {
 // Create a `Duplex` stream combining both `subprocess.readable()` and `subprocess.writable()`
 const createDuplex = ({subprocess, concurrentStreams, encoding}, options) => {
 	const {from, to, binary: binaryOption = true, preserveNewlines = true} = copyOptions(options);
+	checkBooleanOption(binaryOption, 'binary');
+	checkBooleanOption(preserveNewlines, 'preserveNewlines');
 	const binary = binaryOption || BINARY_ENCODINGS.has(encoding);
 	const {subprocessStdout, waitReadableDestroy} = getSubprocessStdout(subprocess, from, concurrentStreams);
 	const {subprocessStdin, waitWritableFinal, waitWritableDestroy} = getSubprocessStdin(subprocess, to, concurrentStreams);
@@ -40996,7 +41473,7 @@ const onDuplexDestroy = async ({subprocessStdout, subprocessStdin, subprocess, w
 	]);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/convert/add.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/add.js
 
 
 
@@ -41017,11 +41494,11 @@ const addConvertedStreams = (subprocess, {encoding}) => {
 	subprocess[Symbol.asyncIterator] = createIterable.bind(undefined, subprocess, encoding, {});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/promise.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/promise.js
 // The return value is a native Promise with Execa-specific properties.
 const mergePromise = (promise, properties) => Object.assign(promise, properties);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/main-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/main-async.js
 
 
 
@@ -41268,7 +41745,7 @@ const getAsyncResult = ({errorInfo, exitCode, signal, stdio, all, ipcOutput, con
 		startTime,
 	});
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/bind.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/bind.js
 
 
 
@@ -41287,7 +41764,7 @@ const mergeOption = (optionName, boundOptionValue, optionValue) => DEEP_OPTIONS.
 
 const DEEP_OPTIONS = new Set(['env', ...FD_SPECIFIC_OPTIONS]);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/create.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/create.js
 
 
 
@@ -41354,7 +41831,7 @@ const parseArguments = ({mapArguments, firstArgument, nextArguments, deepOptions
 	};
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/lib/methods/script.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/script.js
 // Sets `$.sync` and `$.s`
 const setScriptSync = (boundExeca, createNested, boundOptions) => {
 	boundExeca.sync = createNested(mapScriptSync, boundOptions);
@@ -41378,7 +41855,7 @@ const getScriptStdinOption = ({input, inputFile, stdio}) => input === undefined 
 // However, some options (like `stdin: 'inherit'`) would create issues with piping, i.e. cannot be deep.
 const deepScriptOptions = {preferLocal: true};
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.0/node_modules/execa/index.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/index.js
 
 
 
@@ -42883,8 +43360,8 @@ class DecodedURL extends URL {
 //# sourceMappingURL=proxy.js.map
 // EXTERNAL MODULE: ./node_modules/.pnpm/tunnel@0.0.6/node_modules/tunnel/index.js
 var node_modules_tunnel = __nccwpck_require__(7013);
-// EXTERNAL MODULE: ./node_modules/.pnpm/undici@6.29.0/node_modules/undici/index.js
-var undici = __nccwpck_require__(9162);
+// EXTERNAL MODULE: ./node_modules/.pnpm/undici@6.29.1/node_modules/undici/index.js
+var undici = __nccwpck_require__(9309);
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/@actions+http-client@4.0.1/node_modules/@actions/http-client/lib/index.js
 /* eslint-disable @typescript-eslint/no-explicit-any */
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -45632,8 +46109,8 @@ class Context {
 //# sourceMappingURL=context.js.map
 // EXTERNAL MODULE: ./node_modules/.pnpm/@actions+http-client@3.0.2/node_modules/@actions/http-client/lib/index.js
 var lib = __nccwpck_require__(2504);
-// EXTERNAL MODULE: ./node_modules/.pnpm/undici@6.29.0/node_modules/undici/index.js
-var undici = __nccwpck_require__(9162);
+// EXTERNAL MODULE: ./node_modules/.pnpm/undici@6.29.1/node_modules/undici/index.js
+var undici = __nccwpck_require__(9309);
 ;// CONCATENATED MODULE: ./node_modules/.pnpm/@actions+github@9.1.1/node_modules/@actions/github/lib/internal/utils.js
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
