@@ -30396,7 +30396,7 @@ module.exports = {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8830);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(9389);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(4835);
 
 
 
@@ -30412,7 +30412,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 9389:
+/***/ 4835:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -31087,7 +31087,7 @@ function isPlainObject(value) {
 
 // EXTERNAL MODULE: external "node:url"
 var external_node_url_ = __nccwpck_require__(3136);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/file-url.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/arguments/file-url.js
 
 
 // Allow some arguments/options to be either a file path string or a file URL
@@ -31114,7 +31114,7 @@ const isDenoExecPath = file => typeof file !== 'string'
 // Same but also allows other values, e.g. `boolean` for the `shell` option
 const normalizeFileUrl = file => file instanceof URL ? (0,external_node_url_.fileURLToPath)(file) : file;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/parameters.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/methods/parameters.js
 
 
 
@@ -31156,7 +31156,7 @@ const normalizeParameters = (rawFile, rawArguments = [], rawOptions, ...rawExtra
 	return [filePath, normalizedArguments, {__proto__: null, ...options}];
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/escape.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/arguments/escape.js
 
 
 
@@ -31251,7 +31251,7 @@ const NO_ESCAPE_REGEXP = /^[\w\-./]+$/;
 
 ;// CONCATENATED MODULE: external "node:string_decoder"
 const external_node_string_decoder_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:string_decoder");
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/utils/uint-array.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/utils/uint-array.js
 
 
 const {toString: objectToString} = Object.prototype;
@@ -31316,7 +31316,7 @@ const getJoinLength = uint8Arrays => {
 	return joinLength;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/return/final-error.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/return/final-error.js
 // When the subprocess fails, this is the error instance being returned.
 // If another error instance is being thrown, it is kept as `error.cause`.
 const getFinalError = (originalError, message, isSync) => {
@@ -31363,11 +31363,11 @@ class ExecaSyncError extends Error {}
 // eslint-disable-next-line unicorn/no-top-level-side-effects -- `error.name` must be set as soon as the class is defined
 setErrorName(ExecaSyncError, ExecaSyncError.name);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/utils/type-name.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/utils/type-name.js
 // Like `typeof`, but `null` is reported as `null` instead of `object`, so error messages name the actual value
 const getTypeName = value => value === null ? 'null' : typeof value;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/template.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/methods/template.js
 
 
 
@@ -31552,7 +31552,7 @@ const getSubprocessResult = result => {
 	throw new TypeError(`Unexpected "${getTypeName(stdout)}" stdout in template expression`);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/utils/standard-stream.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/utils/standard-stream.js
 
 
 const isStandardStream = stream => STANDARD_STREAMS.includes(stream);
@@ -31566,7 +31566,7 @@ const allStreamSymbol = Symbol('execa.allStream');
 const setAllStream = stream => Object.assign(stream, {[allStreamSymbol]: true});
 const isAllStream = stream => stream?.[allStreamSymbol] === true;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/utils/options.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/utils/options.js
 // The options of methods like `subprocess.pipe()`, `subprocess.readable()` or `sendMessage()` are kept on a null-prototype object, otherwise a polluted `Object.prototype` would inject option values.
 // Like destructuring them, `null` throws.
 const copyOptions = (options = {}) => {
@@ -31583,7 +31583,7 @@ const checkBooleanOption = (value, optionName) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/specific.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/arguments/specific.js
 
 
 
@@ -31717,7 +31717,7 @@ const getFdSpecificValue = (optionArray, fdNumber) => fdNumber === 'ipc'
 	? optionArray.at(-1)
 	: optionArray[fdNumber];
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/values.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/verbose/values.js
 
 
 // The `verbose` option can have different values for `stdout`/`stderr`
@@ -32191,7 +32191,7 @@ const underlineMagentaBright = format('58;5;13', 59);
 const underlineCyanBright = format('58;5;14', 59);
 const underlineWhiteBright = format('58;5;15', 59);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/default.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/verbose/default.js
 
 
 
@@ -32251,7 +32251,7 @@ const COLORS = {
 	duration: () => default_gray,
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/custom.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/verbose/custom.js
 
 
 // Apply the `verbose` function on each line
@@ -32279,7 +32279,7 @@ const appendNewline = printedLine => printedLine.endsWith('\n')
 	? printedLine
 	: `${printedLine}\n`;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/log.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/verbose/log.js
 
 
 
@@ -32332,7 +32332,7 @@ const serializeVerboseMessage = message => {
 	return escapeLines(messageString);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/start.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/verbose/start.js
 
 
 
@@ -32349,7 +32349,7 @@ const logCommand = (escapedCommand, verboseInfo) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/info.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/verbose/info.js
 
 
 // Information computed before spawning, used by the `verbose` option
@@ -32390,7 +32390,7 @@ const validateVerbose = verbose => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/return/duration.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/return/duration.js
 
 
 // Start counting time before spawning the subprocess
@@ -32400,7 +32400,7 @@ const getStartTime = () => external_node_process_namespaceObject.hrtime.bigint()
 // Printed by the `verbose` option.
 const getDurationMs = startTime => Number(external_node_process_namespaceObject.hrtime.bigint() - startTime) / 1e6;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/command.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/arguments/command.js
 
 
 
@@ -32949,7 +32949,7 @@ return signals.find((signalA)=>signalA.number===number)
 };
 
 const signalsByNumber=getSignalsByNumber();
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/terminate/signal.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/terminate/signal.js
 
 
 
@@ -33021,7 +33021,7 @@ const getAvailableSignalIntegers = () => [...new Set(Object.values(external_node
 // Human-friendly description of a signal
 const getSignalDescription = signal => signalsByName[signal].description;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/terminate/timeout.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/terminate/timeout.js
 
 
 
@@ -33056,7 +33056,7 @@ const killAfterTimeout = async (kill, timeout, context, {signal}) => {
 	throw new DiscardedError();
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/terminate/kill.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/terminate/kill.js
 
 
 
@@ -33151,7 +33151,7 @@ const killOnTimeout = async ({kill, forceKillAfterDelay, context, controllerSign
 
 // EXTERNAL MODULE: external "node:events"
 var external_node_events_ = __nccwpck_require__(8474);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/utils/abort-signal.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/utils/abort-signal.js
 
 
 // Combines `util.aborted()` and `events.addAbortListener()`: promise-based and cleaned up with a stop signal
@@ -33168,7 +33168,7 @@ const validateAbortSignal = (signal, optionName) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/terminate/cancel.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/terminate/cancel.js
 
 
 // Validate the `cancelSignal` option
@@ -33195,7 +33195,7 @@ const terminateOnCancel = async (kill, cancelSignal, context, {signal}) => {
 	throw cancelSignal.reason;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/validation.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/ipc/validation.js
 
 
 // Validate the IPC channel is connected before receiving/sending messages
@@ -33319,7 +33319,7 @@ const disconnect = anyProcess => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/utils/deferred.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/utils/deferred.js
 const createDeferred = () => {
 	const methods = {};
 	const promise = new Promise((resolve, reject) => {
@@ -33328,7 +33328,7 @@ const createDeferred = () => {
 	return Object.assign(promise, methods);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/utils/max-listeners.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/utils/max-listeners.js
 
 
 // Temporarily increase the maximum number of listeners on an eventEmitter
@@ -33344,7 +33344,7 @@ const incrementMaxListeners = (eventEmitter, maxListenersIncrement, signal) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/reference.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/ipc/reference.js
 // By default, Node.js keeps the subprocess alive while it has a `message` or `disconnect` listener.
 // We replicate the same logic for the events that we proxy.
 // This ensures the subprocess is kept alive while `getOneMessage()` and `getEachMessage()` are ongoing.
@@ -33394,7 +33394,7 @@ const redoAddedReferences = (channel, isSubprocess) => {
 	addReferenceCount(channel);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/incoming.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/ipc/incoming.js
 
 
 
@@ -33482,7 +33482,7 @@ const onDisconnect = async ({anyProcess, channel, isSubprocess, ipcEmitter, boun
 
 const INCOMING_MESSAGES = new WeakMap();
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/forward.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/ipc/forward.js
 
 
 
@@ -33542,7 +33542,7 @@ const isConnected = anyProcess => {
 		: ipcEmitter.connected;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/strict.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/ipc/strict.js
 
 
 
@@ -33673,7 +33673,7 @@ const isStrictRequest = wrappedMessage => wrappedMessage?.type === REQUEST_TYPE
 	&& Number.isInteger(wrappedMessage.id)
 	&& typeof wrappedMessage.hasListeners === 'boolean';
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/outgoing.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/ipc/outgoing.js
 
 
 
@@ -33728,7 +33728,7 @@ const getMinListenerCount = anyProcess => getOptions(anyProcess) !== undefined
 
 const getOptions = anyProcess => IPC_SUBPROCESS_OPTIONS.get(anyProcess);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/send.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/ipc/send.js
 
 
 
@@ -33821,7 +33821,7 @@ const getSendMethod = anyProcess => {
 
 const PROCESS_SEND_METHODS = new WeakMap();
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/graceful.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/ipc/graceful.js
 
 
 
@@ -33897,7 +33897,7 @@ const abortOnDisconnect = () => {
 
 const cancelController = new AbortController();
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/terminate/graceful.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/terminate/graceful.js
 
 
 
@@ -33972,7 +33972,7 @@ const getReason = ({reason}) => {
 	return error;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/node.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/methods/node.js
 
 
 
@@ -34007,7 +34007,7 @@ const getDefaultNodeOptions = () => {
 
 // Those options are followed by a separate value, which is removed too
 const REMOVED_OPTIONS_WITH_VALUE = new Set(['-e', '--eval', '-p', '--print', '-pe', '--input-type', '--inspect-port']);
-const IGNORED_OPTIONS_REGEXP = /^--(?:inspect|eval=|input-type=)/;
+const IGNORED_OPTIONS_REGEXP = /^--(?:inspect|eval=|print=|input-type=)/;
 
 // Applies the `node: true` option, and the related `nodePath`/`nodeOptions` options.
 // Modifies the file commands/arguments to ensure the same Node binary and flags are re-used.
@@ -34067,7 +34067,7 @@ const handleNodeOption = (file, commandArguments, {
 
 ;// CONCATENATED MODULE: external "node:v8"
 const external_node_v8_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:v8");
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/ipc-input.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/ipc/ipc-input.js
 
 
 
@@ -34124,7 +34124,7 @@ const sendIpcInput = async (subprocess, ipcInput, ipc) => {
 	}, ipcInput);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/encoding-option.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/arguments/encoding-option.js
 // Validate `encoding` option
 const validateEncoding = ({encoding}) => {
 	if (ENCODINGS.has(encoding)) {
@@ -34365,7 +34365,7 @@ function whichCommandAllSync(command, options = {}) {
 	return [...new Set(found)];
 }
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/command-file.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/arguments/command-file.js
 
 
 
@@ -34600,7 +34600,7 @@ const shouldQuoteArgument = argument => argument === ''
 	|| argument.endsWith('\\')
 	|| quotedCharacterRegExp.test(argument);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/cwd.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/arguments/cwd.js
 
 
 
@@ -34645,7 +34645,7 @@ const fixCwdError = (originalMessage, cwd) => {
 	return cwdStat.isDirectory() ? originalMessage : `The "cwd" option is not a directory: ${cwd}.\n${originalMessage}`;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/options.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/arguments/options.js
 
 
 
@@ -34791,7 +34791,7 @@ const computeEnv = ({env: envOption, extendEnv, preferLocal, node, localDirector
 };
 
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/shell.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/arguments/shell.js
 // When the `shell` option is set, any command argument is concatenated as a single string by Node.js:
 // https://github.com/nodejs/node/blob/e38ce27f3ca0a65f68a31cedd984cddb927d4002/lib/child_process.js#L614-L624
 // However, since Node 24, it also prints a deprecation warning.
@@ -34804,7 +34804,7 @@ const concatenateShell = (file, commandArguments, options) => options.shell && c
 	? [[file, ...commandArguments].join(' '), [], options]
 	: [file, commandArguments, options];
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/split.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/transform/split.js
 
 
 // Split chunks line-wise for generators passed to the `std*` options
@@ -34960,7 +34960,7 @@ const LF_BINARY = LF.codePointAt(0);
 const CR = '\r';
 const CR_BINARY = CR.codePointAt(0);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/strip-newline.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/io/strip-newline.js
 
 
 // Apply `stripFinalNewline` option, which applies to `result.stdout|stderr|all|stdio[*]`.
@@ -34975,7 +34975,7 @@ const getStripFinalNewline = (stripFinalNewline, fdNumber, allFds) => fdNumber =
 	? allFds.some(allFd => stripFinalNewline[allFd])
 	: stripFinalNewline[fdNumber];
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/resolve/all-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/resolve/all-sync.js
 
 
 
@@ -35356,7 +35356,7 @@ class MaxBufferError extends Error {
 	}
 }
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/max-buffer.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/io/max-buffer.js
 
 
 
@@ -35422,7 +35422,8 @@ const getMaxBufferInfo = (error, maxBuffer) => {
 // The native `maxBuffer` option passed to `spawnSync()` does not allow differentiating values per file descriptor, so we use `stdout`'s.
 // Since each other file descriptor's own limit is capped by `stdout`'s, this is also the highest one.
 // Node.js applies it to the total output of all piped file descriptors, not to each of them. When it is hit, the subprocess is killed and a `ENOBUFS` error is thrown.
-const getMaxBufferSync = ([, stdoutMaxBuffer]) => stdoutMaxBuffer;
+// Node.js disables its limit at zero, so use the smallest positive value to reject the first output byte.
+const getMaxBufferSync = ([, stdoutMaxBuffer]) => stdoutMaxBuffer === 0 ? Number.MIN_VALUE : stdoutMaxBuffer;
 
 // File descriptors with a limit lower than `spawnSync()`'s native `maxBuffer` are enforced from the output, after the subprocess exits.
 // Since no native error was thrown, we create the `ENOBUFS` error ourselves.
@@ -35460,7 +35461,7 @@ const truncateMaxBufferSync = (result, fdNumber, {maxBuffer, buffer}) => {
 	return buffer[fdNumber] && result.length > maxBufferValue ? result.slice(0, maxBufferValue) : result;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/return/message.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/return/message.js
 
 
 
@@ -35618,7 +35619,7 @@ const serializeMessageItem = messageItem => {
 	return isUint8Array(messageItem) ? uint8ArrayToString(messageItem) : '';
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/return/result.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/return/result.js
 
 
 
@@ -36029,7 +36030,7 @@ function prettyMilliseconds(milliseconds, options) {
 	return sign + result.join(separator);
 }
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/error.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/verbose/error.js
 
 
 // When `verbose` is `short|full|custom`, print each command's error when it fails
@@ -36044,7 +36045,7 @@ const logError = (result, verboseInfo) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/complete.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/verbose/complete.js
 
 
 
@@ -36070,7 +36071,7 @@ const logDuration = (result, verboseInfo) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/return/reject.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/return/reject.js
 
 
 // Applies the `reject` option.
@@ -36085,7 +36086,7 @@ const handleResult = (result, verboseInfo, {reject}) => {
 	return result;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/type.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/stdio/type.js
 
 
 
@@ -36255,7 +36256,7 @@ const TYPE_TO_MESSAGE = {
 	uint8Array: 'a Uint8Array',
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/object-mode.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/transform/object-mode.js
 
 
 /*
@@ -36298,7 +36299,7 @@ const getFdObjectMode = (stdioItems, direction) => {
 		: lastTransform.value.readableObjectMode;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/normalize.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/transform/normalize.js
 
 
 
@@ -36406,7 +36407,7 @@ const normalizeGenerator = ({stdioItem, stdioItem: {value}, index, newTransforms
 
 const sortTransforms = (newTransforms, direction) => direction === 'input' ? newTransforms.reverse() : newTransforms;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/direction.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/stdio/direction.js
 
 
 
@@ -36524,13 +36525,13 @@ const getStandardStreamDirection = value => {
 // When the ambiguity remains, we default to `output` since it is the most common use case for additional file descriptors.
 const DEFAULT_DIRECTION = 'output';
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/array.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/ipc/array.js
 // The `ipc` option adds an `ipc` item to the `stdio` option
 const normalizeIpcStdioArray = (stdioArray, ipc) => ipc
 	? [...stdioArray, 'ipc']
 	: stdioArray;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/stdio-option.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/stdio/stdio-option.js
 
 
 
@@ -36623,7 +36624,7 @@ const isFixedOutputPipe = (fdNumber, input) => input === true && isStandardOutpu
 
 const isStandardOutputFd = fdNumber => fdNumber === 1 || fdNumber === 2;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/arguments/fd-options.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/arguments/fd-options.js
 
 
 // Retrieve stream targeted by the `to` option
@@ -36730,7 +36731,7 @@ const serializeOptionValue = value => {
 	return typeof value === 'number' ? `${value}` : 'Stream';
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/native.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/stdio/native.js
 
 
 
@@ -36835,7 +36836,7 @@ const getStandardStream = (fdNumber, value, optionName) => {
 	return standardStream;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/input-option.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/stdio/input-option.js
 
 
 
@@ -36891,7 +36892,7 @@ const getInputFileType = inputFile => {
 	throw new Error('The `inputFile` option must be a file path string or a file URL.');
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/duplicate.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/stdio/duplicate.js
 
 
 
@@ -37017,7 +37018,7 @@ const throwOnDuplicateStream = (stdioItem, optionName, type) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/handle.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/stdio/handle.js
 
 
 
@@ -37156,10 +37157,15 @@ const validateStreams = (stdioItems, isStdioArray) => {
 	}
 };
 
-// A number is a file descriptor. Anything else is not a valid one, and passing it to `node:child_process` aborts the current process with a fatal assertion instead of throwing.
+// File descriptors can be passed as numbers or native objects with an `fd` property. Invalid descriptors can make `node:child_process` abort the current process with a fatal assertion instead of throwing.
 const validateFileDescriptorStdio = ({type, value, optionName}) => {
-	if (type === 'native' && typeof value === 'number' && (!Number.isInteger(value) || value < 0 || value > MAX_FILE_DESCRIPTOR)) {
-		throw new TypeError(`The \`${optionName}\` option must be a non-negative 32-bit integer: got ${value}.`);
+	if (type !== 'native') {
+		return;
+	}
+
+	const fileDescriptor = typeof value === 'number' ? value : value?.fd;
+	if (typeof fileDescriptor === 'number' && (!Number.isInteger(fileDescriptor) || fileDescriptor < 0 || fileDescriptor > MAX_FILE_DESCRIPTOR)) {
+		throw new TypeError(`The \`${optionName}\` option must be a non-negative 32-bit integer: got ${fileDescriptor}.`);
 	}
 };
 
@@ -37306,7 +37312,7 @@ const forwardStdio = stdioItems => {
 	return type === 'native' ? value : 'pipe';
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/handle-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/stdio/handle-sync.js
 
 
 
@@ -37388,7 +37394,7 @@ const addPropertiesSync = {
 
 // EXTERNAL MODULE: external "node:stream"
 var external_node_stream_ = __nccwpck_require__(7075);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/validate.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/transform/validate.js
 
 
 
@@ -37433,7 +37439,7 @@ Instead, \`yield\` should either be called with a value, or not be called at all
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/encoding-transform.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/transform/encoding-transform.js
 
 
 
@@ -37501,7 +37507,7 @@ const stringToBytesGenerator = function * (stringEncoding, chunk) {
 	yield typeof chunk === 'string' ? bufferToUint8Array(external_node_buffer_.Buffer.from(chunk, stringEncoding)) : chunk;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/run-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/transform/run-async.js
 
 
 // Applies a series of generator functions asynchronously
@@ -37563,7 +37569,7 @@ const identityGenerator = function * (chunk) {
 	yield chunk;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/run-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/transform/run-sync.js
 // Duplicate the code from `run-async.js` but as synchronous functions
 const pushChunksSync = (getChunksSync, getChunksArguments, transformStream, done) => {
 	try {
@@ -37573,15 +37579,27 @@ const pushChunksSync = (getChunksSync, getChunksArguments, transformStream, done
 
 		done();
 	} catch (error) {
-		done(error);
+		done(normalizeTransformError(error));
 	}
 };
 
+// Match `util.callbackify()` so falsy exceptions cannot be mistaken for callback success or missing errors.
+const normalizeTransformError = error => error || Object.assign(new Error('Promise was rejected with falsy value'), {
+	code: 'ERR_FALSY_VALUE_REJECTION',
+	reason: error,
+});
+
 // Run synchronous generators with `execaSync()`
-const runTransformSync = (generators, chunks) => [
-	...chunks.flatMap(chunk => [...transformChunkSync(chunk, generators, 0)]),
-	...finalChunksSync(generators),
-];
+const runTransformSync = (generators, chunks) => {
+	try {
+		return [
+			...chunks.flatMap(chunk => [...transformChunkSync(chunk, generators, 0)]),
+			...finalChunksSync(generators),
+		];
+	} catch (error) {
+		throw normalizeTransformError(error);
+	}
+};
 
 const transformChunkSync = function * (chunk, generators, index) {
 	if (index === generators.length) {
@@ -37615,7 +37633,8 @@ const run_sync_identityGenerator = function * (chunk) {
 	yield chunk;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/transform/generator.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/transform/generator.js
+
 
 
 
@@ -37694,6 +37713,12 @@ const runGeneratorsSync = (chunks, stdioItems, encoding, isInput) => {
 	const reversedGenerators = isInput ? generators.reverse() : generators;
 
 	for (const {value, optionName} of reversedGenerators) {
+		// Byte-mode transforms encode strings before decoding them, like Transform's `decodeStrings` option.
+		if (!value.writableObjectMode) {
+			const stringEncoding = getStringEncoding(value.binary, encoding);
+			chunks = chunks.map(chunk => typeof chunk === 'string' ? external_node_buffer_.Buffer.from(chunk, stringEncoding) : chunk);
+		}
+
 		const generators = addInternalGenerators(value, encoding, optionName);
 		chunks = runTransformSync(generators, chunks);
 	}
@@ -37725,7 +37750,7 @@ const addInternalGenerators = (
 	].filter(Boolean);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/input-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/io/input-sync.js
 
 
 
@@ -37745,7 +37770,8 @@ const getInputFdNumbers = fileDescriptors => new Set(Object.entries(fileDescript
 const addInputOptionSync = (fileDescriptors, fdNumber, options) => {
 	const {stdioItems} = fileDescriptors[fdNumber];
 	const allStdioItems = stdioItems.filter(({contents}) => contents !== undefined);
-	if (allStdioItems.length === 0) {
+	// Even without an input source, generators must run so that `final` can produce input or report errors.
+	if (allStdioItems.length === 0 && stdioItems.every(({type}) => type !== 'generator')) {
 		return;
 	}
 
@@ -37785,7 +37811,7 @@ const throwOnSerializableInput = (optionName, invalidItem) => {
 	throw new TypeError(`The \`${optionName}\` option is invalid: when passing objects as input, a transform must be used to serialize them to strings or Uint8Arrays: ${invalidItem}.`);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/output.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/verbose/output.js
 
 
 
@@ -37849,7 +37875,7 @@ const logLine = (line, fdNumber, verboseInfo) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/output-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/io/output-sync.js
 
 
 
@@ -37935,7 +37961,8 @@ const runOutputGeneratorsSync = (chunks, stdioItems, encoding) => {
 		// `error` is set, so that a polluted `Object.prototype.error` is not read when destructuring
 		return {chunks: runGeneratorsSync(chunks, stdioItems, encoding, false), error: undefined};
 	} catch (error) {
-		return {chunks, error};
+		// Raw output must not bypass a failed transform, which might be filtering sensitive data.
+		return {chunks: [], error};
 	}
 };
 
@@ -38011,7 +38038,7 @@ const writeToFiles = (chunks, stdioItems, outputFiles) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/resolve/exit-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/resolve/exit-async.js
 
 
 
@@ -38067,7 +38094,7 @@ const isSubprocessErrorExit = (exitCode, signal) => exitCode === undefined && si
 // When the subprocess fails due to a non-0 exit code or to a signal termination
 const isFailedExit = (exitCode, signal) => exitCode !== 0 || signal !== null;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/resolve/exit-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/resolve/exit-sync.js
 
 
 
@@ -38102,7 +38129,7 @@ const getResultError = (error, exitCode, signal) => {
 	return isFailedExit(exitCode, signal) ? new DiscardedError() : undefined;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/main-sync.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/methods/main-sync.js
 
 
 
@@ -38274,7 +38301,7 @@ const getSyncResult = ({error, exitCode, signal, timedOut, isMaxBuffer, stdio, a
 		isSync: true,
 	});
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/get-one.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/ipc/get-one.js
 
 
 
@@ -38369,7 +38396,7 @@ const throwOnStrictError = async (ipcEmitter, isSubprocess, {signal}) => {
 	throw getStrictResponseError(error, isSubprocess);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/get-each.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/ipc/get-each.js
 
 
 
@@ -38488,7 +38515,7 @@ const throwIfStrictError = ({error}) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/methods.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/ipc/methods.js
 
 
 
@@ -38540,7 +38567,7 @@ const getIpcMethods = (anyProcess, isSubprocess, ipc, waitProcess = anyProcess) 
 	}),
 });
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/return/early-error.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/return/early-error.js
 
 
 
@@ -38655,7 +38682,7 @@ const handleDummyPromise = async ({error, command, escapedCommand, fileDescripto
 	return handleResult(earlyError, verboseInfo, options);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/stdio/handle-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/stdio/handle-async.js
 
 
 
@@ -38726,7 +38753,7 @@ const addPropertiesAsync = {
 		asyncGenerator: generatorToInputStream,
 		fileUrl: ({value}) => ({stream: (0,external_node_fs_namespaceObject.createReadStream)(value)}),
 		filePath: ({value: {file}}) => ({stream: (0,external_node_fs_namespaceObject.createReadStream)(file)}),
-		webStream: ({value}) => ({stream: external_node_stream_.Readable.fromWeb(value)}),
+		webStream: ({value}, options, objectMode) => ({stream: external_node_stream_.Readable.fromWeb(value, {objectMode})}),
 		iterable: ({value, optionName}, options, objectMode) => ({stream: external_node_stream_.Readable.from(objectMode ? value : validateIterable(value, optionName))}),
 		asyncIterable: ({value, optionName}, options, objectMode) => ({stream: external_node_stream_.Readable.from(objectMode ? value : validateAsyncIterable(value, optionName))}),
 		string: ({value}) => ({stream: readableFromChunk(value)}),
@@ -38736,7 +38763,8 @@ const addPropertiesAsync = {
 		...handle_async_addProperties,
 		fileUrl: ({value}) => ({stream: (0,external_node_fs_namespaceObject.createWriteStream)(value)}),
 		filePath: ({value: {file, append}}) => ({stream: (0,external_node_fs_namespaceObject.createWriteStream)(file, append ? {flags: 'a'} : {})}),
-		webStream: ({value}) => ({stream: external_node_stream_.Writable.fromWeb(value)}),
+		// Web writers accept arbitrary chunks, including when a shared writer receives both bytes and objects.
+		webStream: ({value}) => ({stream: external_node_stream_.Writable.fromWeb(value, {objectMode: true})}),
 		iterable: forbiddenIfAsync,
 		asyncIterable: forbiddenIfAsync,
 		string: forbiddenIfAsync,
@@ -39013,7 +39041,7 @@ const PASSTHROUGH_LISTENERS_COUNT = 2;
 //  - once due to `stream.pipe(passThroughStream)`
 const PASSTHROUGH_LISTENERS_PER_STREAM = 1;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/pipeline.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/io/pipeline.js
 
 
 
@@ -39068,7 +39096,7 @@ const abortSourceStream = source => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/output-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/io/output-async.js
 
 
 
@@ -39154,7 +39182,7 @@ const MAX_LISTENERS_INCREMENT = 2;
 
 ;// CONCATENATED MODULE: external "node:path/win32"
 const win32_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path/win32");
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/terminate/kill-descendants.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/terminate/kill-descendants.js
 
 
 
@@ -39567,7 +39595,7 @@ load,
  */
 unload, } = signalExitWrap(processOk(mjs_process) ? new SignalExit(mjs_process) : new SignalExitFallback());
 //# sourceMappingURL=index.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/terminate/cleanup.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/terminate/cleanup.js
 
 
 
@@ -39585,7 +39613,7 @@ const cleanupOnExit = (kill, {cleanup, detached}, {signal}) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/concurrent.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/convert/concurrent.js
 
 
 // When using multiple `.readable()`/`.writable()`/`.duplex()`, `final` and `destroy` should wait for other streams
@@ -39620,7 +39648,7 @@ const waitForConcurrentStreams = async ({resolve, promises}, subprocess) => {
 	return !isSubprocessExit;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/iterate.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/io/iterate.js
 
 
 
@@ -39732,7 +39760,7 @@ const getGenerators = ({binary, shouldEncode, encoding, shouldSplit, preserveNew
 	getSplitLinesGenerator(binary, preserveNewlines, !shouldSplit, {}),
 ].filter(Boolean);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/iterable.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/convert/iterable.js
 
 
 
@@ -39768,7 +39796,7 @@ const iterateOnStdoutData = async function * (onStdoutData, subprocessStdout, su
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/resolve/wait-stream.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/resolve/wait-stream.js
 
 
 // Wraps `finished(stream)` to handle the following case:
@@ -39891,7 +39919,7 @@ const isStreamAbort = error => error?.code === 'ERR_STREAM_PREMATURE_CLOSE';
 // Therefore, we ignore this error on writable streams.
 const isStreamEpipe = error => error?.code === 'EPIPE';
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/shared.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/convert/shared.js
 
 
 
@@ -39939,7 +39967,7 @@ const destroyOtherStream = (stream, isOpen, error) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/readable.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/convert/readable.js
 
 
 
@@ -39956,7 +39984,9 @@ const createReadable = ({subprocess, concurrentStreams, encoding}, options) => {
 	checkBooleanOption(binaryOption, 'binary');
 	checkBooleanOption(preserveNewlines, 'preserveNewlines');
 	const binary = binaryOption || BINARY_ENCODINGS.has(encoding);
-	const {subprocessStdout, waitReadableDestroy} = getSubprocessStdout(subprocess, from, concurrentStreams);
+	// Retrieve `stdout` (or other stream depending on `from`)
+	const subprocessStdout = getFromStream(subprocess, from);
+	const waitReadableDestroy = addConcurrentStream(concurrentStreams, subprocessStdout, 'readableDestroy');
 	const {readableEncoding, readableObjectMode, readableHighWaterMark} = getReadableOptions(subprocessStdout, binary);
 	const {read, onStdoutDataDone} = getReadableMethods({
 		subprocessStdout,
@@ -39979,13 +40009,6 @@ const createReadable = ({subprocess, concurrentStreams, encoding}, options) => {
 		subprocess,
 	});
 	return readable;
-};
-
-// Retrieve `stdout` (or other stream depending on `from`)
-const getSubprocessStdout = (subprocess, from, concurrentStreams) => {
-	const subprocessStdout = getFromStream(subprocess, from);
-	const waitReadableDestroy = addConcurrentStream(concurrentStreams, subprocessStdout, 'readableDestroy');
-	return {subprocessStdout, waitReadableDestroy};
 };
 
 const getReadableOptions = ({readableEncoding, readableObjectMode, readableHighWaterMark}, binary) => binary
@@ -40070,7 +40093,7 @@ const destroyOtherReadable = (stream, error) => {
 	destroyOtherStream(stream, stream.readable, error);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/web.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/convert/web.js
 
 
 // Web stream versions of `subprocess.readable()`, `subprocess.writable()` and `subprocess.duplex()`.
@@ -40079,7 +40102,7 @@ const createReadableStream = (subprocess, readableOptions) => external_node_stre
 const createWritableStream = (subprocess, writableOptions) => external_node_stream_.Writable.toWeb(subprocess.writable(writableOptions));
 const createTransformStream = (subprocess, duplexOptions) => external_node_stream_.Duplex.toWeb(subprocess.duplex(duplexOptions));
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/pipe/pipe-arguments.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/pipe/pipe-arguments.js
 
 
 
@@ -40206,7 +40229,7 @@ const getSourceStream = (source, from) => {
 	}
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/pipe/throw.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/pipe/throw.js
 
 
 
@@ -40268,7 +40291,7 @@ const createNonCommandError = ({error, fileDescriptors, sourceOptions, startTime
 
 const PIPE_COMMAND_MESSAGE = 'source.pipe(destination)';
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/pipe/sequence.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/pipe/sequence.js
 // Like Bash, we await both subprocesses. This is unlike some other shells which only await the destination subprocess.
 // Like Bash with the `pipefail` option, if either subprocess fails, the whole pipe fails.
 // Like Bash, if both subprocesses fail, we return the failure of the destination.
@@ -40295,7 +40318,7 @@ const waitForBothSubprocesses = async subprocessPromises => {
 	return destinationResult;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/pipe/streaming.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/pipe/streaming.js
 
 
 
@@ -40391,7 +40414,7 @@ const SOURCE_LISTENERS_PER_PIPE = 2;
 // Those are added by `finished()` in `cleanupMergedStreamsMap()`
 const DESTINATION_LISTENERS_PER_PIPE = 1;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/pipe/abort.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/pipe/abort.js
 
 
 
@@ -40414,7 +40437,7 @@ const unpipeOnSignalAbort = async (unpipeSignal, {sourceStream, mergedStream, fi
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/pipe/setup.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/pipe/setup.js
 
 
 
@@ -40827,7 +40850,7 @@ const stringMethods = {
 	finalize: getContentsProperty,
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/io/contents.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/io/contents.js
 
 
 
@@ -40942,7 +40965,7 @@ const handleBufferedData = error => isArrayBuffer(error?.bufferedData)
 	? new Uint8Array(error.bufferedData)
 	: error?.bufferedData;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/resolve/stdio.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/resolve/stdio.js
 
 
 
@@ -40992,7 +41015,7 @@ const waitForSubprocessStream = async ({stream, fdNumber, encoding, buffer, maxB
 	return output;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/resolve/all-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/resolve/all-async.js
 
 
 
@@ -41027,7 +41050,8 @@ const waitForAllStream = ({subprocess, all, encoding, buffer, maxBuffer, lines, 
 			maxBuffer: maxBuffer[1] + maxBuffer[2],
 			lines: lines[1] || lines[2],
 			allFds: getAllFds(subprocess, buffer),
-			allMixed: getAllMixed(subprocess, all),
+			// A single buffered descriptor keeps its own object mode, even when the merged stream has mixed modes.
+			allMixed: stream === all && getAllMixed(subprocess, all),
 			stripFinalNewline,
 			verboseInfo,
 			streamInfo,
@@ -41064,7 +41088,7 @@ const getAllMixed = ({stdout, stderr}, all) => all
 	&& stderr
 	&& stdout.readableObjectMode !== stderr.readableObjectMode;
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/verbose/ipc.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/verbose/ipc.js
 
 
 
@@ -41081,7 +41105,7 @@ const logIpcOutput = (message, verboseInfo) => {
 	});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/ipc/buffer-messages.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/ipc/buffer-messages.js
 
 
 
@@ -41140,7 +41164,8 @@ const getBufferedIpcOutput = async (ipcOutputPromise, ipcOutput) => {
 	return ipcOutput;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/resolve/wait-subprocess.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/resolve/wait-subprocess.js
+
 
 
 
@@ -41257,6 +41282,11 @@ const waitForSubprocessResult = async ({
 		]);
 	} catch (error) {
 		context.terminationReason ??= 'other';
+		// Closing the output stream does not stop a subprocess that stays alive without writing again.
+		if (error instanceof MaxBufferError) {
+			kill();
+		}
+
 		return Promise.all([
 			{error},
 			exitPromise,
@@ -41294,7 +41324,7 @@ const throwOnSubprocessError = async (subprocess, {signal}) => {
 	throw error;
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/writable.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/convert/writable.js
 
 
 
@@ -41306,7 +41336,9 @@ const throwOnSubprocessError = async (subprocess, {signal}) => {
 // Create a `Writable` stream that forwards to `stdin` and awaits the subprocess
 const createWritable = ({subprocess, concurrentStreams}, options) => {
 	const {to} = copyOptions(options);
-	const {subprocessStdin, waitWritableFinal, waitWritableDestroy} = getSubprocessStdin(subprocess, to, concurrentStreams);
+	// Retrieve `stdin` (or other stream depending on `to`)
+	const subprocessStdin = getToStream(subprocess, to);
+	const {waitWritableFinal, waitWritableDestroy} = addWritableConcurrentStreams(concurrentStreams, subprocessStdin);
 	const writable = new external_node_stream_.Writable({
 		...getWritableMethods(subprocessStdin, subprocess, waitWritableFinal),
 		destroy: (0,external_node_util_.callbackify)(onWritableDestroy.bind(undefined, {
@@ -41322,12 +41354,11 @@ const createWritable = ({subprocess, concurrentStreams}, options) => {
 	return writable;
 };
 
-// Retrieve `stdin` (or other stream depending on `to`)
-const getSubprocessStdin = (subprocess, to, concurrentStreams) => {
-	const subprocessStdin = getToStream(subprocess, to);
+// Register both writable lifecycle waits for an already validated stream.
+const addWritableConcurrentStreams = (concurrentStreams, subprocessStdin) => {
 	const waitWritableFinal = addConcurrentStream(concurrentStreams, subprocessStdin, 'writableFinal');
 	const waitWritableDestroy = addConcurrentStream(concurrentStreams, subprocessStdin, 'writableDestroy');
-	return {subprocessStdin, waitWritableFinal, waitWritableDestroy};
+	return {waitWritableFinal, waitWritableDestroy};
 };
 
 const getWritableMethods = (subprocessStdin, subprocess, waitWritableFinal) => ({
@@ -41409,7 +41440,9 @@ const destroyOtherWritable = (stream, error) => {
 	destroyOtherStream(stream, stream.writable, error);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/duplex.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/convert/duplex.js
+
+
 
 
 
@@ -41423,8 +41456,11 @@ const createDuplex = ({subprocess, concurrentStreams, encoding}, options) => {
 	checkBooleanOption(binaryOption, 'binary');
 	checkBooleanOption(preserveNewlines, 'preserveNewlines');
 	const binary = binaryOption || BINARY_ENCODINGS.has(encoding);
-	const {subprocessStdout, waitReadableDestroy} = getSubprocessStdout(subprocess, from, concurrentStreams);
-	const {subprocessStdin, waitWritableFinal, waitWritableDestroy} = getSubprocessStdin(subprocess, to, concurrentStreams);
+	// Validate both directions before registering lifecycle waits, since a thrown option error must not leave a concurrent stream behind.
+	const subprocessStdout = getFromStream(subprocess, from);
+	const subprocessStdin = getToStream(subprocess, to);
+	const waitReadableDestroy = addConcurrentStream(concurrentStreams, subprocessStdout, 'readableDestroy');
+	const {waitWritableFinal, waitWritableDestroy} = addWritableConcurrentStreams(concurrentStreams, subprocessStdin);
 	const {readableEncoding, readableObjectMode, readableHighWaterMark} = getReadableOptions(subprocessStdout, binary);
 	const {read, onStdoutDataDone} = getReadableMethods({
 		subprocessStdout,
@@ -41473,7 +41509,7 @@ const onDuplexDestroy = async ({subprocessStdout, subprocessStdin, subprocess, w
 	]);
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/convert/add.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/convert/add.js
 
 
 
@@ -41494,11 +41530,11 @@ const addConvertedStreams = (subprocess, {encoding}) => {
 	subprocess[Symbol.asyncIterator] = createIterable.bind(undefined, subprocess, encoding, {});
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/promise.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/methods/promise.js
 // The return value is a native Promise with Execa-specific properties.
 const mergePromise = (promise, properties) => Object.assign(promise, properties);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/main-async.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/methods/main-async.js
 
 
 
@@ -41745,7 +41781,7 @@ const getAsyncResult = ({errorInfo, exitCode, signal, stdio, all, ipcOutput, con
 		startTime,
 	});
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/bind.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/methods/bind.js
 
 
 
@@ -41764,7 +41800,7 @@ const mergeOption = (optionName, boundOptionValue, optionValue) => DEEP_OPTIONS.
 
 const DEEP_OPTIONS = new Set(['env', ...FD_SPECIFIC_OPTIONS]);
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/create.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/methods/create.js
 
 
 
@@ -41817,6 +41853,13 @@ const parseArguments = ({mapArguments, firstArgument, nextArguments, deepOptions
 		: [firstArgument, ...nextArguments];
 	const [initialFile, initialArguments, initialOptions] = normalizeParameters(...callArguments);
 	const mergedOptions = mergeOptions(mergeOptions(deepOptions, boundOptions), initialOptions);
+	// Explicit `undefined` resets to the method's default, including on pipe destinations.
+	for (const [optionName, optionValue] of Object.entries(deepOptions)) {
+		if (mergedOptions[optionName] === undefined) {
+			mergedOptions[optionName] = optionValue;
+		}
+	}
+
 	// `mapArguments()` returns a plain object, so its result is read from a null-prototype copy.
 	// Otherwise a polluted `Object.prototype` would replace every option, or switch the execution mode.
 	const {
@@ -41831,7 +41874,7 @@ const parseArguments = ({mapArguments, firstArgument, nextArguments, deepOptions
 	};
 };
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/lib/methods/script.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/lib/methods/script.js
 // Sets `$.sync` and `$.s`
 const setScriptSync = (boundExeca, createNested, boundOptions) => {
 	boundExeca.sync = createNested(mapScriptSync, boundOptions);
@@ -41845,17 +41888,17 @@ const mapScriptAsync = ({options}) => getScriptOptions(options);
 const mapScriptSync = ({options}) => ({...getScriptOptions(options), isSync: true});
 
 // `$` is like `execa` but with script-friendly options: `{stdin: 'inherit', preferLocal: true}`
-const getScriptOptions = options => ({options: {__proto__: null, ...getScriptStdinOption(options), ...options}});
+const getScriptOptions = options => ({options: {__proto__: null, ...options, ...getScriptStdinOption(options)}});
 
-const getScriptStdinOption = ({input, inputFile, stdio}) => input === undefined && inputFile === undefined && stdio === undefined
-	? {stdin: 'inherit'}
+const getScriptStdinOption = ({stdin = 'inherit', input, inputFile, stdio}) => input === undefined && inputFile === undefined && stdio === undefined
+	? {stdin}
 	: {};
 
 // When using $(...).pipe(...), most script-friendly options should apply to both commands.
 // However, some options (like `stdin: 'inherit'`) would create issues with piping, i.e. cannot be deep.
 const deepScriptOptions = {preferLocal: true};
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.1.1/node_modules/execa/index.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/execa@10.2.1/node_modules/execa/index.js
 
 
 
