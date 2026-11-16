@@ -213,8 +213,8 @@ importers:
         specifier: 0.10.0
         version: 0.10.0
       create-typescript-app:
-        specifier: 2.74.0
-        version: 2.74.0(bingo-systems@0.7.0)(typescript@5.9.3)
+        specifier: 2.75.0
+        version: 2.75.0(bingo-systems@0.7.0)(typescript@5.9.3)
       cspell:
         specifier: 10.4.0
         version: 10.4.0
@@ -1724,11 +1724,11 @@ packages:
     resolution: {integrity: sha512-cpvNWqMlFkbynxJzyKJ4B/R57zR2MsPkJSldNJRxSTN6LlgB9uzQ8jAeDZy2ENoUHNlH5nApv2JyHxVqFxcjSg==}
     engines: {node: '>=18'}
 
-  bingo-stratum@0.7.1:
-    resolution: {integrity: sha512-IULvgt/wn0GlTmlqN7ln+I4jx3QQkJcsmQOmhHfbo6TemWIRZE+/xWawQuJ6/BUObWtF7t6MeZm/Is2mEHcKmA==}
+  bingo-stratum@0.8.0:
+    resolution: {integrity: sha512-n3NlAge52Kg4os7OyexD79UccRYhdDUeqrL+mWxmDOoaGeJG6Hc7V1sBiB3p1rS7QJB13a8kGLhwQ71zyBCylg==}
     engines: {node: '>=20.18.0'}
     peerDependencies:
-      bingo: ^0.13.0
+      bingo: ^0.13.1
       bingo-fs: ^0.6.0
       bingo-systems: ^0.7.0
       zod: ^4.4.3
@@ -1737,10 +1737,15 @@ packages:
     resolution: {integrity: sha512-Aw5dokVSssSagrVcib9dfVYobp0h/pJKb5m+PhCkAjYkzgGiEN4E56uBVeB42rMAedg7/hxvhFsCsH6wthrDFw==}
     engines: {node: '>=22'}
 
-  bingo@0.13.2:
-    resolution: {integrity: sha512-sgSZOjlD2c8Lrsgn1NBvcxNoH1tzVL+Nu3QKfg8Y9ciBP5qvXskadH7u0zpRIdtCXzOqviHyubYcInYPnqqR3Q==}
+  bingo@0.14.0:
+    resolution: {integrity: sha512-whvMcsO9T5GXbZZq3n78XzdHOlvLgrNZFVHSo4Vy1TfHSF190qzpmxeMznY8BmplZUwYCZxQpkKAFl90zSQuNQ==}
     engines: {node: '>=22'}
     hasBin: true
+    peerDependencies:
+      zod: ^4.4.3
+    peerDependenciesMeta:
+      zod:
+        optional: true
 
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
@@ -1947,8 +1952,8 @@ packages:
     engines: {node: '>=22'}
     hasBin: true
 
-  create-typescript-app@2.74.0:
-    resolution: {integrity: sha512-Mad7JOa10JyfSbzbqvStN9yeBgWcS2bV4VkOb5qAwB8d5wE1k9IvT0sScyeto5n0+MuW2TcnLdWgIF2Bmcl8oA==}
+  create-typescript-app@2.75.0:
+    resolution: {integrity: sha512-GKDsJj7GhEF2pwvPjwJ9fWE5UxGsaEZn+flY+AHuyyR9CPGm5UO6//YoveXYiqOyV5IjJIYVWSK4SiLI625K+Q==}
     engines: {node: ^22.13.0 || ^24.11.0 || >=26.0.0}
     hasBin: true
 
@@ -2614,11 +2619,25 @@ packages:
     peerDependencies:
       bingo: ^0.13.0
 
-  input-from-script@0.5.9:
-    resolution: {integrity: sha512-69FfKBD8QyEvJG+voGVAWyV/tGhrqPxGSH/VyvvjBTxTLL0qGUFmaQSMLTr8eA7iWk2R/SwyLS/9E2Raz9F1sg==}
+  input-from-file@0.6.0:
+    resolution: {integrity: sha512-OUCKbRQ4iRyrE6e0lp2LFjiVml0+aZp6CjcabZnbqy1JF2uaPw0PNaDIAX14/462mwzxUpWOwrk2aygf0YVUWw==}
     engines: {node: '>=18'}
     peerDependencies:
-      bingo: ^0.13.0
+      bingo: ^0.14.0
+      zod: ^4.4.3
+    peerDependenciesMeta:
+      zod:
+        optional: true
+
+  input-from-script@0.6.0:
+    resolution: {integrity: sha512-aXnd5SBr4RDvjDDfdetlSJvN0R72KsCKjxm/cbE8u1Ygz4XYr0MGV7Z5Z1PoOU2QbmNtlMgEhjON9G1S730Akw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      bingo: ^0.14.0
+      zod: ^4.4.3
+    peerDependenciesMeta:
+      zod:
+        optional: true
 
   ip-address@10.7.4:
     resolution: {integrity: sha512-DWBMKyeM25D70nrIiTkgQth59/G+naKOTep6huF9j+GmeK3DMD60Zvxg5d5qQnz+38AHgou6ean2LECX+lrKDg==}
@@ -4042,8 +4061,8 @@ packages:
     peerDependencies:
       zod: ^4.0.0
 
-  zod-tsconfig@0.2.1:
-    resolution: {integrity: sha512-vG7lpJPPakNSR3i2uDDWqAVAxetevnirfETvCu3s6ZHLasJB+iQ9EMTlhI+25vyqFHH8qUKO3B6V83U8cuHUhw==}
+  zod-tsconfig@0.3.1:
+    resolution: {integrity: sha512-ZVePcJkTRw7JBNghtMLTJEj698X8qEDk6c7h6mMcrm23+UsHF3StwaKlPHkj9QNtStuk5hzNuTtDnGHbgIBt3w==}
     engines: {node: '>=18.3.0'}
     peerDependencies:
       zod: ^4.4.3
@@ -5389,10 +5408,10 @@ snapshots:
     dependencies:
       '@octokit/types': 16.0.0
 
-  bingo-stratum@0.7.1(bingo-fs@0.6.0)(bingo-systems@0.7.0)(bingo@0.13.2)(zod@4.6.7):
+  bingo-stratum@0.8.0(bingo-fs@0.6.0)(bingo-systems@0.7.0)(bingo@0.14.0)(zod@4.6.7):
     dependencies:
       all-properties-lazy: 0.1.0
-      bingo: 0.13.2
+      bingo: 0.14.0
       bingo-fs: 0.6.0
       bingo-systems: 0.7.0
       cached-factory: 0.3.0
@@ -5409,7 +5428,7 @@ snapshots:
       get-github-auth-token: 0.1.2
       octokit: 5.0.5
 
-  bingo@0.13.2:
+  bingo@0.14.0:
     dependencies:
       '@clack/prompts': 0.11.0
       all-properties-lazy: 0.1.0
@@ -5629,14 +5648,14 @@ snapshots:
       conventional-commits-filter: 6.0.1
       conventional-commits-parser: 7.1.3
 
-  create-typescript-app@2.74.0(bingo-systems@0.7.0)(typescript@5.9.3):
+  create-typescript-app@2.75.0(bingo-systems@0.7.0)(typescript@5.9.3):
     dependencies:
       '@prettier/sync': 0.6.1(prettier@3.9.7)
       '@typescript-eslint/typescript-estree': 8.72.0(typescript@5.9.3)
       all-contributors-types: 0.1.0
-      bingo: 0.13.2
+      bingo: 0.14.0
       bingo-fs: 0.6.0
-      bingo-stratum: 0.7.1(bingo-fs@0.6.0)(bingo-systems@0.7.0)(bingo@0.13.2)(zod@4.6.7)
+      bingo-stratum: 0.8.0(bingo-fs@0.6.0)(bingo-systems@0.7.0)(bingo@0.14.0)(zod@4.6.7)
       cached-factory: 0.3.0
       cspell-populate-words: 0.3.1
       execa: 10.2.1
@@ -5644,9 +5663,9 @@ snapshots:
       github-default-labels: 0.1.1
       html-to-text: 10.0.1
       image-size: 2.0.4
-      input-from-file: 0.5.9(bingo@0.13.2)
-      input-from-file-json: 0.5.9(bingo@0.13.2)
-      input-from-script: 0.5.9(bingo@0.13.2)
+      input-from-file: 0.6.0(bingo@0.14.0)
+      input-from-file-json: 0.5.9(bingo@0.14.0)
+      input-from-script: 0.6.0(bingo@0.14.0)
       js-yaml: 5.5.0
       json5: 2.2.3
       lazy-value: 3.0.0
@@ -5667,7 +5686,7 @@ snapshots:
       trash-cli: 7.2.0
       zod: 4.6.7
       zod-package-json: 2.1.0(zod@4.6.7)
-      zod-tsconfig: 0.2.1(zod@4.6.7)
+      zod-tsconfig: 0.3.1(zod@4.6.7)
     transitivePeerDependencies:
       - bingo-systems
       - supports-color
@@ -6470,19 +6489,24 @@ snapshots:
 
   ini@7.0.0: {}
 
-  input-from-file-json@0.5.9(bingo@0.13.2):
+  input-from-file-json@0.5.9(bingo@0.14.0):
     dependencies:
-      bingo: 0.13.2
-      input-from-file: 0.5.9(bingo@0.13.2)
+      bingo: 0.14.0
+      input-from-file: 0.5.9(bingo@0.14.0)
 
-  input-from-file@0.5.9(bingo@0.13.2):
+  input-from-file@0.5.9(bingo@0.14.0):
     dependencies:
-      bingo: 0.13.2
+      bingo: 0.14.0
       zod: 4.6.7
 
-  input-from-script@0.5.9(bingo@0.13.2):
+  input-from-file@0.6.0(bingo@0.14.0):
     dependencies:
-      bingo: 0.13.2
+      bingo: 0.14.0
+      zod: 4.6.7
+
+  input-from-script@0.6.0(bingo@0.14.0):
+    dependencies:
+      bingo: 0.14.0
       zod: 4.6.7
 
   ip-address@10.7.4: {}
@@ -7930,7 +7954,7 @@ snapshots:
     dependencies:
       zod: 4.6.7
 
-  zod-tsconfig@0.2.1(zod@4.6.7):
+  zod-tsconfig@0.3.1(zod@4.6.7):
     dependencies:
       zod: 4.6.7
 
