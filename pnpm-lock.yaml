@@ -264,17 +264,17 @@ importers:
         specifier: 0.1.7
         version: 0.1.7(markdownlint@0.42.0)
       prettier:
-        specifier: 3.9.7
-        version: 3.9.7
+        specifier: 3.10.1
+        version: 3.10.1
       prettier-plugin-curly:
         specifier: 0.4.0
-        version: 0.4.0(prettier@3.9.7)
+        version: 0.4.0(prettier@3.10.1)
       prettier-plugin-packagejson:
         specifier: 3.0.2
-        version: 3.0.2(prettier@3.9.7)
+        version: 3.0.2(prettier@3.10.1)
       prettier-plugin-sh:
         specifier: 0.20.0
-        version: 0.20.0(prettier@3.9.7)
+        version: 0.20.0(prettier@3.10.1)
       release-it:
         specifier: 21.1.0
         version: 21.1.0(@types/node@26.6.5)(magicast@0.5.5)
@@ -3405,8 +3405,8 @@ packages:
     peerDependencies:
       prettier: ^3.6.0
 
-  prettier@3.9.7:
-    resolution: {integrity: sha512-T3mF5P7HFzZVLDQuCUNtJj6WK1pcpLMweMNUVwGb01bLNkH9AkKxtZvmInw8K6bnn2O3d6/5RHl6zSHiBAD0Og==}
+  prettier@3.10.1:
+    resolution: {integrity: sha512-70vp3ZUYoPlFbF9uiTdXHUUCGEIp7d4+6p+8DYbkm2jP7x/3i/paXVF6dopSI3zd/CEitrZN1rc4i85xWmmXlg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -5038,10 +5038,10 @@ snapshots:
 
   '@pkgr/core@0.3.6': {}
 
-  '@prettier/sync@0.6.1(prettier@3.9.7)':
+  '@prettier/sync@0.6.1(prettier@3.10.1)':
     dependencies:
       make-synchronized: 0.8.0
-      prettier: 3.9.7
+      prettier: 3.10.1
 
   '@release-it/conventional-changelog@12.0.2(conventional-commits-filter@6.0.1)(conventional-commits-parser@7.1.3)(release-it@21.1.0(@types/node@26.6.5)(magicast@0.5.5))':
     dependencies:
@@ -5650,7 +5650,7 @@ snapshots:
 
   create-typescript-app@2.75.0(bingo-systems@0.7.0)(typescript@5.9.3):
     dependencies:
-      '@prettier/sync': 0.6.1(prettier@3.9.7)
+      '@prettier/sync': 0.6.1(prettier@3.10.1)
       '@typescript-eslint/typescript-estree': 8.72.0(typescript@5.9.3)
       all-contributors-types: 0.1.0
       bingo: 0.14.0
@@ -5675,7 +5675,7 @@ snapshots:
       object-strings-deep: 0.1.2
       parse-author: 2.0.0
       parse-package-name: 1.0.0
-      prettier: 3.9.7
+      prettier: 3.10.1
       remove-dependencies: 0.1.1
       remove-undefined-objects: 9.0.2
       semver: 7.8.5
@@ -7380,23 +7380,23 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier-plugin-curly@0.4.0(prettier@3.9.7):
+  prettier-plugin-curly@0.4.0(prettier@3.10.1):
     dependencies:
-      prettier: 3.9.7
+      prettier: 3.10.1
 
-  prettier-plugin-packagejson@3.0.2(prettier@3.9.7):
+  prettier-plugin-packagejson@3.0.2(prettier@3.10.1):
     dependencies:
       sort-package-json: 3.7.1
     optionalDependencies:
-      prettier: 3.9.7
+      prettier: 3.10.1
 
-  prettier-plugin-sh@0.20.0(prettier@3.9.7):
+  prettier-plugin-sh@0.20.0(prettier@3.10.1):
     dependencies:
       '@reteps/dockerfmt': 0.5.4
-      prettier: 3.9.7
+      prettier: 3.10.1
       sh-syntax: 0.7.0
 
-  prettier@3.9.7: {}
+  prettier@3.10.1: {}
 
   pretty-ms@9.3.1:
     dependencies:
