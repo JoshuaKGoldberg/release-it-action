@@ -222,8 +222,8 @@ importers:
         specifier: 0.10.0
         version: 0.10.0
       create-typescript-app:
-        specifier: 2.78.1
-        version: 2.78.1(bingo-systems@0.7.0)(typescript@5.9.3)
+        specifier: 2.83.0
+        version: 2.83.0(bingo-systems@0.7.0)(typescript@5.9.3)
       cspell:
         specifier: 10.5.0
         version: 10.5.0
@@ -2012,8 +2012,8 @@ packages:
     engines: {node: '>=22'}
     hasBin: true
 
-  create-typescript-app@2.78.1:
-    resolution: {integrity: sha512-tdqwDtDkSGxhOaycKCn60y/1x6HuMhMQWoM5ZYcXg0hSGl7JupZpapkjG03KVg4IXb/BLa5QMv9jq5jg+AN1kw==}
+  create-typescript-app@2.83.0:
+    resolution: {integrity: sha512-Viz9Njxhi7mW0e20zcM6D1P16kc3w5OoQ5RUzm6Vq7HBNDP32D3BSGQo0Xq9Gw4mw90bTP625figJssCU4YC8w==}
     engines: {node: ^22.13.0 || ^24.11.0 || >=26.0.0}
     hasBin: true
 
@@ -2972,9 +2972,6 @@ packages:
 
   lodash.uniqby@4.7.0:
     resolution: {integrity: sha512-e/zcLx6CSbmaEgFHCA7BnoQKyCtKMxnuWrJygbwPs/AIn+IMKl66L8/s+wBUn5LRw2pZx3bUHibiV1b6aTWIww==}
-
-  lodash@4.18.1:
-    resolution: {integrity: sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==}
 
   log-symbols@7.0.1:
     resolution: {integrity: sha512-ja1E3yCr9i/0hmBVaM0bfwDjnGy8I/s6PP4DFp+yP+a+mrHO4Rm7DtmnqROTUkHIkqffC84YY7AeqX6oFk0WFg==}
@@ -5746,7 +5743,7 @@ snapshots:
       conventional-commits-filter: 6.0.1
       conventional-commits-parser: 7.1.3
 
-  create-typescript-app@2.78.1(bingo-systems@0.7.0)(typescript@5.9.3):
+  create-typescript-app@2.83.0(bingo-systems@0.7.0)(typescript@5.9.3):
     dependencies:
       '@prettier/sync': 0.6.1(prettier@3.10.1)
       '@typescript-eslint/typescript-estree': 8.73.0(typescript@5.9.3)
@@ -5767,7 +5764,6 @@ snapshots:
       js-yaml: 5.5.0
       json5: 2.2.3
       lazy-value: 3.0.0
-      lodash: 4.18.1
       marked: 18.1.1
       npm-user: 6.1.1
       object-strings-deep: 0.1.2
@@ -6826,8 +6822,6 @@ snapshots:
   lodash.merge@4.6.2: {}
 
   lodash.uniqby@4.7.0: {}
-
-  lodash@4.18.1: {}
 
   log-symbols@7.0.1:
     dependencies:
