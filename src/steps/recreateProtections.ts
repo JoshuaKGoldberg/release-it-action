@@ -1,7 +1,7 @@
 import type { RequestParameters } from "@octokit/types";
 
-import { tryCatchSetFailedAction } from "../tryCatchAction.js";
-import { ExistingProtections, Octokit } from "../types.js";
+import { tryCatchSetFailedAction } from "../tryCatchAction.ts";
+import { ExistingProtections, Octokit } from "../types.ts";
 
 export interface RecreateProtectionsOptions {
 	existingProtections: ExistingProtections | undefined;

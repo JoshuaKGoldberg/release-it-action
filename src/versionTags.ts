@@ -1,4 +1,4 @@
-import { $quiet } from "./execa.js";
+import { $quiet } from "./execa.ts";
 
 export async function getHeadTags() {
 	return (await $quiet`git tag --points-at HEAD`).stdout.split("\n");

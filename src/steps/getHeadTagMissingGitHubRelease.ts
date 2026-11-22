@@ -1,10 +1,10 @@
 import * as fs from "node:fs/promises";
 
-import { readPackageData, ReleaseItConfig } from "../packageData.js";
-import { parseArgsString } from "../parseArgsString.js";
-import { Octokit } from "../types.js";
-import { getHeadTags, getVersionTagNames } from "../versionTags.js";
-import { hasGitHubRelease } from "./hasGitHubRelease.js";
+import { readPackageData, ReleaseItConfig } from "../packageData.ts";
+import { parseArgsString } from "../parseArgsString.ts";
+import { Octokit } from "../types.ts";
+import { getHeadTags, getVersionTagNames } from "../versionTags.ts";
+import { hasGitHubRelease } from "./hasGitHubRelease.ts";
 
 const configOverride =
 	/^(?:-c|--config|--(?:no-)?github(?:\.(?:draft|release|web))?)(?:=|$)/;

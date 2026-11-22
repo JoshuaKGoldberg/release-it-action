@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ExistingRuleset, Octokit } from "../types.js";
-import { updateRulesetsEnforcement } from "./updateRulesetsEnforcement.js";
+import { ExistingRuleset, Octokit } from "../types.ts";
+import { updateRulesetsEnforcement } from "./updateRulesetsEnforcement.ts";
 
 const mockInfo = vi.fn();
 
@@ -15,8 +15,8 @@ const mockTryCatchSetFailedAction = vi.fn(
 	async (_: string, action: () => Promise<unknown>) => await action(),
 );
 
-vi.mock("../tryCatchAction.js", async (importOriginal) => ({
-	...(await importOriginal<typeof import("../tryCatchAction.js")>()),
+vi.mock("../tryCatchAction.ts", async (importOriginal) => ({
+	...(await importOriginal<typeof import("../tryCatchAction.ts")>()),
 	get tryCatchSetFailedAction() {
 		return mockTryCatchSetFailedAction;
 	},
@@ -35,7 +35,7 @@ const existingRulesets = [
 	{ enforcement: "evaluate", id: 2, name: "B" },
 ] as ExistingRuleset[];
 
-describe("updateRulesetsEnforcement", () => {
+describe(updateRulesetsEnforcement, () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});

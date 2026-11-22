@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { parseArgsString } from "./parseArgsString.js";
+import { parseArgsString } from "./parseArgsString.ts";
 
-describe("parseArgsString", () => {
+describe(parseArgsString, () => {
 	describe("whitespace", () => {
 		it.each([
 			["", []],

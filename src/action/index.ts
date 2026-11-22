@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 
-import { runReleaseItAction } from "./runReleaseItAction.js";
+import { runReleaseItAction } from "./runReleaseItAction.ts";
 
 try {
 	await runReleaseItAction(github.context);

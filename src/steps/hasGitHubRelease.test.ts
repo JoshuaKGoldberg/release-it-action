@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { Octokit } from "../types.js";
-import { hasGitHubRelease } from "./hasGitHubRelease.js";
+import { Octokit } from "../types.ts";
+import { hasGitHubRelease } from "./hasGitHubRelease.ts";
 
 const mockRequest = vi.fn();
 const mockOctokit = { request: mockRequest } as unknown as Octokit;
@@ -12,7 +12,7 @@ const options = {
 	tag: "v1.2.3",
 };
 
-describe("hasGitHubRelease", () => {
+describe(hasGitHubRelease, () => {
 	it("returns true when the release exists", async () => {
 		mockRequest.mockResolvedValueOnce({ data: {} });
 

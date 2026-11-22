@@ -7,6 +7,7 @@
 //   https://github.com/JoshuaKGoldberg/bingo/issues/128
 import {
 	blockESLint,
+	blockGitHubActionsCI,
 	blockKnip,
 	blockNcc,
 	blockREADME,
@@ -17,19 +18,62 @@ import {
 
 export default createConfig({
 	refinements: {
-		addons: [
+		blocks: {
+			add: [blockNcc],
+			exclude: [blockReleaseIt, blockTSDown],
+		},
+		extensions: [
 			blockESLint({
-				rules: [
+				extensions: [
 					{
-						entries: {
+						files: ["**/*.ts"],
+						rules: {
 							"n/no-missing-import": "off",
+						},
+					},
+					{
+						// These file names are referenced outside the repository
+						// (e.g. action consumers and npm trusted publishing).
+						// This must sort after the generated **/*.{yml,yaml} block.
+						files: [
+							"action.yml",
+							".github/workflows/post-release.yml",
+							".github/workflows/rebuild-dist.yml",
+							".github/workflows/release.yml",
+						],
+						rules: {
+							"yml/file-extension": "off",
 						},
 					},
 				],
 			}),
+			blockGitHubActionsCI({
+				jobs: [
+					{
+						checkoutWith: {
+							"fetch-depth": "0",
+						},
+						name: "Action",
+						permissions: {
+							contents: "read",
+						},
+						steps: [
+							{
+								uses: "./",
+								with: {
+									"github-token": "${{ secrets.GITHUB_TOKEN }}",
+									"release-it-args":
+										"--dry-run --no-git.push --no-git.requireUpstream",
+									"skip-npm-publish": "true",
+								},
+							},
+						],
+					},
+				],
+			}),
 			blockKnip({
-				entry: ["src/action/index.ts"],
-				project: ["src/**/*.ts"],
+				entry: ["src/action/index.ts!"],
+				project: ["!src/tests/**!", "src/**/*.ts!"],
 			}),
 			blockREADME({
 				badges: [
@@ -41,9 +85,5 @@ export default createConfig({
 				],
 			}),
 		],
-		blocks: {
-			add: [blockNcc],
-			exclude: [blockReleaseIt, blockTSDown],
-		},
 	},
 });

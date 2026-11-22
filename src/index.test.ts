@@ -1,12 +1,12 @@
 import * as core from "@actions/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { releaseItAction, ReleaseItActionOptions } from "./index.js";
-import { parseArgsString } from "./parseArgsString.js";
+import { releaseItAction, ReleaseItActionOptions } from "./index.ts";
+import { parseArgsString } from "./parseArgsString.ts";
 
 const mock$$ = vi.fn().mockResolvedValue({ exitCode: 0, stdout: "" });
 
-vi.mock("./execa.js", () => ({
+vi.mock("./execa.ts", () => ({
 	get $$() {
 		return mock$$;
 	},
@@ -22,7 +22,7 @@ vi.mock("should-semantic-release", () => ({
 
 const mockRunBypassingBranchProtections = vi.fn();
 
-vi.mock("./runBypassingBranchProtections.js", () => ({
+vi.mock("./runBypassingBranchProtections.ts", () => ({
 	get runBypassingBranchProtections() {
 		return mockRunBypassingBranchProtections;
 	},
@@ -30,7 +30,7 @@ vi.mock("./runBypassingBranchProtections.js", () => ({
 
 const mockRunBypassingBranchRulesets = vi.fn();
 
-vi.mock("./runBypassingBranchRulesets.js", () => ({
+vi.mock("./runBypassingBranchRulesets.ts", () => ({
 	get runBypassingBranchRulesets() {
 		return mockRunBypassingBranchRulesets;
 	},
@@ -38,7 +38,7 @@ vi.mock("./runBypassingBranchRulesets.js", () => ({
 
 const mockGetHeadTagMissingGitHubRelease = vi.fn();
 
-vi.mock("./steps/getHeadTagMissingGitHubRelease.js", () => ({
+vi.mock("./steps/getHeadTagMissingGitHubRelease.ts", () => ({
 	get getHeadTagMissingGitHubRelease() {
 		return mockGetHeadTagMissingGitHubRelease;
 	},
@@ -46,7 +46,7 @@ vi.mock("./steps/getHeadTagMissingGitHubRelease.js", () => ({
 
 const mockGetUnpublishedVersion = vi.fn();
 
-vi.mock("./steps/getUnpublishedVersion.js", () => ({
+vi.mock("./steps/getUnpublishedVersion.ts", () => ({
 	get getUnpublishedVersion() {
 		return mockGetUnpublishedVersion;
 	},
@@ -54,7 +54,7 @@ vi.mock("./steps/getUnpublishedVersion.js", () => ({
 
 const mockHasGitHubRelease = vi.fn();
 
-vi.mock("./steps/hasGitHubRelease.js", () => ({
+vi.mock("./steps/hasGitHubRelease.ts", () => ({
 	get hasGitHubRelease() {
 		return mockHasGitHubRelease;
 	},
@@ -62,7 +62,7 @@ vi.mock("./steps/hasGitHubRelease.js", () => ({
 
 const mockRunReleaseIt = vi.fn();
 
-vi.mock("./steps/runReleaseIt.js", () => ({
+vi.mock("./steps/runReleaseIt.ts", () => ({
 	get runReleaseIt() {
 		return mockRunReleaseIt;
 	},
@@ -72,8 +72,8 @@ const mockTryCatchInfoAction = vi.fn(
 	async (_: string, action: () => Promise<unknown>) => await action(),
 );
 
-vi.mock("./tryCatchAction.js", async (importOriginal) => ({
-	...(await importOriginal<typeof import("./tryCatchAction.js")>()),
+vi.mock("./tryCatchAction.ts", async (importOriginal) => ({
+	...(await importOriginal<typeof import("./tryCatchAction.ts")>()),
 	get tryCatchInfoAction() {
 		return mockTryCatchInfoAction;
 	},
@@ -101,7 +101,7 @@ const mockOptions = {
 	repo: "mock-repo",
 } satisfies ReleaseItActionOptions;
 
-describe("releaseItAction", () => {
+describe(releaseItAction, () => {
 	afterEach(() => {
 		vi.unstubAllEnvs();
 	});

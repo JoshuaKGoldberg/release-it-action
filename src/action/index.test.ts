@@ -11,7 +11,7 @@ vi.mock("@actions/github", () => ({
 
 const mockRunReleaseItAction = vi.fn();
 
-vi.mock("./runReleaseItAction.js", () => ({
+vi.mock("./runReleaseItAction.ts", () => ({
 	get runReleaseItAction() {
 		return mockRunReleaseItAction;
 	},
@@ -28,7 +28,7 @@ describe("action entry", () => {
 	});
 
 	it("runs the action with the GitHub context", async () => {
-		await import("./index.js");
+		await import("./index.ts");
 
 		expect(mockRunReleaseItAction).toHaveBeenCalledWith(mockContext);
 		expect(mockCore.setFailed).not.toHaveBeenCalled();
@@ -37,7 +37,7 @@ describe("action entry", () => {
 	it("fails the run when the action throws unexpectedly", async () => {
 		mockRunReleaseItAction.mockRejectedValueOnce(new Error("Oh no!"));
 
-		await import("./index.js");
+		await import("./index.ts");
 
 		expect(mockCore.setFailed).toHaveBeenCalledWith("Error: Oh no!");
 	});

@@ -24,7 +24,7 @@
 
 - check npm more often while waiting for a recent version ([#1003](https://github.com/JoshuaKGoldberg/release-it-action/issues/1003)) ([63666ee](https://github.com/JoshuaKGoldberg/release-it-action/commit/63666ee32d88b838a70a80f094af1de72f0f2f4b)), closes [#1002](https://github.com/JoshuaKGoldberg/release-it-action/issues/1002)
 
-# [0.6.0](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.33...v0.6.0) (2026-10-03)
+## [0.6.0](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.5.33...v0.6.0) (2026-10-03)
 
 ### Features
 
@@ -237,7 +237,7 @@
 
 - **deps:** update dependency @actions/core to v3 ([#817](https://github.com/JoshuaKGoldberg/release-it-action/issues/817)) ([d86070c](https://github.com/JoshuaKGoldberg/release-it-action/commit/d86070cb0714c9bd1a38227138c1b89e7ae1eaf8)), closes [#8203](https://github.com/JoshuaKGoldberg/release-it-action/issues/8203)
 
-# [0.5.0](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.4.0...v0.5.0) (2026-09-20)
+## [0.5.0](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.4.0...v0.5.0) (2026-09-20)
 
 ### Bug Fixes
 
@@ -273,7 +273,7 @@
 
 - bump to create-typescript-app@2 with transitions action ([#479](https://github.com/JoshuaKGoldberg/release-it-action/issues/479)) ([cb1e69a](https://github.com/JoshuaKGoldberg/release-it-action/commit/cb1e69a2e3d5714d41858bbf55fee15604466ce9)), closes [#477](https://github.com/JoshuaKGoldberg/release-it-action/issues/477)
 
-# 0.1.0 (2023-10-01)
+## 0.1.0 (2023-10-01)
 
 ### Bug Fixes
 

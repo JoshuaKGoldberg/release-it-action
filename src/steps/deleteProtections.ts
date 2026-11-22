@@ -2,8 +2,8 @@ import type { Endpoints } from "@octokit/types";
 
 import * as core from "@actions/core";
 
-import { tryCatchThrowAction } from "../tryCatchAction.js";
-import { ExistingProtections, Octokit } from "../types.js";
+import { tryCatchThrowAction } from "../tryCatchAction.ts";
+import { ExistingProtections, Octokit } from "../types.ts";
 
 export interface DeleteProtectionsOptions {
 	existingProtections: ExistingProtections | undefined;

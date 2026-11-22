@@ -1,9 +1,9 @@
 import * as core from "@actions/core";
 import { setTimeout } from "node:timers/promises";
 
-import { $quiet } from "../execa.js";
-import { readPackageData } from "../packageData.js";
-import { getHeadTags, getVersionTagNames } from "../versionTags.js";
+import { $quiet } from "../execa.ts";
+import { readPackageData } from "../packageData.ts";
+import { getHeadTags, getVersionTagNames } from "../versionTags.ts";
 
 // npm can take a few minutes after a publish before it shows the new version.
 const recentTagSeconds = 10 * 60;

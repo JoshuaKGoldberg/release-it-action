@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { mockCommands } from "../tests/mockCommands.js";
-import { getUnpublishedVersion } from "./getUnpublishedVersion.js";
+import { mockCommands } from "../tests/mockCommands.ts";
+import { getUnpublishedVersion } from "./getUnpublishedVersion.ts";
 
 const mock$quiet = vi.fn();
 const mock$quietOptions = vi.fn();
@@ -48,7 +48,7 @@ const packageData = { name: "test-package", version: "1.2.3" };
 const notFound = { exitCode: 1, stdout: '{"error":{"code":"E404"}}' };
 const recentTagTime = { stdout: String(Math.floor(Date.now() / 1000)) };
 
-describe("getUnpublishedVersion", () => {
+describe(getUnpublishedVersion, () => {
 	it("returns undefined when the package is private", async () => {
 		mockPackageJson({ ...packageData, private: true });
 

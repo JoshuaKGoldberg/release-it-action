@@ -2,18 +2,18 @@ import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { shouldSemanticRelease } from "should-semantic-release";
 
-import { $$ } from "./execa.js";
-import { parseArgsString } from "./parseArgsString.js";
-import { runBypassingBranchProtections } from "./runBypassingBranchProtections.js";
-import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
-import { getHeadTagMissingGitHubRelease } from "./steps/getHeadTagMissingGitHubRelease.js";
-import { getUnpublishedVersion } from "./steps/getUnpublishedVersion.js";
-import { hasGitHubRelease } from "./steps/hasGitHubRelease.js";
-import { runReleaseIt, RunReleaseItOptions } from "./steps/runReleaseIt.js";
+import { $$ } from "./execa.ts";
+import { parseArgsString } from "./parseArgsString.ts";
+import { runBypassingBranchProtections } from "./runBypassingBranchProtections.ts";
+import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.ts";
+import { getHeadTagMissingGitHubRelease } from "./steps/getHeadTagMissingGitHubRelease.ts";
+import { getUnpublishedVersion } from "./steps/getUnpublishedVersion.ts";
+import { hasGitHubRelease } from "./steps/hasGitHubRelease.ts";
+import { runReleaseIt, RunReleaseItOptions } from "./steps/runReleaseIt.ts";
 import {
 	tryCatchInfoAction,
 	tryCatchSetFailedAction,
-} from "./tryCatchAction.js";
+} from "./tryCatchAction.ts";
 
 export interface ReleaseItActionOptions {
 	bypassBranchProtections?: string;

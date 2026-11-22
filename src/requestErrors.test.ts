@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	getRequestErrorDetails,
 	isPlanUpgradeRequired,
-} from "./requestErrors.js";
+} from "./requestErrors.ts";
 
 describe(getRequestErrorDetails, () => {
 	it("returns the response message and status when they exist", () => {

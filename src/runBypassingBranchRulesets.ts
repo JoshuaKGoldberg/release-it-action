@@ -1,7 +1,7 @@
-import { createCommonRequestData } from "./createCommonRequestData.js";
-import { fetchRulesets } from "./steps/fetchRulesets.js";
-import { updateRulesetsEnforcement } from "./steps/updateRulesetsEnforcement.js";
-import { CommonData, Octokit } from "./types.js";
+import { createCommonRequestData } from "./createCommonRequestData.ts";
+import { fetchRulesets } from "./steps/fetchRulesets.ts";
+import { updateRulesetsEnforcement } from "./steps/updateRulesetsEnforcement.ts";
+import { CommonData, Octokit } from "./types.ts";
 
 export async function runBypassingBranchRulesets(
 	commonData: CommonData,

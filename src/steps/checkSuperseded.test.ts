@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { mockCommands } from "../tests/mockCommands.js";
-import { checkSuperseded, getHeadSha } from "./checkSuperseded.js";
+import { mockCommands } from "../tests/mockCommands.ts";
+import { checkSuperseded, getHeadSha } from "./checkSuperseded.ts";
 
 const mock$quiet = vi.fn();
 const mock$quietOptions = vi.fn();
@@ -24,7 +24,7 @@ vi.mock("execa", () => ({
 const githubToken = "mock-github-token";
 const startSha = "start-sha";
 
-describe("getHeadSha", () => {
+describe(getHeadSha, () => {
 	it("returns the HEAD sha when git succeeds", async () => {
 		mockCommands(mock$quiet, { "git rev-parse HEAD": { stdout: startSha } });
 
@@ -38,7 +38,7 @@ describe("getHeadSha", () => {
 	});
 });
 
-describe("checkSuperseded", () => {
+describe(checkSuperseded, () => {
 	it("returns false when HEAD is detached", async () => {
 		mockCommands(mock$quiet, {
 			"git rev-parse --abbrev-ref HEAD": { stdout: "HEAD" },

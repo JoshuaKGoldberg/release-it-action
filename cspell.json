@@ -10,20 +10,29 @@
 		"pnpm-lock.yaml"
 	],
 	"words": [
-		"apexskier",
 		"Codecov",
+		"JoshuaKGoldberg",
+		"MatteoGabriele",
+		"agentscan",
+		"apexskier",
 		"contributorsrc",
 		"conventionalcommits",
 		"execa",
 		"knip",
 		"lcov",
+		"mshick",
 		"mtfoley",
 		"noreply",
 		"npmjs",
+		"octoguide",
 		"packagejson",
+		"peakoss",
 		"rulesets",
 		"shlex",
+		"stefanzweifel",
 		"tseslint",
-		"unstub"
+		"unstub",
+		"zizmor",
+		"zizmorcore"
 	]
 }

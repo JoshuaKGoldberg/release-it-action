@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { readPackageData } from "./packageData.js";
+import { readPackageData } from "./packageData.ts";
 
 const mockReadFile = vi.fn();
 

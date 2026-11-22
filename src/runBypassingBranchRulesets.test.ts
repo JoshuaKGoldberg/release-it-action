@@ -1,8 +1,8 @@
 import { describe, expect, test, vi } from "vitest";
 
-import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.js";
-import { UpdateRulesetsEnforcementOptions } from "./steps/updateRulesetsEnforcement.js";
-import { ExistingRuleset, Octokit } from "./types.js";
+import { runBypassingBranchRulesets } from "./runBypassingBranchRulesets.ts";
+import { UpdateRulesetsEnforcementOptions } from "./steps/updateRulesetsEnforcement.ts";
+import { ExistingRuleset, Octokit } from "./types.ts";
 
 const mockRequest = vi.fn();
 const mockOctokit = { request: mockRequest } as unknown as Octokit;
@@ -14,7 +14,7 @@ const existingRulesets = [
 
 const mockFetchRulesets = vi.fn().mockResolvedValue(existingRulesets);
 
-vi.mock("./steps/fetchRulesets.js", () => ({
+vi.mock("./steps/fetchRulesets.ts", () => ({
 	get fetchRulesets() {
 		return mockFetchRulesets;
 	},
@@ -22,13 +22,13 @@ vi.mock("./steps/fetchRulesets.js", () => ({
 
 const mockUpdateRulesetsEnforcement = vi.fn();
 
-vi.mock("./steps/updateRulesetsEnforcement.js", () => ({
+vi.mock("./steps/updateRulesetsEnforcement.ts", () => ({
 	get updateRulesetsEnforcement() {
 		return mockUpdateRulesetsEnforcement;
 	},
 }));
 
-describe("runBypassingBranchRulesets", () => {
+describe(runBypassingBranchRulesets, () => {
 	test("API calls", async () => {
 		const run = vi.fn();
 
