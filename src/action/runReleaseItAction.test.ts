@@ -41,7 +41,7 @@ const mockContext = {
 		owner: "context-owner",
 		repo: "context-repo",
 	},
-} as typeof github.context;
+} as unknown as typeof github.context;
 
 describe(runReleaseItAction, () => {
 	beforeEach(() => {

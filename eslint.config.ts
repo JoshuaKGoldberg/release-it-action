@@ -64,11 +64,6 @@ export default defineConfig(
 		},
 	},
 	{
-		extends: [tseslint.configs.disableTypeChecked],
-		files: ["**/*.md/*.ts"],
-		rules: { "n/no-missing-import": "off" },
-	},
-	{
 		extends: [vitest.configs.recommended],
 		files: ["**/*.test.*"],
 		rules: {
@@ -82,6 +77,11 @@ export default defineConfig(
 		rules: { "n/no-unsupported-features/node-builtins": "off" },
 	},
 	{ files: ["**/*.ts"], rules: { "n/no-missing-import": "off" } },
+	{
+		extends: [tseslint.configs.disableTypeChecked],
+		files: ["**/*.md/*.ts"],
+		rules: { "n/no-missing-import": "off" },
+	},
 	{
 		extends: [yml.configs["flat/standard"], yml.configs["flat/prettier"]],
 		files: ["**/*.{yml,yaml}"],

@@ -28,7 +28,7 @@ vi.mock("./hasGitHubRelease.ts", () => ({
 	},
 }));
 
-const mockOctokit = {} as Octokit;
+const mockOctokit = {} as unknown as Octokit;
 const options = {
 	octokit: mockOctokit,
 	owner: "test-owner",
