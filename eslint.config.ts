@@ -78,11 +78,6 @@ export default defineConfig(
 	},
 	{ files: ["**/*.ts"], rules: { "n/no-missing-import": "off" } },
 	{
-		extends: [tseslint.configs.disableTypeChecked],
-		files: ["**/*.md/*.ts"],
-		rules: { "n/no-missing-import": "off" },
-	},
-	{
 		extends: [yml.configs["flat/standard"], yml.configs["flat/prettier"]],
 		files: ["**/*.{yml,yaml}"],
 		rules: {

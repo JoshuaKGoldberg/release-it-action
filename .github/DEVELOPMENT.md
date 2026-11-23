@@ -35,7 +35,7 @@ pnpm build:release
 
 CI fails if the committed `dist/` doesn't match what `pnpm build:release` produces, not counting `.d.ts` files.
 If that happens, run `pnpm build:release` and commit the changed files under `dist/`.
-Renovate PRs that update bundled dependencies need the same: rebuild and commit `dist/` on their branch before they can merge.
+On Renovate branches, the [Rebuild Dist workflow](./workflows/rebuild-dist.yml) runs `pnpm build:release` and pushes any `dist/` changes so dependency updates can still merge.
 
 ## Formatting
 
