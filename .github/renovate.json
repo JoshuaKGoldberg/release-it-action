@@ -6,6 +6,9 @@
 		"config:best-practices",
 		"replacements:all"
 	],
+	"gitIgnoredAuthors": [
+		"41898282+github-actions[bot]@users.noreply.github.com"
+	],
 	"ignoreDeps": ["codecov/codecov-action"],
 	"labels": ["dependencies"],
 	"minimumReleaseAge": "7 days",
