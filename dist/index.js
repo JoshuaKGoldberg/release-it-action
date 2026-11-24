@@ -30396,7 +30396,7 @@ module.exports = {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(8830);
 /* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1918);
-/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(4835);
+/* harmony import */ var _runReleaseItAction_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(9143);
 
 
 
@@ -30412,7 +30412,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 4835:
+/***/ 9143:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 
@@ -41931,7 +41931,7 @@ const $$captured = $({
 });
 const $quiet = $({ reject: false });
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/shlex@3.0.0/node_modules/shlex/shlex.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/shlex@3.0.1/node_modules/shlex/shlex.js
 
 
 /*
@@ -42018,7 +42018,7 @@ class Shlexer {
         // Non-printable ASCII characters
         'a': () => '\x07',
         'b': () => '\x08',
-        'e|E': () => '\x1b',
+        '[eE]': () => '\x1b',
         'f': () => '\x0c',
         'n': () => '\x0a',
         'r': () => '\x0d',
@@ -42026,14 +42026,18 @@ class Shlexer {
         'v': () => '\x0b',
 
         // Octal bytes
-        '([0-7]{1,3})': (x) => String.fromCharCode(parseInt(x, 8)),
+        '([0-7]{1,3})': (x) => String.fromCharCode(parseInt(x, 8) & 0xff),
 
         // Hexadecimal bytes
         'x([0-9a-fA-F]{1,2})': (x) => String.fromCharCode(parseInt(x, 16)),
 
-        // Unicode code units
+        // Unicode escapes
         'u([0-9a-fA-F]{1,4})': (x) => String.fromCharCode(parseInt(x, 16)),
-        'U([0-9a-fA-F]{1,8})': (x) => String.fromCharCode(parseInt(x, 16)),
+        'U([0-9a-fA-F]{1,8})': (x) => {
+          const codePoint = parseInt(x, 16)
+          if (codePoint > 0x10ffff) { return String.fromCharCode(codePoint) }
+          return String.fromCodePoint(codePoint)
+        },
 
         // Control characters
         // https://en.wikipedia.org/wiki/Control_character#How_control_characters_map_to_keyboards
@@ -42074,7 +42078,8 @@ class Shlexer {
     let inQuote = false
     let inDollarQuote = false
     let escaped = false
-    let lastDollar = -2 // position of last dollar sign we saw
+    let afterDollar = false
+    let quoteStart = 0 // where the current quoted string starts in the token
     let token
 
     if (this.debug) {
@@ -42092,7 +42097,7 @@ class Shlexer {
           'accumulated:', token,
           'inQuote:', inQuote,
           'inDollarQuote:', inDollarQuote,
-          'lastDollar:', lastDollar,
+          'afterDollar:', afterDollar,
           'escaped:', escaped
         )
       }
@@ -42116,6 +42121,7 @@ class Shlexer {
           token = (token || '') + escaped + char
         } else {
           // Just use the literal character
+          afterDollar = false
           token = (token || '') + char
         }
 
@@ -42138,7 +42144,10 @@ class Shlexer {
       if (inQuote !== false) {
         // String is finished. Don't grab the quote character.
         if (char === inQuote) {
-          token = this.processEscapes(token, inQuote, inDollarQuote === '\'')
+          // Only interpret escapes inside this quoted string. The text before
+          // it in the same token has already been processed.
+          token = token.slice(0, quoteStart) + this.processEscapes(
+            token.slice(quoteStart), inQuote, inDollarQuote === '\'')
           inQuote = false
           inDollarQuote = false
           continue
@@ -42152,7 +42161,8 @@ class Shlexer {
       // This is the start of a new string, don't accumulate the quotation mark
       if (this.quotes.includes(char)) {
         inQuote = char
-        if (lastDollar === pos - 1) {
+        if (afterDollar) {
+          afterDollar = false
           if (char === '\'' && !this.ansiCQuotes) {
             // Feature not enabled
           } else if (char === '"' && !this.localeQuotes) {
@@ -42169,14 +42179,12 @@ class Shlexer {
           token = token.slice(0, -1)
         }
 
+        quoteStart = token.length
         continue
       }
 
-      // This is a dollar sign, record that we saw it in case it's the start of
-      // an ANSI C or localized string
-      if (inQuote === false && char === '$') {
-        lastDollar = pos
-      }
+      // An unescaped dollar sign can introduce an ANSI C or localized string
+      afterDollar = char === '$'
 
       // This is whitespace, so yield the token if we have one
       if (this.whitespace.includes(char)) {
