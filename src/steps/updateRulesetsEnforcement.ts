@@ -5,8 +5,8 @@ import * as core from "@actions/core";
 import {
 	tryCatchSetFailedAction,
 	tryCatchThrowAction,
-} from "../tryCatchAction.js";
-import { ExistingRuleset, Octokit, RulesetEnforcement } from "../types.js";
+} from "../tryCatchAction.ts";
+import { ExistingRuleset, Octokit, RulesetEnforcement } from "../types.ts";
 
 export interface UpdateRulesetsEnforcementOptions {
 	enforcement: (ruleset: ExistingRuleset) => RulesetEnforcement;

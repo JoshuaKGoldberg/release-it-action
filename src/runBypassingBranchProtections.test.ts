@@ -1,14 +1,14 @@
 import { describe, expect, test, vi } from "vitest";
 
-import { runBypassingBranchProtections } from "./runBypassingBranchProtections.js";
-import { Octokit } from "./types.js";
+import { runBypassingBranchProtections } from "./runBypassingBranchProtections.ts";
+import { Octokit } from "./types.ts";
 
 const mockRequest = vi.fn();
 const mockOctokit = { request: mockRequest } as unknown as Octokit;
 
 const mockFetchProtections = vi.fn();
 
-vi.mock("./steps/fetchProtections.js", () => ({
+vi.mock("./steps/fetchProtections.ts", () => ({
 	get fetchProtections() {
 		return mockFetchProtections;
 	},
@@ -16,7 +16,7 @@ vi.mock("./steps/fetchProtections.js", () => ({
 
 const mockDeleteProtections = vi.fn();
 
-vi.mock("./steps/deleteProtections.js", () => ({
+vi.mock("./steps/deleteProtections.ts", () => ({
 	get deleteProtections() {
 		return mockDeleteProtections;
 	},
@@ -24,13 +24,13 @@ vi.mock("./steps/deleteProtections.js", () => ({
 
 const mockRecreateProtections = vi.fn();
 
-vi.mock("./steps/recreateProtections.js", () => ({
+vi.mock("./steps/recreateProtections.ts", () => ({
 	get recreateProtections() {
 		return mockRecreateProtections;
 	},
 }));
 
-describe("runBypassingBranchProtections", () => {
+describe(runBypassingBranchProtections, () => {
 	test("API calls", async () => {
 		const run = vi.fn();
 

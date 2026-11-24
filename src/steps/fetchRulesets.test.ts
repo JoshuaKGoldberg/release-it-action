@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { Octokit } from "../types.js";
-import { fetchRulesets } from "./fetchRulesets.js";
+import { Octokit } from "../types.ts";
+import { fetchRulesets } from "./fetchRulesets.ts";
 
 const mockInfo = vi.fn();
 const mockWarning = vi.fn();
@@ -32,7 +32,7 @@ function createRequestError(status: number, message: string) {
 	});
 }
 
-describe("fetchRulesets", () => {
+describe(fetchRulesets, () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});

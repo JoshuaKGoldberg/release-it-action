@@ -1,7 +1,7 @@
 import * as github from "@actions/github";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { runReleaseItAction } from "./runReleaseItAction.js";
+import { runReleaseItAction } from "./runReleaseItAction.ts";
 
 process.env.GITHUB_REPOSITORY = "mock-github-repository";
 
@@ -21,7 +21,7 @@ vi.mock("@actions/core", () => ({
 	},
 }));
 
-vi.mock("../getTokenInput.js", () => ({
+vi.mock("../getTokenInput.ts", () => ({
 	getTokenInput(tokenName: string) {
 		return `mock-${tokenName}`;
 	},
@@ -29,7 +29,7 @@ vi.mock("../getTokenInput.js", () => ({
 
 const mockReleaseItAction = vi.fn();
 
-vi.mock("../index.js", () => ({
+vi.mock("../index.ts", () => ({
 	get releaseItAction() {
 		return mockReleaseItAction;
 	},
@@ -41,9 +41,9 @@ const mockContext = {
 		owner: "context-owner",
 		repo: "context-repo",
 	},
-} as typeof github.context;
+} as unknown as typeof github.context;
 
-describe("runReleaseItAction", () => {
+describe(runReleaseItAction, () => {
 	beforeEach(() => {
 		mockGetBooleanInput.mockReturnValue(false);
 		vi.stubEnv("NPM_TOKEN", undefined);

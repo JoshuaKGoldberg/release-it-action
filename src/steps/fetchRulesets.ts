@@ -2,9 +2,9 @@ import type { Endpoints } from "@octokit/types";
 
 import * as core from "@actions/core";
 
-import { isPlanUpgradeRequired } from "../requestErrors.js";
-import { tryCatchThrowAction } from "../tryCatchAction.js";
-import { ExistingRuleset, Octokit } from "../types.js";
+import { isPlanUpgradeRequired } from "../requestErrors.ts";
+import { tryCatchThrowAction } from "../tryCatchAction.ts";
+import { ExistingRuleset, Octokit } from "../types.ts";
 
 export interface FetchRulesetsOptions {
 	octokit: Octokit;

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { Octokit } from "../types.js";
-import { getHeadTagMissingGitHubRelease } from "./getHeadTagMissingGitHubRelease.js";
+import { Octokit } from "../types.ts";
+import { getHeadTagMissingGitHubRelease } from "./getHeadTagMissingGitHubRelease.ts";
 
 const mock$quiet = vi.fn();
 
@@ -22,13 +22,13 @@ vi.mock("node:fs/promises", () => ({
 
 const mockHasGitHubRelease = vi.fn();
 
-vi.mock("./hasGitHubRelease.js", () => ({
+vi.mock("./hasGitHubRelease.ts", () => ({
 	get hasGitHubRelease() {
 		return mockHasGitHubRelease;
 	},
 }));
 
-const mockOctokit = {} as Octokit;
+const mockOctokit = {} as unknown as Octokit;
 const options = {
 	octokit: mockOctokit,
 	owner: "test-owner",
@@ -52,7 +52,7 @@ function mockHeadTags(stdout: string) {
 	mock$quiet.mockResolvedValueOnce({ exitCode: 0, stdout });
 }
 
-describe("getHeadTagMissingGitHubRelease", () => {
+describe(getHeadTagMissingGitHubRelease, () => {
 	it("returns undefined without checking tags when there is no package.json", async () => {
 		mockFiles({ ".release-it.json": releaseItJson });
 

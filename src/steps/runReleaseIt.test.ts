@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { runReleaseIt } from "./runReleaseIt.js";
+import { runReleaseIt } from "./runReleaseIt.ts";
 
 const mockError = vi.fn();
 const mockInfo = vi.fn();
@@ -25,7 +25,7 @@ vi.mock("@actions/core", () => ({
 const mock$$ = vi.fn();
 const mock$$captured = vi.fn(() => mock$$);
 
-vi.mock("../execa.js", () => ({
+vi.mock("../execa.ts", () => ({
 	get $$captured() {
 		return mock$$captured;
 	},
@@ -34,7 +34,7 @@ vi.mock("../execa.js", () => ({
 const mockCheckSuperseded = vi.fn();
 const mockGetHeadSha = vi.fn();
 
-vi.mock("./checkSuperseded.js", () => ({
+vi.mock("./checkSuperseded.ts", () => ({
 	get checkSuperseded() {
 		return mockCheckSuperseded;
 	},
@@ -52,7 +52,7 @@ const commandFailure = Object.assign(
 	{ shortMessage: "Command failed with exit code 1: npx release-it --verbose" },
 );
 
-describe("runReleaseIt", () => {
+describe(runReleaseIt, () => {
 	it("does not log an error if running release-it succeeds with stderr output", async () => {
 		mock$$.mockResolvedValue({ exitCode: 0, stderr: "npm notice" });
 

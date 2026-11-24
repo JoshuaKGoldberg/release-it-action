@@ -1,7 +1,0 @@
-{
-	"$schema": "./node_modules/knip/schema.json",
-	"entry": ["src/action/index.ts"],
-	"ignore": ["dist/**"],
-	"ignoreExportsUsedInFile": { "interface": true, "type": true },
-	"project": ["src/**/*.ts"]
-}

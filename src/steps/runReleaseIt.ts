@@ -1,8 +1,8 @@
 import * as core from "@actions/core";
 
-import { $$captured } from "../execa.js";
-import { parseArgsString } from "../parseArgsString.js";
-import { checkSuperseded, getHeadSha } from "./checkSuperseded.js";
+import { $$captured } from "../execa.ts";
+import { parseArgsString } from "../parseArgsString.ts";
+import { checkSuperseded, getHeadSha } from "./checkSuperseded.ts";
 
 export interface RunReleaseItOptions {
 	allowPublishConflict?: boolean;

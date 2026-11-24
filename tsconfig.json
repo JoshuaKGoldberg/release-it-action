@@ -1,10 +1,12 @@
 {
 	"compilerOptions": {
+		"declaration": true,
 		"esModuleInterop": true,
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
 		"outDir": "lib",
 		"resolveJsonModule": true,
+		"rewriteRelativeImportExtensions": true,
 		"rootDir": "src",
 		"skipLibCheck": true,
 		"strict": true,

@@ -1,4 +1,4 @@
-import { Octokit } from "../types.js";
+import { Octokit } from "../types.ts";
 
 export interface HasGitHubReleaseOptions {
 	octokit: Octokit;

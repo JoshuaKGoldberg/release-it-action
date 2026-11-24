@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { Octokit } from "../types.js";
-import { fetchProtections } from "./fetchProtections.js";
+import { Octokit } from "../types.ts";
+import { fetchProtections } from "./fetchProtections.ts";
 
 const mockInfo = vi.fn();
 const mockWarning = vi.fn();
@@ -28,7 +28,7 @@ function createRequestError(status: number, message: string) {
 	});
 }
 
-describe("fetchProtections", () => {
+describe(fetchProtections, () => {
 	it("returns protections", async () => {
 		const mockProtections = {};
 		mockRequest.mockResolvedValueOnce({ data: mockProtections });

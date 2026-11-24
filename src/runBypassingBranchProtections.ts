@@ -1,8 +1,8 @@
-import { createCommonRequestData } from "./createCommonRequestData.js";
-import { deleteProtections } from "./steps/deleteProtections.js";
-import { fetchProtections } from "./steps/fetchProtections.js";
-import { recreateProtections } from "./steps/recreateProtections.js";
-import { CommonData, Octokit } from "./types.js";
+import { createCommonRequestData } from "./createCommonRequestData.ts";
+import { deleteProtections } from "./steps/deleteProtections.ts";
+import { fetchProtections } from "./steps/fetchProtections.ts";
+import { recreateProtections } from "./steps/recreateProtections.ts";
+import { CommonData, Octokit } from "./types.ts";
 
 export async function runBypassingBranchProtections(
 	commonData: CommonData,

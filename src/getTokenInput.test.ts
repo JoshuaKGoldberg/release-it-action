@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { getTokenInput } from "./getTokenInput.js";
+import { getTokenInput } from "./getTokenInput.ts";
 
 const mockGetInfo = vi.fn();
 const mockSetSecret = vi.fn();

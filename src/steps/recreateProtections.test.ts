@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { Octokit } from "../types.js";
-import { recreateProtections } from "./recreateProtections.js";
+import { Octokit } from "../types.ts";
+import { recreateProtections } from "./recreateProtections.ts";
 
 const mockTryCatchSetFailedAction = vi.fn(
 	async (_: string, action: () => Promise<unknown>) => await action(),
 );
 
-vi.mock("../tryCatchAction.js", () => ({
+vi.mock("../tryCatchAction.ts", () => ({
 	get tryCatchSetFailedAction() {
 		return mockTryCatchSetFailedAction;
 	},
@@ -66,7 +66,7 @@ const mockApp = {
 const mockRequest = vi.fn();
 const mockOctokit = { request: mockRequest } as unknown as Octokit;
 
-describe("recreateProtections", () => {
+describe(recreateProtections, () => {
 	it("does not recreate protections when existingProtections is undefined", async () => {
 		await recreateProtections({
 			existingProtections: undefined,

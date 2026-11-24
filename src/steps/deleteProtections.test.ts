@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { Octokit } from "../types.js";
-import { deleteProtections } from "./deleteProtections.js";
+import { Octokit } from "../types.ts";
+import { deleteProtections } from "./deleteProtections.ts";
 
 const mockInfo = vi.fn();
 
@@ -16,7 +16,7 @@ const mockRequest = vi.fn();
 const mockOctokit = { request: mockRequest } as unknown as Octokit;
 const requestData = { branch, owner: "test-owner", repo: "test-repo" };
 
-describe("deleteProtections", () => {
+describe(deleteProtections, () => {
 	it("deletes protections when existingProtections exists", async () => {
 		await deleteProtections({
 			existingProtections: {},

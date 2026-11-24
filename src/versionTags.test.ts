@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { getHeadTags, getVersionTagNames } from "./versionTags.js";
+import { getHeadTags, getVersionTagNames } from "./versionTags.ts";
 
 const mock$quiet = vi.fn();
 

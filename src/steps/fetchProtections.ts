@@ -5,9 +5,9 @@ import * as core from "@actions/core";
 import {
 	getRequestErrorDetails,
 	isPlanUpgradeRequired,
-} from "../requestErrors.js";
-import { tryCatchThrowAction } from "../tryCatchAction.js";
-import { ExistingProtections, Octokit } from "../types.js";
+} from "../requestErrors.ts";
+import { tryCatchThrowAction } from "../tryCatchAction.ts";
+import { ExistingProtections, Octokit } from "../types.ts";
 
 export interface FetchProtectionsOptions {
 	octokit: Octokit;

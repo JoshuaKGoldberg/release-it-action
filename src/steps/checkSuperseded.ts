@@ -1,4 +1,4 @@
-import { $quiet } from "../execa.js";
+import { $quiet } from "../execa.ts";
 
 export async function checkSuperseded(startSha: string, githubToken: string) {
 	const branch = await $quiet`git rev-parse --abbrev-ref HEAD`;

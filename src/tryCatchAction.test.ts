@@ -4,7 +4,7 @@ import {
 	tryCatchInfoAction,
 	tryCatchSetFailedAction,
 	tryCatchThrowAction,
-} from "./tryCatchAction.js";
+} from "./tryCatchAction.ts";
 
 const mockInfo = vi.fn();
 const mockSetFailed = vi.fn();
@@ -18,7 +18,7 @@ vi.mock("@actions/core", () => ({
 	},
 }));
 
-describe("tryCatchInfoAction", () => {
+describe(tryCatchInfoAction, () => {
 	it("returns the action's result when it resolves", async () => {
 		const actual = await tryCatchInfoAction(
 			"abc",
@@ -65,7 +65,7 @@ describe("tryCatchInfoAction", () => {
 	});
 });
 
-describe("tryCatchSetFailedAction", () => {
+describe(tryCatchSetFailedAction, () => {
 	it("returns the action's result when it resolves", async () => {
 		const actual = await tryCatchSetFailedAction(
 			"abc",
@@ -93,7 +93,7 @@ describe("tryCatchSetFailedAction", () => {
 	});
 });
 
-describe("tryCatchThrowAction", () => {
+describe(tryCatchThrowAction, () => {
 	it("logs and returns the action's result when it resolves", async () => {
 		const actual = await tryCatchThrowAction(
 			"abc",

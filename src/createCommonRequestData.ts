@@ -1,4 +1,4 @@
-import { CommonData } from "./types.js";
+import { CommonData } from "./types.ts";
 
 export function createCommonRequestData(commonData: CommonData) {
 	return {

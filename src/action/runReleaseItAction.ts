@@ -2,8 +2,8 @@ import * as core from "@actions/core";
 import * as github from "@actions/github";
 import * as process from "node:process";
 
-import { getTokenInput } from "../getTokenInput.js";
-import { releaseItAction } from "../index.js";
+import { getTokenInput } from "../getTokenInput.ts";
+import { releaseItAction } from "../index.ts";
 
 export async function runReleaseItAction(context: typeof github.context) {
 	const gitUserName = core.getInput("git-user-name") || context.actor;

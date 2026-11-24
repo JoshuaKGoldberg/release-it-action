@@ -2,6 +2,7 @@
 	"dictionaries": ["npm", "node", "typescript"],
 	"ignorePaths": [
 		".all-contributorsrc",
+		"/_tmp_*",
 		"CHANGELOG.md",
 		"coverage",
 		"dist",
@@ -10,20 +11,28 @@
 		"pnpm-lock.yaml"
 	],
 	"words": [
-		"apexskier",
 		"Codecov",
+		"JoshuaKGoldberg",
+		"MatteoGabriele",
+		"agentscan",
+		"apexskier",
 		"contributorsrc",
 		"conventionalcommits",
 		"execa",
 		"knip",
 		"lcov",
-		"mtfoley",
+		"mshick",
 		"noreply",
 		"npmjs",
+		"octoguide",
 		"packagejson",
+		"peakoss",
 		"rulesets",
 		"shlex",
+		"stefanzweifel",
 		"tseslint",
-		"unstub"
+		"unstub",
+		"zizmor",
+		"zizmorcore"
 	]
 }
