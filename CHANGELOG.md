@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.5](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.6.4...v0.6.5) (2026-11-24)
+
+### Bug Fixes
+
+- bump to create-typescript-app@2.87.18 ([#1106](https://github.com/JoshuaKGoldberg/release-it-action/issues/1106)) ([5e3fd2f](https://github.com/JoshuaKGoldberg/release-it-action/commit/5e3fd2f53a47b6836b7442fe098c463b6d43f5a9)), closes [#1105](https://github.com/JoshuaKGoldberg/release-it-action/issues/1105)
+
 ## [0.6.4](https://github.com/JoshuaKGoldberg/release-it-action/compare/v0.6.3...v0.6.4) (2026-10-03)
 
 ### Bug Fixes
